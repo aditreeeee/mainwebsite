@@ -1,4 +1,4 @@
-/* eGlobe Solutions — shared front-end behaviour (no backend, no dependencies) */
+/* eGlobe Solutions, shared front-end behaviour (no backend, no dependencies) */
 (function(){
   'use strict';
 
@@ -64,7 +64,7 @@
       var vh = window.innerHeight;
       var isMobile = window.innerWidth <= 760;
       /* On mobile the topbar has no page links, so the dock is the only
-         way to navigate — never hide it for the hero on small screens. */
+         way to navigate, never hide it for the hero on small screens. */
       var inHero = (!isMobile && heroEl) ? heroEl.getBoundingClientRect().bottom > vh * 0.35 : false;
       var inFooter = footerEl ? footerEl.getBoundingClientRect().top < vh * 0.65 : false;
       dockWrap.classList.toggle('hide', inHero || inFooter);
@@ -354,7 +354,7 @@
           .map(function(cb){ return cb.parentNode.textContent.trim(); });
         var item = document.createElement('div');
         item.className = 'demo-promo__list-item';
-        item.innerHTML = '<span>' + name + ' — <b>' + discount + '% off</b></span><span style="color:var(--ink-soft);font-size:11px;">' + (channels.join(', ') || 'No channel') + '</span>';
+        item.innerHTML = '<span>' + name + ', <b>' + discount + '% off</b></span><span style="color:var(--ink-soft);font-size:11px;">' + (channels.join(', ') || 'No channel') + '</span>';
         promoList.insertBefore(item, promoList.firstChild);
         while(promoList.children.length > 3){
           promoList.removeChild(promoList.lastChild);
@@ -417,91 +417,91 @@
     'pms': {
       icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>',
       title:'Property Management System',
-      desc:'A smart, secure and scalable cloud PMS, fully integrated with Channel Manager for real-time OTA sync. Trusted by 7,000+ properties worldwide, it streamlines front desk tasks, auto-assigns rooms on booking, and gives you remote access from any device — no on-site servers, no IT maintenance.',
+      desc:'A smart, secure and scalable cloud PMS, fully integrated with Channel Manager for real-time OTA sync. Trusted by 7,000+ properties worldwide, it streamlines front desk tasks, auto-assigns rooms on booking, and gives you remote access from any device. No on-site servers, no IT maintenance.',
       points:['Auto room allotment on every booking', 'Access anytime, from any device', 'Multi-currency & multi-language support', 'Connected to Channel Manager, POS & Payment Gateway'],
       faq:[{q:'What is a Property Management System (PMS)?', a:'Hotel management software hosted on the cloud that lets you manage bookings, check-ins, housekeeping and billing from any device with an internet connection.'}]
     },
     'channel-manager': {
       icon:'<circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 010 18a15 15 0 010-18"/>',
       title:'Channel Manager',
-      desc:'Keeps rates, availability and inventory in sync across 100+ Indian and global OTAs — Booking.com, Expedia, MakeMyTrip, Goibibo and more — from one dashboard, in real time. A pooled inventory model means no room ever sits blocked on one channel while available on another.',
+      desc:'Keeps rates, availability and inventory in sync across 100+ Indian and global OTAs (Booking.com, Expedia, MakeMyTrip, Goibibo and more) from one dashboard, in real time. A pooled inventory model means no room ever sits blocked on one channel while available on another.',
       points:['Two-way real-time sync across 100+ OTAs', 'Dynamic pricing based on demand', 'Automatic rate-parity alerts', 'Reservations flow straight into your PMS'],
-      faq:[{q:'Will it prevent overbookings?', a:'Yes — real-time two-way sync updates every connected OTA within seconds of a booking, virtually eliminating double bookings.'}]
+      faq:[{q:'Will it prevent overbookings?', a:'Yes, real-time two-way sync updates every connected OTA within seconds of a booking, virtually eliminating double bookings.'}]
     },
     'finance': {
       icon:'<path d="M3 3v18h18M7 15l4-4 3 3 5-6"/>',
       title:'Finance & Revenue',
       desc:'Dynamic pricing and demand forecasting that adjusts your rates automatically as occupancy and demand shift, backed by financial reporting that stays accurate without manual spreadsheet work. See RevPAR, ADR and forecasted demand on one screen, and let the system suggest rate changes before you lose a booking to a competitor.',
       points:['Demand-based pricing suggestions', 'Live RevPAR & ADR tracking', 'Automated financial reports', 'Forecasts ahead of peak periods'],
-      faq:[{q:'Does it set rates automatically?', a:'It suggests rate changes based on demand — your revenue team approves before anything goes live.'}]
+      faq:[{q:'Does it set rates automatically?', a:'It suggests rate changes based on demand, your revenue team approves before anything goes live.'}]
     },
     'pos': {
       icon:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4M2 11h20"/>',
       title:'Point of Sale',
-      desc:'Manage restaurant orders, table assignments and billing from any device, fully integrated with your hotel PMS. Post charges from the restaurant, bar, spa or room service straight to the guest room with one click, and run every outlet — including delivery and takeaway — from a single dashboard.',
-      points:['Bill to room — posts directly to guest folio', 'Table management with real-time overview', 'Multi-outlet support: restaurant, bar, spa, room service', 'GST-compliant billing, generated in seconds'],
-      faq:[{q:'Does it connect to my hotel PMS?', a:'Yes — bills post directly to the guest folio and sync in real time with eGlobe Cloud PMS.'}]
+      desc:'Manage restaurant orders, table assignments and billing from any device, fully integrated with your hotel PMS. Post charges from the restaurant, bar, spa or room service straight to the guest room with one click, and run every outlet, including delivery and takeaway, from a single dashboard.',
+      points:['Bill to room, posts directly to guest folio', 'Table management with real-time overview', 'Multi-outlet support: restaurant, bar, spa, room service', 'GST-compliant billing, generated in seconds'],
+      faq:[{q:'Does it connect to my hotel PMS?', a:'Yes, bills post directly to the guest folio and sync in real time with eGlobe Cloud PMS.'}]
     },
     'kot': {
       icon:'<path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
       title:'Kitchen Order Ticket (KOT)',
       desc:'Orders taken at the POS route instantly to a live kitchen display, so the kitchen starts cooking the moment a guest orders instead of waiting on a paper ticket to be walked over. It cuts down mix-ups between what a guest ordered and what the kitchen prepares, especially during a busy service.',
       points:['Instant order routing from POS', 'Live kitchen display screen', 'Fewer order mix-ups', 'Faster table and room-service turnaround'],
-      faq:[{q:'Does it need a separate kitchen device?', a:'Just a screen or printer at the kitchen pass — no special hardware or software installation required.'}]
+      faq:[{q:'Does it need a separate kitchen device?', a:'Just a screen or printer at the kitchen pass, no special hardware or software installation required.'}]
     },
     'housekeeping': {
       icon:'<path d="M3 6l9-4 9 4M4 10h16v10H4z"/>',
       title:'Housekeeping',
-      desc:'Room status updates flow instantly between front desk and housekeeping staff on mobile, replacing radios and phone calls with a live board everyone can see. The moment a room is marked clean, front desk can sell it — cutting the gap between checkout and a new guest checking into a ready room.',
+      desc:'Room status updates flow instantly between front desk and housekeeping staff on mobile, replacing radios and phone calls with a live board everyone can see. The moment a room is marked clean, front desk can sell it, cutting the gap between checkout and a new guest checking into a ready room.',
       points:['Live room-status board', 'Task assignment on mobile', 'Faster room turnover', 'Fewer front-desk / housekeeping phone calls'],
-      faq:[{q:'Do staff need a special device?', a:'No — it works from any smartphone or tablet housekeeping already carries.'}]
+      faq:[{q:'Do staff need a special device?', a:'No, it works from any smartphone or tablet housekeeping already carries.'}]
     },
     'booking-engine': {
       icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
       title:'Booking Engine',
-      desc:'A single-page, 4-step direct booking flow fully integrated with your PMS, Channel Manager and Payment Gateway — so guests book straight from your website instead of an OTA. Sell packages, apply discounts (early bird, last-minute, coupons) and accept payment through multiple gateways, with GST-compliant invoices generated automatically.',
+      desc:'A single-page, 4-step direct booking flow fully integrated with your PMS, Channel Manager and Payment Gateway, so guests book straight from your website instead of an OTA. Sell packages, apply discounts (early bird, last-minute, coupons) and accept payment through multiple gateways, with GST-compliant invoices generated automatically.',
       points:['Instant confirmation, no OTA commission', 'Auto-optimised for mobile devices', 'Multiple payment gateways supported', 'Packages, up-sells & discount codes built in'],
-      faq:[{q:'Is it fully integrated with my other systems?', a:'Yes — the Booking Engine is fully integrated with your PMS, Channel Manager, and Payment Gateway.'}]
+      faq:[{q:'Is it fully integrated with my other systems?', a:'Yes, the Booking Engine is fully integrated with your PMS, Channel Manager, and Payment Gateway.'}]
     },
     'ota-listing': {
       icon:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/>',
       title:'OTA Listing & Management',
-      desc:'A fully managed OTA listing service — we set up and optimise your profiles on Booking.com, Expedia, MakeMyTrip and 100+ more, then connect them to your Channel Manager for real-time inventory and rate sync. Includes professional descriptions, photo optimisation, and rate-parity & promotions management.',
+      desc:'A fully managed OTA listing service. We set up and optimise your profiles on Booking.com, Expedia, MakeMyTrip and 100+ more, then connect them to your Channel Manager for real-time inventory and rate sync. Includes professional descriptions, photo optimisation, and rate-parity & promotions management.',
       points:['End-to-end account setup on 100+ OTAs', 'Real-time inventory & rate sync', 'Professional listing & photo optimisation', 'Rate parity & promotions management'],
       faq:[{q:'How long does OTA listing take?', a:'Usually 2 to 5 working days, depending on each platform\'s approval process and how complete your property details are.'}]
     },
     'google-ads': {
       icon:'<circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/>',
       title:'Google Hotel Ads',
-      desc:'Display your live rates and availability on Google Search, Google Maps and your Google Business listing, and pay only for confirmed bookings — no setup fees, no rental costs. Available as fixed-rental or Pay Per Conversion plans, it\'s how 7,000+ properties reach travellers already searching on Google.',
-      points:['Real-time rate updates on Search & Maps', 'Pay Per Conversion — no cost for clicks alone', 'No setup fees or rental costs', 'Detailed reporting on impressions, clicks & bookings'],
-      faq:[{q:'Is there a cost to participate?', a:'No setup fees or rental costs — you pay a low commission only on confirmed bookings, under the Pay Per Conversion model.'}]
+      desc:'Display your live rates and availability on Google Search, Google Maps and your Google Business listing, and pay only for confirmed bookings. No setup fees, no rental costs. Available as fixed-rental or Pay Per Conversion plans, it\'s how 7,000+ properties reach travellers already searching on Google.',
+      points:['Real-time rate updates on Search & Maps', 'Pay Per Conversion, no cost for clicks alone', 'No setup fees or rental costs', 'Detailed reporting on impressions, clicks & bookings'],
+      faq:[{q:'Is there a cost to participate?', a:'No setup fees or rental costs, you pay a low commission only on confirmed bookings, under the Pay Per Conversion model.'}]
     },
     'meta-search': {
       icon:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
       title:'Meta Search Engines',
-      desc:'eGlobe is an official Google Hotel Ads partner in India, connecting your booking engine to the world\'s leading hotel meta search platforms — including direct Google Maps integration, so your live rates surface right where travellers are searching, alongside OTA rates, at the moment of decision.',
+      desc:'eGlobe is an official Google Hotel Ads partner in India, connecting your booking engine to the world\'s leading hotel meta search platforms, including direct Google Maps integration, so your live rates surface right where travellers are searching, alongside OTA rates, at the moment of decision.',
       points:['Official Google Hotel Ads partner in India', 'Google Maps integration for real-time visibility', 'Rates shown alongside OTA pricing', 'Reach travellers across desktop, tablet & mobile'],
       faq:[{q:'Which meta search platforms are supported?', a:'Google Hotel Ads and Google Maps Integration, with your rates shown alongside major OTAs at the point of search.'}]
     },
     'stay-b2b': {
       icon:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
       title:'Stay B2B',
-      desc:'A dedicated network for your corporate clients and travel agents to book your inventory at special rates — through their own branded mobile app or secure, role-based corporate logins, either online or via city ledger. Set custom commission structures per partner, with real-time inventory and automated invoicing.',
+      desc:'A dedicated network for your corporate clients and travel agents to book your inventory at special rates, through their own branded mobile app or secure, role-based corporate logins, either online or via city ledger. Set custom commission structures per partner, with real-time inventory and automated invoicing.',
       points:['Dedicated branded mobile app for partners', 'Secure, role-based corporate logins', 'Custom rates & commission per partner', 'Automated invoicing & payment reconciliation'],
-      faq:[{q:'Can partners see my public rates too?', a:'No — role-based access means each partner only sees the rates and inventory you assign to them.'}]
+      faq:[{q:'Can partners see my public rates too?', a:'No, role-based access means each partner only sees the rates and inventory you assign to them.'}]
     },
     'website-builder': {
       icon:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/>',
       title:'Website Builder',
-      desc:'Launch a mobile-ready, SEO-optimised hotel website from hospitality-built templates — no coding needed, free hosting included. Update photos, colours and content yourself, show live offers from your Booking Engine, and add TripAdvisor, Facebook and Google Maps widgets to build guest trust before they book.',
+      desc:'Launch a mobile-ready, SEO-optimised hotel website from hospitality-built templates. No coding needed, free hosting included. Update photos, colours and content yourself, show live offers from your Booking Engine, and add TripAdvisor, Facebook and Google Maps widgets to build guest trust before they book.',
       points:['No-code templates built for hotels', 'SEO-optimised, mobile & Facebook friendly', 'Free hosting, multi-language & currency', 'TripAdvisor, Facebook & Google Maps widgets'],
-      faq:[{q:'Do I need coding or design experience?', a:'No — it\'s built so you can launch and update a professional, conversion-optimised site without any technical skills.'}]
+      faq:[{q:'Do I need coding or design experience?', a:'No, it\'s built so you can launch and update a professional, conversion-optimised site without any technical skills.'}]
     },
     'reviews': {
       icon:'<path d="M12 17.75l-6.16 3.24 1.18-6.88L2 9.24l6.92-1.01L12 2l3.08 6.23L22 9.24l-5.02 4.87 1.18 6.88z"/>',
       title:'Reviews Manager',
-      desc:'Brings guest reviews from every platform — Google, Booking.com, TripAdvisor and more — into a single inbox, so nothing gets missed and nothing waits days for a reply. Respond to a review once from the same screen it arrived in, and track how your rating is trending over time.',
+      desc:'Brings guest reviews from every platform (Google, Booking.com, TripAdvisor and more) into a single inbox, so nothing gets missed and nothing waits days for a reply. Respond to a review once from the same screen it arrived in, and track how your rating is trending over time.',
       points:['All platforms, one inbox', 'Faster response times', 'Track rating trends over time', 'Reply once, without switching tabs'],
       faq:[{q:'Which review platforms are covered?', a:'Google, Booking.com, TripAdvisor and the other major platforms your guests already review you on.'}]
     },
@@ -509,20 +509,20 @@
       icon:'<path d="M12 2a4 4 0 014 4c0 1.5-.8 2.5-1.5 3.3-.7.8-1.3 1.4-1.3 2.7v1h-2.4v-1c0-1.3-.6-1.9-1.3-2.7C8.8 8.5 8 7.5 8 6a4 4 0 014-4zM9 18h6M10 21h4"/>',
       title:'eGlobe AI Tools',
       desc:'Three AI agents built into your daily workflow: a Sales Agent that answers WhatsApp and website enquiries and pushes bookings to your PMS 24/7, a Smartdesk that assists staff at check-in/out and answers guest queries, and an Admin Agent that answers questions like "What was my occupancy last week?" instantly.',
-      points:['AI Sales Agent — converts enquiries into bookings', 'AI Smartdesk — assists front desk & guest queries', 'AI Admin Agent — instant business insights', 'Works 24/7 across WhatsApp, website & PMS'],
-      faq:[{q:'Does this replace my front-desk staff?', a:'No — it handles routine enquiries and check-in support so your team can focus on guests, reducing workload rather than replacing staff.'}]
+      points:['AI Sales Agent, converts enquiries into bookings', 'AI Smartdesk, assists front desk & guest queries', 'AI Admin Agent, instant business insights', 'Works 24/7 across WhatsApp, website & PMS'],
+      faq:[{q:'Does this replace my front-desk staff?', a:'No, it handles routine enquiries and check-in support so your team can focus on guests, reducing workload rather than replacing staff.'}]
     },
     'payment-gateway': {
       icon:'<path d="M1 10h22M5 15h1M10 15h1"/><rect x="1" y="4" width="22" height="16" rx="2"/>',
       title:'Payment Gateway',
       desc:'Secure card and digital payment processing that posts straight to the guest folio the moment a transaction clears, with no manual entry required by front desk. It supports the major payment methods guests expect, and every charge reconciles automatically against the correct reservation.',
       points:['Secure card & digital processing', 'Direct-to-folio posting', 'Multiple payment methods supported', 'Automatic reconciliation, no manual entry'],
-      faq:[{q:'Is it PCI compliant?', a:'Yes — all card processing runs through PCI-certified payment partners.'}]
+      faq:[{q:'Is it PCI compliant?', a:'Yes, all card processing runs through PCI-certified payment partners.'}]
     },
     'apis': {
       icon:'<path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3"/>',
       title:'APIs for PMS',
-      desc:'Bi-directional, OAuth 2.0-secured endpoints for revenue-management tools, analytics platforms and PMS providers who need direct programmatic access — extract booking data, push or pull inventory and rates in real time, backed by a 99.9% uptime guarantee, full documentation and dedicated developer support.',
+      desc:'Bi-directional, OAuth 2.0-secured endpoints for revenue-management tools, analytics platforms and PMS providers who need direct programmatic access. Extract booking data, push or pull inventory and rates in real time, backed by a 99.9% uptime guarantee, full documentation and dedicated developer support.',
       points:['Real-time, bi-directional data sync', 'OAuth 2.0 secured endpoints', '99.9% uptime guarantee', 'Full docs + dedicated developer support'],
       faq:[{q:'How secure is the API?', a:'All endpoints are protected with OAuth 2.0 authentication, so your data transfers are always secure.'}]
     }
@@ -546,7 +546,7 @@
 
       if(key === 'channel-manager'){
         demoEl.innerHTML =
-          '<p class="demo-hint" style="padding-left:0;">Try it — click a rate, then sync.</p>' +
+          '<p class="demo-hint" style="padding-left:0;">Try it, click a rate, then sync.</p>' +
           '<div class="demo-box">' +
             '<div class="demo-rates">' +
               '<div class="demo-rates__row demo-rates__row--head"><span>Room</span><span>Jun 17</span><span>Jun 18</span></div>' +
@@ -575,12 +575,12 @@
           {name:'Peanut Masala', price:90}
         ];
         demoEl.innerHTML =
-          '<p class="demo-hint" style="padding-left:0;">Try it — tap items to build an order.</p>' +
+          '<p class="demo-hint" style="padding-left:0;">Try it, tap items to build an order.</p>' +
           '<div class="demo-box demo-pos">' +
             '<div class="demo-pos__menu">' + menu.map(function(m){
               return '<button class="demo-pos__chip" type="button" data-name="' + m.name + '" data-price="' + m.price + '">' + m.name + ' · ₹' + m.price + '</button>';
             }).join('') + '</div>' +
-            '<div class="demo-pos__order" id="modal-demo-order"><span class="demo-pos__empty">No items yet — tap a dish above.</span></div>' +
+            '<div class="demo-pos__order" id="modal-demo-order"><span class="demo-pos__empty">No items yet, tap a dish above.</span></div>' +
             '<div class="demo-pos__total"><span>Total Payable</span><b id="modal-demo-total">₹0.00</b></div>' +
           '</div>';
         wirePosDemo(demoEl);
@@ -592,7 +592,7 @@
           {name:'Deluxe Double Pool View', rate:10309}
         ];
         demoEl.innerHTML =
-          '<p class="demo-hint" style="padding-left:0;">Try it — pick room quantities.</p>' +
+          '<p class="demo-hint" style="padding-left:0;">Try it, pick room quantities.</p>' +
           '<div class="demo-box demo-book">' + rooms.map(function(r, i){
             return '<div class="demo-book__room" data-rate="' + r.rate + '" data-qty="0">' +
               '<div><span class="demo-book__room-name">' + r.name + '</span><span class="demo-book__room-rate">₹' + r.rate.toLocaleString('en-IN') + ' / night</span></div>' +
@@ -608,7 +608,7 @@
         demoEl.innerHTML =
           '<div class="product-modal__mascot">' +
             '<img src="https://www.eglobe-solutions.com/img/ai-img1.png" alt="eGlobe AI mascot">' +
-            '<div class="product-modal__mascot-text"><b>Meet eGlobe AI</b>Your Sales Agent, Smartdesk and Admin Agent — working across WhatsApp, front desk and your PMS.</div>' +
+            '<div class="product-modal__mascot-text"><b>Meet eGlobe AI</b>Your Sales Agent, Smartdesk and Admin Agent, working across WhatsApp, front desk and your PMS.</div>' +
           '</div>';
       }
 
@@ -664,7 +664,7 @@
       var order = [];
       function render(){
         if(!order.length){
-          orderEl.innerHTML = '<span class="demo-pos__empty">No items yet — tap a dish above.</span>';
+          orderEl.innerHTML = '<span class="demo-pos__empty">No items yet, tap a dish above.</span>';
           totalEl.textContent = '₹0.00';
           return;
         }
@@ -787,9 +787,9 @@
     };
     var PLAN_BY_ROOMS = {
       '1-10': 'Great fit for our Per-Room plan.',
-      '11-50': 'Per-Room or Per-Property — we\'ll help you compare.',
-      '51-150': 'Per-Property plan — one flat rate covers you.',
-      '150+': 'Enterprise — portfolio dashboards & SLA support.'
+      '11-50': 'Per-Room or Per-Property, we\'ll help you compare.',
+      '51-150': 'Per-Property plan, one flat rate covers you.',
+      '150+': 'Enterprise, portfolio dashboards & SLA support.'
     };
 
     var selectedRooms = '';
@@ -949,23 +949,64 @@
       }
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending…';
-      setTimeout(function(){
-        form.reset();
-        selectedRooms = '';
-        selectedProducts = [];
-        form.querySelectorAll('.room-chip, .product-chip').forEach(function(c){ c.classList.remove('active'); });
-        form.querySelectorAll('.field').forEach(function(g){ g.classList.remove('valid', 'invalid'); });
-        form.querySelectorAll('.field-msg').forEach(function(m){ m.innerHTML = ''; });
-        if(roomsHint) roomsHint.textContent = 'Pick a range — we\'ll suggest the right plan.';
-        if(planEl) planEl.textContent = 'Tell us your room count';
-        updateProgress();
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Send to Sales';
-        if(statusEl){
-          statusEl.textContent = 'Thanks — this is a frontend demo, so nothing was actually sent. Our team will reach out on a live site.';
-          statusEl.className = 'form-status success';
-        }
-      }, 900);
+
+      var otherChipEl = form.querySelector('#product-chip-other');
+      var otherInputEl = form.querySelector('#product-other-input');
+      var messageEl = form.querySelector('#sales-form-message');
+      var websiteEl = form.querySelector('#sales-form-website');
+      var tokenEl = form.querySelector('input[name="__RequestVerificationToken"]');
+
+      var body = new URLSearchParams();
+      body.set('FullName', fieldGroup('name').querySelector('input').value.trim());
+      body.set('HotelName', fieldGroup('company').querySelector('input').value.trim());
+      body.set('Email', fieldGroup('email').querySelector('input').value.trim());
+      body.set('Phone', fieldGroup('phone').querySelector('input').value.trim());
+      body.set('RoomsRange', selectedRooms);
+      body.set('InterestedIn', selectedProducts.join(','));
+      body.set('OtherInterest', otherChipEl && otherChipEl.classList.contains('active') && otherInputEl ? otherInputEl.value.trim() : '');
+      body.set('Message', messageEl ? messageEl.value.trim() : '');
+      body.set('Website', websiteEl ? websiteEl.value : '');
+      if(tokenEl) body.set('__RequestVerificationToken', tokenEl.value);
+
+      fetch('/contact/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+        body: body.toString()
+      })
+        .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
+        .then(function(result){
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send to Sales';
+          if(!result.ok){
+            if(statusEl){
+              statusEl.textContent = (result.data && result.data.message) || 'Something went wrong, please try again or call us directly.';
+              statusEl.className = 'form-status error';
+            }
+            return;
+          }
+          form.reset();
+          selectedRooms = '';
+          selectedProducts = [];
+          form.querySelectorAll('.room-chip, .product-chip').forEach(function(c){ c.classList.remove('active'); });
+          form.querySelectorAll('.field').forEach(function(g){ g.classList.remove('valid', 'invalid'); });
+          form.querySelectorAll('.field-msg').forEach(function(m){ m.innerHTML = ''; });
+          if(otherInputEl) otherInputEl.classList.remove('show');
+          if(roomsHint) roomsHint.textContent = 'Pick a range, we\'ll suggest the right plan.';
+          if(planEl) planEl.textContent = 'Tell us your room count';
+          updateProgress();
+          if(statusEl){
+            statusEl.textContent = (result.data && result.data.message) || 'Thanks, your message is on its way to our sales team.';
+            statusEl.className = 'form-status success';
+          }
+        })
+        .catch(function(){
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send to Sales';
+          if(statusEl){
+            statusEl.textContent = 'Could not reach the server, please check your connection and try again.';
+            statusEl.className = 'form-status error';
+          }
+        });
     });
   }
 
@@ -1035,6 +1076,41 @@
     rings.forEach(function(r){ io.observe(r); });
   }
 
+  /* ---------- Blog filters ---------- */
+  function initBlogFilters(){
+    var filters = document.querySelectorAll('.blog-filter');
+    var cards = document.querySelectorAll('.blog-card');
+    if(!filters.length || !cards.length) return;
+    filters.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        filters.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        var filter = btn.getAttribute('data-filter');
+        cards.forEach(function(card){
+          var match = filter === 'all' || card.getAttribute('data-category') === filter;
+          card.classList.toggle('blog-hide', !match);
+        });
+      });
+    });
+  }
+
+  /* ---------- Announcement bar (dismissible, remembered for the session) ---------- */
+  function initAnnounceBar(){
+    var bar = document.querySelector('.announce-bar');
+    if(!bar) return;
+    var closeBtn = bar.querySelector('.announce-bar__close');
+    if(sessionStorage.getItem('announceDismissed') === '1'){
+      bar.classList.add('hide');
+      return;
+    }
+    if(closeBtn){
+      closeBtn.addEventListener('click', function(){
+        bar.classList.add('hide');
+        sessionStorage.setItem('announceDismissed', '1');
+      });
+    }
+  }
+
   /* ---------- init ---------- */
   document.addEventListener('DOMContentLoaded', function(){
     markActiveNav();
@@ -1055,5 +1131,7 @@
     initPricingToggle();
     initFAQ();
     initOccRings();
+    initBlogFilters();
+    initAnnounceBar();
   });
 })();
