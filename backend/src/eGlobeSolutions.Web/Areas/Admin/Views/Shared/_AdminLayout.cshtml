@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] &middot; eGlobe Admin</title>
+    <link rel="stylesheet" href="~/admin/admin.css">
+</head>
+<body>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar__brand">eGlobe Admin</div>
+            <nav class="admin-sidebar__nav">
+                @{ var ctrl = ViewContext.RouteData.Values["controller"]?.ToString(); }
+                <a href="/admin/dashboard" class="@(ctrl == "Dashboard" ? "active" : "")">Dashboard</a>
+                <a href="/admin/enquiries" class="@(ctrl == "Enquiries" ? "active" : "")">Enquiries</a>
+                <a href="/admin/pricing" class="@(ctrl == "Pricing" ? "active" : "")">Pricing Plans</a>
+                <a href="/admin/content" class="@(ctrl == "Content" ? "active" : "")">Page Content</a>
+                <a href="/admin/blog" class="@(ctrl == "BlogPosts" ? "active" : "")">Blog Posts</a>
+                <a href="/admin/faqs" class="@(ctrl == "Faqs" ? "active" : "")">FAQs</a>
+                <a href="/admin/media" class="@(ctrl == "Media" ? "active" : "")">Media Library</a>
+                <a href="/admin/menus" class="@(ctrl == "Menus" ? "active" : "")">Navigation</a>
+                <a href="/admin/seo" class="@(ctrl == "Seo" ? "active" : "")">SEO Metadata</a>
+                <a href="/admin/settings" class="@(ctrl == "Settings" ? "active" : "")">Site Settings</a>
+                <a href="/admin/users" class="@(ctrl == "Users" ? "active" : "")">Users &amp; Roles</a>
+                <a href="/admin/activitylog" class="@(ctrl == "ActivityLog" ? "active" : "")">Activity Log</a>
+            </nav>
+        </aside>
+        <div class="admin-main">
+            <header class="admin-topbar">
+                <span>Signed in as <strong>@User.Identity!.Name</strong></span>
+                <form method="post" action="/admin/account/logout">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="admin-btn admin-btn--ghost">Log Out</button>
+                </form>
+            </header>
+            <main class="admin-content">
+                @if (TempData["Success"] is string successMsg)
+                {
+                    <div class="admin-alert admin-alert--success">@successMsg</div>
+                }
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+</body>
+</html>

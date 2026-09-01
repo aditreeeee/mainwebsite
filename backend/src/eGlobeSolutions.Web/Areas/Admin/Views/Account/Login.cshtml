@@ -1,0 +1,35 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Log In";
+    Layout = "_AdminLayout";
+}
+<div class="admin-login">
+    <div class="admin-login__box">
+        <h1>eGlobe Admin</h1>
+        <p>Sign in to manage site content and enquiries.</p>
+
+        <form asp-area="Admin" asp-controller="Account" asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div asp-validation-summary="ModelOnly" class="field-error"></div>
+
+            <div class="admin-field">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" autocomplete="username" autofocus />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+            <div class="admin-field">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" type="password" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+            <div class="admin-field" style="display:flex;align-items:center;gap:8px;">
+                <input asp-for="RememberMe" type="checkbox" style="width:auto;" />
+                <label asp-for="RememberMe" style="margin:0;">Remember me</label>
+            </div>
+
+            <button type="submit" class="admin-btn admin-btn--primary" style="width:100%;">Log In</button>
+        </form>
+    </div>
+</div>

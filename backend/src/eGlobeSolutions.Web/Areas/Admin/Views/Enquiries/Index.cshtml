@@ -1,0 +1,80 @@
+@model EnquiryListViewModel
+@{
+    ViewData["Title"] = "Enquiries";
+}
+
+<h1>Enquiries @(Model.ShowTrashed ? "· Trash" : "")</h1>
+
+<form method="get" class="admin-filters">
+    <input type="text" name="search" value="@Model.Search" placeholder="Search name, hotel, email, phone..." />
+    <select name="type">
+        <option value="">All Types</option>
+        @foreach (var t in Enum.GetValues<EnquiryType>())
+        {
+            <option value="@t" selected="@(Model.TypeFilter == t)">@t</option>
+        }
+    </select>
+    <select name="status">
+        <option value="">All Statuses</option>
+        @foreach (var s in Enum.GetValues<EnquiryStatus>())
+        {
+            <option value="@s" selected="@(Model.StatusFilter == s)">@s</option>
+        }
+    </select>
+    <select name="sort">
+        <option value="date_desc" selected="@(Model.SortBy == "date_desc")">Newest first</option>
+        <option value="date_asc" selected="@(Model.SortBy == "date_asc")">Oldest first</option>
+        <option value="name_asc" selected="@(Model.SortBy == "name_asc")">Name A, Z</option>
+        <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Name Z, A</option>
+        <option value="status_asc" selected="@(Model.SortBy == "status_asc")">Status</option>
+    </select>
+    <button type="submit" class="admin-btn">Filter</button>
+    <a href="/admin/enquiries@(Model.ShowTrashed ? "" : "?trashed=true")" class="admin-btn">
+        @(Model.ShowTrashed ? "Back to Inbox" : "View Trash")
+    </a>
+</form>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead>
+            <tr><th>Name</th><th>Hotel / Company</th><th>Email</th><th>Type</th><th>Status</th><th>Received</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var e in Model.Items)
+        {
+            <tr onclick="location.href='/admin/enquiries/@e.Id'" style="cursor:pointer;">
+                <td>@e.FullName</td>
+                <td>@e.HotelName</td>
+                <td>@e.Email</td>
+                <td>@e.Type</td>
+                <td>
+                    <span class="admin-badge admin-badge--@(e.Status.ToString().ToLower())">@e.Status</span>
+                </td>
+                <td>@e.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</td>
+            </tr>
+        }
+        @if (!Model.Items.Any())
+        {
+            <tr><td colspan="6">No enquiries match these filters.</td></tr>
+        }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="admin-pagination">
+            @for (var p = 1; p <= Model.TotalPages; p++)
+            {
+                var query = $"?page={p}&search={Model.Search}&type={Model.TypeFilter}&status={Model.StatusFilter}&sort={Model.SortBy}&trashed={Model.ShowTrashed}";
+                if (p == Model.Page)
+                {
+                    <span class="current">@p</span>
+                }
+                else
+                {
+                    <a href="/admin/enquiries@query">@p</a>
+                }
+            }
+        </div>
+    }
+</div>

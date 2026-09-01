@@ -1,0 +1,41 @@
+@model BlogPost
+@{ ViewData["Title"] = "Edit Blog Post"; }
+<h1>Edit Blog Post</h1>
+<div class="admin-card">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="admin-alert admin-alert--error">
+            @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@e.ErrorMessage</div>
+            }
+        </div>
+    }
+    <form method="post" action="/admin/blog/@Model.Id/edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="admin-field"><label>Title</label><input asp-for="Title" required /></div>
+        <div class="admin-field"><label>Slug (leave blank for a teaser-only card with no article page)</label><input asp-for="Slug" /></div>
+        <div class="admin-field"><label>Category</label>
+            <select asp-for="Category"><option value="Guide">Guide</option><option value="Product">Product</option><option value="News">News</option></select>
+        </div>
+        <div class="admin-field"><label>Excerpt</label><textarea asp-for="Excerpt" rows="2" required></textarea></div>
+        <div class="admin-field"><label>Body (HTML, leave blank for a teaser-only card)</label><textarea asp-for="Body" rows="10"></textarea></div>
+        <div class="admin-field"><label>Cover Image URL</label><input asp-for="CoverImageUrl" /></div>
+        <div class="admin-field"><label>Author Name</label><input asp-for="AuthorName" /></div>
+        <div class="admin-field"><label>Author Role</label><input asp-for="AuthorRole" /></div>
+        <div class="admin-field"><label>Read Time (minutes)</label><input asp-for="ReadTimeMinutes" type="number" /></div>
+        <div class="admin-field"><label>Published Date</label><input asp-for="PublishedAtUtc" type="date" value="@Model.PublishedAtUtc.ToString("yyyy-MM-dd")" /></div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <div class="admin-checkbox-row"><input asp-for="IsFeatured" type="checkbox" /> <label asp-for="IsFeatured">Featured (shown at top of blog.html)</label></div>
+        <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" /> <label asp-for="IsPublished">Published</label></div>
+
+        <h3>SEO (optional, falls back to Title/Excerpt)</h3>
+        <div class="admin-field"><label>Meta Title</label><input asp-for="MetaTitle" /></div>
+        <div class="admin-field"><label>Meta Description</label><input asp-for="MetaDescription" /></div>
+        <div class="admin-field"><label>Meta Keywords</label><input asp-for="MetaKeywords" /></div>
+
+        <button class="admin-btn admin-btn--primary" type="submit">Save</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/blog">Cancel</a>
+    </form>
+</div>

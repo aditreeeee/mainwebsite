@@ -1,0 +1,41 @@
+@model List<ContentBlock>
+@{ ViewData["Title"] = "Page Content"; string page = ViewBag.Page; }
+
+<div class="admin-toolbar">
+    <h1>Page Content</h1>
+    <a href="/admin/content/create?page=@(page)" class="admin-btn admin-btn--primary">+ New Block</a>
+</div>
+<p class="admin-hint">Content blocks drive editable sections of the public pages (heading, subtitle, body, CTA, image).</p>
+
+<div class="admin-filters">
+    <a class="admin-btn @(page == "home" ? "admin-btn--primary" : "")" href="/admin/content?page=home">Home</a>
+    <a class="admin-btn @(page == "reseller" ? "admin-btn--primary" : "")" href="/admin/content?page=reseller">Resellers</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Section Key</th><th>Title</th><th>Published</th><th>Sort</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td><code>@b.SectionKey</code></td>
+                <td>@b.Title</td>
+                <td>@(b.IsPublished ? "Published" : "Draft")</td>
+                <td>@b.SortOrder</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/content/@b.Id/edit">Edit</a>
+                    <form method="post" action="/admin/content/@b.Id/delete" onsubmit="return confirm('Delete this block?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="5">No content blocks yet for this page.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

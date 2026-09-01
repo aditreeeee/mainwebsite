@@ -1,0 +1,84 @@
+@model Enquiry
+@{
+    ViewData["Title"] = $"Enquiry, {Model.FullName}";
+}
+
+<a href="/admin/enquiries" class="admin-btn" style="margin-bottom:16px;display:inline-block;">&larr; Back to Enquiries</a>
+
+<div class="admin-card">
+    <h2>@Model.FullName</h2>
+    <p style="color:#6B7280;">@Model.HotelName &middot; @Model.Type &middot; Received @Model.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</p>
+
+    <table class="admin-table">
+        <tr><th style="width:160px;">Email</th><td><a href="mailto:@Model.Email">@Model.Email</a></td></tr>
+        <tr><th>Phone</th><td><a href="tel:@Model.Phone">@Model.Phone</a></td></tr>
+        @if (!string.IsNullOrEmpty(Model.RoomsRange))
+        {
+            <tr><th>Room Count</th><td>@Model.RoomsRange</td></tr>
+        }
+        @if (!string.IsNullOrEmpty(Model.InterestedIn))
+        {
+            <tr><th>Interested In</th><td>@Model.InterestedIn</td></tr>
+        }
+        @if (!string.IsNullOrEmpty(Model.OtherInterest))
+        {
+            <tr><th>Other</th><td>@Model.OtherInterest</td></tr>
+        }
+        @if (!string.IsNullOrEmpty(Model.CompanyType))
+        {
+            <tr><th>Company Type</th><td>@Model.CompanyType</td></tr>
+        }
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <tr><th>Message</th><td>@Model.Message</td></tr>
+        }
+        <tr><th>Source Page</th><td>@Model.SourcePage</td></tr>
+    </table>
+</div>
+
+<div class="admin-card">
+    <h3>Update Status</h3>
+    <form asp-area="Admin" asp-controller="Enquiries" asp-action="UpdateStatus" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div class="admin-field">
+            <label>Status</label>
+            <select name="Status">
+                @foreach (var s in Enum.GetValues<EnquiryStatus>())
+                {
+                    <option value="@s" selected="@(Model.Status == s)">@s</option>
+                }
+            </select>
+        </div>
+        <div class="admin-field">
+            <label>Follow-up date</label>
+            <input type="datetime-local" name="FollowUpAtUtc" value="@(Model.FollowUpAtUtc?.ToString("yyyy-MM-ddTHH:mm"))" />
+        </div>
+        <div class="admin-field">
+            <label>Internal Notes</label>
+            <textarea name="InternalNotes" rows="4">@Model.InternalNotes</textarea>
+        </div>
+
+        <button type="submit" class="admin-btn admin-btn--primary">Save</button>
+    </form>
+</div>
+
+<div class="admin-card">
+    <h3>Danger Zone</h3>
+    @if (Model.IsDeleted)
+    {
+        <form asp-area="Admin" asp-controller="Enquiries" asp-action="Restore" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="admin-btn">Restore from Trash</button>
+        </form>
+    }
+    else
+    {
+        <form asp-area="Admin" asp-controller="Enquiries" asp-action="Delete" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('Move this enquiry to trash?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="admin-btn admin-btn--danger">Move to Trash</button>
+        </form>
+    }
+</div>

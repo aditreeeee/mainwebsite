@@ -1,0 +1,52 @@
+@model List<MediaAsset>
+@{ ViewData["Title"] = "Media Library"; }
+
+<h1>Media Library</h1>
+
+<div class="admin-card">
+    <form method="post" action="/admin/media/upload" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+        @Html.AntiForgeryToken()
+        <div class="admin-field" style="margin:0;"><label>File</label><input type="file" name="file" required /></div>
+        <div class="admin-field" style="margin:0;"><label>Alt text</label><input type="text" name="altText" placeholder="Describe the image…" /></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Upload</button>
+    </form>
+    <p class="admin-hint">jpg, png, webp, gif, svg or pdf, up to 10 MB.</p>
+    @if (TempData["Error"] is string err)
+    {
+        <div class="admin-alert admin-alert--error">@err</div>
+    }
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th></th><th>File</th><th>Type</th><th>Size</th><th>URL</th><th>Uploaded</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>
+                    @if (a.ContentType.StartsWith("image/"))
+                    {
+                        <img class="admin-thumb" src="@a.Url" alt="@a.AltText" />
+                    }
+                </td>
+                <td>@a.OriginalFileName</td>
+                <td>@a.ContentType</td>
+                <td>@((a.SizeBytes / 1024.0).ToString("N0")) KB</td>
+                <td><code>@a.Url</code></td>
+                <td>@a.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <form method="post" action="/admin/media/@a.Id/delete" onsubmit="return confirm('Remove this file from the library?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="7">No files uploaded yet.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

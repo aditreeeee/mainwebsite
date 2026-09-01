@@ -1,0 +1,15 @@
+@model List<MenuItem>
+<nav class="topbar__links" id="topbar-links">
+  @foreach (var item in Model)
+  {
+    @if (item.OpenInNewTab)
+    {
+      <a href="@item.Url" target="_blank" rel="noopener">@item.Label</a>
+    }
+    else
+    {
+      <a href="@item.Url">@item.Label</a>
+    }
+  }
+  <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="topbar__links-login">Log In</a>
+</nav>

@@ -1,0 +1,17 @@
+@model FaqItem
+@{ ViewData["Title"] = "New FAQ"; }
+<h1>New FAQ</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/faqs/create">
+        @Html.AntiForgeryToken()
+        <div class="admin-field"><label>Page</label>
+            <select asp-for="PageKey"><option value="pricing">Pricing</option><option value="home">Home</option></select>
+        </div>
+        <div class="admin-field"><label>Question</label><input asp-for="Question" required /></div>
+        <div class="admin-field"><label>Answer</label><textarea asp-for="Answer" rows="4" required></textarea></div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" checked /> <label asp-for="IsPublished">Published</label></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Create</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/faqs">Cancel</a>
+    </form>
+</div>

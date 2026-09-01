@@ -1,0 +1,136 @@
+@model BlogArticleViewModel
+@{
+    Layout = null;
+    var post = Model.Post;
+    var metaTitle = post.MetaTitle ?? $"{post.Title}, eGlobe Solutions Blog";
+    var metaDesc = post.MetaDescription ?? post.Excerpt;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@metaTitle</title>
+<meta name="description" content="@metaDesc">
+@if (!string.IsNullOrWhiteSpace(post.MetaKeywords))
+{
+  <meta name="keywords" content="@post.MetaKeywords">
+}
+<link rel="canonical" href="https://www.eglobe-solutions.com/@(post.Slug).html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="@metaTitle">
+<meta property="og:description" content="@metaDesc">
+<meta property="og:url" content="https://www.eglobe-solutions.com/@(post.Slug).html">
+<meta property="og:image" content="@(post.CoverImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="~/css/style.css">
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BlogPosting",
+  "headline": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(post.Title)),
+  "datePublished": "@post.PublishedAtUtc.ToString("yyyy-MM-dd")",
+  "author": {"@@type": "Organization", "name": "eGlobe Solutions"},
+  "publisher": {"@@type": "Organization", "name": "eGlobe Solutions"}
+}
+</script>
+</head>
+<body>
+
+<div class="scroll-progress"></div>
+
+<div class="topbar">
+  <div class="topbar__inner">
+    <a href="index.html" class="brand"><img class="mark" src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe Solutions"></a>
+    @await Component.InvokeAsync("TopNav")
+    <div class="topbar__actions">
+      <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Log In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
+    </div>
+    <button class="topbar__burger" id="topbar-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== ARTICLE HEADER ===================== -->
+<section class="section-tight panel-white">
+  <div class="container" style="max-width:900px;">
+    <a href="blog.html" class="article-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to Blog</a>
+    <div class="blog-meta" style="margin-top:22px;">
+      <span class="blog-meta__tag">@post.Category</span>
+      <span>@post.PublishedAtUtc.ToString("MMM d, yyyy")</span>
+      <span>@post.ReadTimeMinutes min read</span>
+    </div>
+    <h1 class="article-title">@post.Title</h1>
+    <p class="lead" style="margin-top:16px;">@post.Excerpt</p>
+    <div class="blog-author" style="margin-top:28px;">
+      <div class="blog-author__avatar">@(new string(post.AuthorName.Split(' ').Where(w => w.Length > 0).Select(w => w[0]).Take(2).ToArray()))</div>
+      <div><div class="blog-author__name">@post.AuthorName</div><div class="blog-author__role">@post.AuthorRole</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HERO BANNER ===================== -->
+<section class="panel-white">
+  <div class="container" style="max-width:1100px;">
+    <div class="article-banner" data-reveal="scale">
+      <img src="@(post.CoverImageUrl ?? "https://www.eglobe-solutions.com/img/logo-dark.webp")" alt="@post.Title" class="article-banner__mark">
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ARTICLE BODY ===================== -->
+<section class="section-tight panel-white">
+  <div class="container" style="max-width:900px;">
+    <div class="article-layout">
+      <div class="article-content">
+        @Html.Raw(post.Body)
+      </div>
+
+      <aside class="article-sidebar">
+        <div class="article-toc" style="margin-top:24px;">
+          <div class="article-toc__label">Share</div>
+          <div class="get-in-touch__social" style="margin-top:4px;">
+            <a href="https://www.linkedin.com/company/eglobesolutions/" target="_blank" rel="noopener" aria-label="Share on LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+            <a href="https://wa.me/919818880480" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINAL CTA ===================== -->
+<section class="section-tight">
+  <div class="container">
+    <div class="final-cta" data-reveal="scale">
+      <div class="grid-bg" style="opacity:.15"></div>
+      <div style="position:relative;z-index:1;">
+        <h2>The future of hotel operations starts with eGlobe.</h2>
+        <p>See the PMS, channel manager and AI tools your hotel could be running on, in a live 20-minute walkthrough.</p>
+        <div class="final-cta__row">
+          <a href="contact.html" class="btn btn-dark">Book a Demo</a>
+          <a href="blog.html" class="btn btn-ghost">More from the Blog</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@await Component.InvokeAsync("SiteFooter")
+
+<div class="nav-dock-wrap">
+  <nav class="nav-dock">
+    <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="nav-dock__brand"><img src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe"></span>
+    @await Component.InvokeAsync("NavDock")
+    <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
+  </nav>
+</div>
+
+<script src="~/js/main.js"></script>
+</body>
+</html>

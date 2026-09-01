@@ -1,0 +1,18 @@
+@model FaqItem
+@{ ViewData["Title"] = "Edit FAQ"; }
+<h1>Edit FAQ</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/faqs/@Model.Id/edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="admin-field"><label>Page</label>
+            <select asp-for="PageKey"><option value="pricing">Pricing</option><option value="home">Home</option></select>
+        </div>
+        <div class="admin-field"><label>Question</label><input asp-for="Question" required /></div>
+        <div class="admin-field"><label>Answer</label><textarea asp-for="Answer" rows="4" required></textarea></div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" /> <label asp-for="IsPublished">Published</label></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Save</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/faqs?page=@Model.PageKey">Cancel</a>
+    </form>
+</div>

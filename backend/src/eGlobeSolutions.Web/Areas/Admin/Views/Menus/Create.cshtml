@@ -1,0 +1,23 @@
+@model MenuItem
+@{ ViewData["Title"] = "New Menu Item"; }
+<h1>New Menu Item</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/menus/create">
+        @Html.AntiForgeryToken()
+        <div class="admin-field"><label>Location</label>
+            <select asp-for="Location">
+                <option value="topbar">Top Bar</option>
+                <option value="nav-dock">Nav Dock</option>
+                <option value="footer-product">Footer: Product</option>
+                <option value="footer-company">Footer: Company</option>
+            </select>
+        </div>
+        <div class="admin-field"><label>Label</label><input asp-for="Label" required /></div>
+        <div class="admin-field"><label>URL</label><input asp-for="Url" required /></div>
+        <div class="admin-checkbox-row"><input asp-for="OpenInNewTab" type="checkbox" /> <label asp-for="OpenInNewTab">Open in new tab</label></div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" checked /> <label asp-for="IsPublished">Published</label></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Create</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/menus">Cancel</a>
+    </form>
+</div>

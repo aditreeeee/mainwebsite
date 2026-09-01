@@ -1,0 +1,27 @@
+@using eGlobeSolutions.Web.Areas.Admin.Models
+@model List<UserListItem>
+@{ ViewData["Title"] = "Users & Roles"; }
+
+<div class="admin-toolbar">
+    <h1>Users &amp; Roles</h1>
+    <a href="/admin/users/create" class="admin-btn admin-btn--primary">+ New User</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.FullName</td>
+                <td>@u.Email</td>
+                <td>@string.Join(", ", u.Roles)</td>
+                <td>@(u.IsActive ? "Active" : "Disabled")</td>
+                <td>@(u.LastLoginAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
+                <td><a class="admin-btn" href="/admin/users/@u.Id/edit">Edit</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

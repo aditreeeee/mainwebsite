@@ -1,0 +1,203 @@
+@model ContentPageViewModel
+@{
+    Layout = null;
+    var hero = Model.Block("hero");
+    var plansIntro = Model.Block("plans-intro");
+    var planReferral = Model.Block("plan-referral");
+    var planReseller = Model.Block("plan-reseller");
+    var planWhitelabel = Model.Block("plan-whitelabel");
+    var statement = Model.Block("statement");
+    var whoShould = Model.Block("who-should-apply");
+    var benefit1 = Model.Block("benefit-1");
+    var benefit2 = Model.Block("benefit-2");
+    var benefit3 = Model.Block("benefit-3");
+    var finalCta = Model.Block("final-cta");
+
+    static IEnumerable<string> Bullets(eGlobeSolutions.Domain.Entities.ContentBlock? b) =>
+        (b?.Body ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@(Model.Seo?.Title ?? "Resellers, eGlobe Solutions | Hotel Technology Reseller Program")</title>
+<meta name="description" content="@(Model.Seo?.Description ?? "Become an eGlobe reseller partner.")">
+<meta name="keywords" content="@(Model.Seo?.Keywords ?? "hotel technology reseller")">
+<link rel="canonical" href="@(Model.Seo?.CanonicalUrl ?? "https://www.eglobe-solutions.com/reseller.html")">
+<meta property="og:type" content="website">
+<meta property="og:title" content="@(Model.Seo?.Title ?? "Resellers, eGlobe Solutions")">
+<meta property="og:description" content="@(Model.Seo?.Description ?? "Become a reseller or partner for eGlobe's sourced hotel technology stack.")">
+<meta property="og:url" content="@(Model.Seo?.CanonicalUrl ?? "https://www.eglobe-solutions.com/reseller.html")">
+<meta property="og:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
+<meta property="og:image:alt" content="eGlobe Solutions connected hotel management ecosystem">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@(Model.Seo?.Title ?? "Resellers, eGlobe Solutions")">
+<meta name="twitter:description" content="@(Model.Seo?.Description ?? "Become a reseller or partner for eGlobe's sourced hotel technology stack.")">
+<meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
+<link rel="stylesheet" href="~/css/style.css">
+</head>
+<body>
+
+<div class="scroll-progress"></div>
+
+<div class="topbar">
+  <div class="topbar__inner">
+    <a href="index.html" class="brand"><img class="mark" src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe Solutions"></a>
+    @await Component.InvokeAsync("TopNav")
+    <div class="topbar__actions">
+      <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Log In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
+    </div>
+    <button class="topbar__burger" id="topbar-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+<header class="page-hero page-hero--compact">
+  <div class="container page-hero__split">
+    <h1 data-reveal>@Html.Raw(hero?.Title ?? "Become an eGlobe <span class=\"accent\">Reseller</span> <span class=\"accent-alt\">Partner.</span>")</h1>
+    <p class="lead" data-reveal>@(hero?.Subtitle ?? "Up to 15% recurring commission, white-label options and flexible plans, bring the stack we source to your clients.")</p>
+  </div>
+  <div class="container">
+    <div class="hero__cta-row" data-reveal style="margin-top:14px;">
+      <span class="magnetic"><a href="@(hero?.CtaUrl ?? "contact.html")" class="btn btn-primary">@(hero?.CtaLabel ?? "Talk to Partnerships")</a></span>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== RESELLER PARTNER PLANS ===================== -->
+<section class="section panel-white">
+  <div class="container">
+    <div class="section-head center" style="margin-left:auto;margin-right:auto;">
+      <span class="section-kicker">@(plansIntro?.Kicker ?? "Partner Plans")</span>
+      <h2 data-reveal>@Html.Raw(plansIntro?.Title ?? "Three ways to partner with eGlobe.")</h2>
+    </div>
+    <div class="price-teaser" data-reveal-group>
+      <div class="price-teaser-card">
+        <span class="badge-pill">@(planReferral?.Kicker ?? "Referral Program")</span>
+        <h4>@Html.Raw(planReferral?.Title ?? "Refer &amp; Earn")</h4>
+        <p class="unit">@(planReferral?.Subtitle ?? "Refer hotels to us, we handle the rest")</p>
+        <ul>
+          @foreach (var bullet in Bullets(planReferral).DefaultIfEmpty("").Where(b => b != ""))
+          {
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>@bullet</li>
+          }
+          @if (planReferral is null)
+          {
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>We manage onboarding, demo &amp; training</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>We handle ongoing support</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>You earn on each successful referral</li>
+          }
+        </ul>
+        <a href="@(planReferral?.CtaUrl ?? "contact.html")" class="btn btn-ghost btn-block">@(planReferral?.CtaLabel ?? "Refer a Hotel")</a>
+      </div>
+      <div class="price-teaser-card featured">
+        <span class="badge-pill">@(planReseller?.Kicker ?? "Most Popular")</span>
+        <h4>@(planReseller?.Title ?? "Reseller Commission")</h4>
+        <p class="unit">@(planReseller?.Subtitle ?? "Sell directly and earn recurring commission")</p>
+        <ul>
+          @foreach (var bullet in Bullets(planReseller).DefaultIfEmpty("").Where(b => b != ""))
+          {
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>@bullet</li>
+          }
+          @if (planReseller is null)
+          {
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Earn up to 15% reseller commission</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Convert once, keep earning monthly</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Full sales &amp; marketing material support</li>
+          }
+        </ul>
+        <a href="@(planReseller?.CtaUrl ?? "contact.html")" class="btn btn-primary btn-block">@(planReseller?.CtaLabel ?? "Become a Reseller")</a>
+      </div>
+      <div class="price-teaser-card">
+        <span class="badge-pill">@(planWhitelabel?.Kicker ?? "White Label")</span>
+        <h4>@(planWhitelabel?.Title ?? "Your Own Brand")</h4>
+        <p class="unit">@(planWhitelabel?.Subtitle ?? "Offer eGlobe's platform under your identity")</p>
+        <ul>
+          @foreach (var bullet in Bullets(planWhitelabel).DefaultIfEmpty("").Where(b => b != ""))
+          {
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>@bullet</li>
+          }
+          @if (planWhitelabel is null)
+          {
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Promote your own brand, not ours</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Increase client loyalty &amp; retention</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Strengthen long-term client relations</li>
+          }
+        </ul>
+        <a href="@(planWhitelabel?.CtaUrl ?? "contact.html")" class="btn btn-ghost btn-block">@(planWhitelabel?.CtaLabel ?? "Ask About White Label")</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATEMENT ===================== -->
+<section class="statement">
+  <div class="container">
+    <span class="statement__tag" data-reveal>@(statement?.Kicker ?? "No exclusivity requirements")</span>
+    <p class="statement__text" data-reveal>@Html.Raw(statement?.Body ?? "You don't have to drop your other vendors or lock into one brand. <span class=\"accent\">Sell what makes sense</span> for the hotel in front of you.")</p>
+  </div>
+</section>
+
+<!-- ===================== WHO SHOULD APPLY + BENEFITS ===================== -->
+<section class="section section-border-top section-dark">
+  <div class="container">
+    <div class="why-grid">
+      <div>
+        <span class="section-kicker" style="color:var(--blue)">@(whoShould?.Kicker ?? "Who Should Apply")</span>
+        <h2 data-reveal>@Html.Raw(whoShould?.Title ?? "If you already work with hotels,<br>you already have a head start.")</h2>
+        <p class="lead" style="margin-top:18px;color:rgba(255,255,255,.6);">@(whoShould?.Subtitle ?? "Revenue management companies, hotel consultants & GMs, IT solutions providers, web designers & marketers, PMS and booking engine providers, reputation management companies, photographers, hardware suppliers, and tour operators.")</p>
+        <p style="margin-top:22px;font-size:13px;color:rgba(255,255,255,.5);">@(whoShould?.Body ?? "Industries served: Hotels & Resorts, Boutique Properties, Vacation Rentals, Hostels, Guest Houses, Travel Agencies.")</p>
+      </div>
+      <div class="why-list" data-reveal-group>
+        <div class="why-item">
+          <div class="why-item__icon" style="background:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/></svg></div>
+          <div><h4>@Html.Raw(benefit1?.Title ?? "Recurring Revenue &amp; High Commissions")</h4><p>@(benefit1?.Body ?? "A generous commission structure that rewards performance, plus special partner pricing.")</p></div>
+        </div>
+        <div class="why-item">
+          <div class="why-item__icon" style="background:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0112 0v2"/></svg></div>
+          <div><h4>@Html.Raw(benefit2?.Title ?? "Dedicated Account Manager &amp; Live Support")</h4><p>@(benefit2?.Body ?? "A personal success manager plus 24/7 expert support for you and your customers.")</p></div>
+        </div>
+        <div class="why-item">
+          <div class="why-item__icon" style="background:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg></div>
+          <div><h4>@Html.Raw(benefit3?.Title ?? "Sales, Marketing &amp; Onboarding Support")</h4><p>@(benefit3?.Body ?? "Ready-to-use marketing materials and a quick, guided onboarding to get you selling fast.")</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINAL CTA ===================== -->
+<section class="section-tight">
+  <div class="container">
+    <div class="final-cta" data-reveal="scale">
+      <div class="grid-bg" style="opacity:.15"></div>
+      <div style="position:relative;z-index:1;">
+        <h2>@(finalCta?.Title ?? "Ready to Grow Together?")</h2>
+        <p>@(finalCta?.Body ?? "Talk to our partnerships team about the referral, reseller commission or white label model that fits your business.")</p>
+        <div class="final-cta__row">
+          <a href="@(finalCta?.CtaUrl ?? "contact.html")" class="btn btn-dark">@(finalCta?.CtaLabel ?? "Talk to Partnerships")</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@await Component.InvokeAsync("SiteFooter")
+
+<div class="nav-dock-wrap">
+  <nav class="nav-dock">
+    <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="nav-dock__brand"><img src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe"></span>
+    @await Component.InvokeAsync("NavDock")
+    <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
+  </nav>
+</div>
+
+<script src="~/js/main.js"></script>
+</body>
+</html>

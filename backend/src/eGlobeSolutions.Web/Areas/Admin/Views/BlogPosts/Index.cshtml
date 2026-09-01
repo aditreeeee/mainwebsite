@@ -1,0 +1,37 @@
+@model List<BlogPost>
+@{ ViewData["Title"] = "Blog Posts"; }
+
+<div class="admin-toolbar">
+    <h1>Blog Posts</h1>
+    <a href="/admin/blog/create" class="admin-btn admin-btn--primary">+ New Post</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Title</th><th>Category</th><th>Slug</th><th>Featured</th><th>Published</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.Title</td>
+                <td>@p.Category</td>
+                <td>@(string.IsNullOrWhiteSpace(p.Slug) ? "—" : p.Slug + ".html")</td>
+                <td>@(p.IsFeatured ? "Yes" : "")</td>
+                <td>@(p.IsPublished ? "Published" : "Draft")</td>
+                <td>@p.PublishedAtUtc.ToString("yyyy-MM-dd")</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/blog/@p.Id/edit">Edit</a>
+                    <form method="post" action="/admin/blog/@p.Id/delete" onsubmit="return confirm('Delete this post?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="7">No blog posts yet.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

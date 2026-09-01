@@ -1,0 +1,77 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1>Dashboard</h1>
+
+<div class="admin-kpis">
+    <div class="admin-kpi">
+        <div class="admin-kpi__label">New, Last 7 Days</div>
+        <div class="admin-kpi__value">@Model.NewEnquiriesLast7Days</div>
+    </div>
+    <div class="admin-kpi">
+        <div class="admin-kpi__label">New, Last 30 Days</div>
+        <div class="admin-kpi__value">@Model.NewEnquiriesLast30Days</div>
+    </div>
+    <div class="admin-kpi">
+        <div class="admin-kpi__label">Open Enquiries</div>
+        <div class="admin-kpi__value">@Model.OpenEnquiries</div>
+    </div>
+    <div class="admin-kpi">
+        <div class="admin-kpi__label">Contact Sales (All Time)</div>
+        <div class="admin-kpi__value">@Model.TotalContactSalesEnquiries</div>
+    </div>
+    <div class="admin-kpi">
+        <div class="admin-kpi__label">Reseller (All Time)</div>
+        <div class="admin-kpi__value">@Model.TotalResellerEnquiries</div>
+    </div>
+</div>
+
+<div class="admin-card">
+    <h2>Recent Enquiries</h2>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Name</th><th>Hotel / Company</th><th>Type</th><th>Status</th><th>Received</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var e in Model.RecentEnquiries)
+        {
+            <tr onclick="location.href='/admin/enquiries/@e.Id'" style="cursor:pointer;">
+                <td>@e.FullName</td>
+                <td>@e.HotelName</td>
+                <td>@e.Type</td>
+                <td><span class="admin-badge">@e.Status</span></td>
+                <td>@e.CreatedAtUtc.ToLocalTime().ToString("dd MMM, HH:mm")</td>
+            </tr>
+        }
+        @if (!Model.RecentEnquiries.Any())
+        {
+            <tr><td colspan="5">No enquiries yet.</td></tr>
+        }
+        </tbody>
+    </table>
+    <p style="margin-top:14px;"><a href="/admin/enquiries" class="admin-btn">View All Enquiries</a></p>
+</div>
+
+<div class="admin-card">
+    <h2>Recent Activity</h2>
+    <table class="admin-table">
+        <thead><tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+        <tbody>
+        @foreach (var log in Model.RecentActivity)
+        {
+            <tr>
+                <td>@log.TimestampUtc.ToLocalTime().ToString("dd MMM, HH:mm")</td>
+                <td>@(log.UserDisplayName ?? "-")</td>
+                <td>@log.Action</td>
+                <td>@log.Summary</td>
+            </tr>
+        }
+        @if (!Model.RecentActivity.Any())
+        {
+            <tr><td colspan="4">No activity recorded yet.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

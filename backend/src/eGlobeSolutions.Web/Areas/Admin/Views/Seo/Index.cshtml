@@ -1,0 +1,34 @@
+@model List<SeoMetadata>
+@{ ViewData["Title"] = "SEO Metadata"; }
+
+<div class="admin-toolbar">
+    <h1>SEO Metadata</h1>
+    <a href="/admin/seo/create" class="admin-btn admin-btn--primary">+ New Page Entry</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Page Key</th><th>Title</th><th>Description</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td><code>@s.PageKey</code></td>
+                <td>@s.Title</td>
+                <td>@s.Description</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/seo/@s.Id/edit">Edit</a>
+                    <form method="post" action="/admin/seo/@s.Id/delete" onsubmit="return confirm('Delete this SEO entry?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="4">No SEO entries yet.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,48 @@
+@using eGlobeSolutions.Web.Areas.Admin.Models
+@model ActivityLogListViewModel
+@{ ViewData["Title"] = "Activity Log"; }
+
+<h1>Activity Log</h1>
+
+<form method="get" class="admin-filters">
+    <select name="entityType">
+        <option value="">All Entities</option>
+        <option value="Enquiry" selected="@(Model.EntityType == "Enquiry")">Enquiry</option>
+    </select>
+    <button type="submit" class="admin-btn">Filter</button>
+</form>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>When</th><th>User</th><th>Action</th><th>Entity</th><th>Summary</th><th>IP</th></tr></thead>
+        <tbody>
+        @foreach (var a in Model.Items)
+        {
+            <tr>
+                <td>@a.TimestampUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</td>
+                <td>@a.UserDisplayName</td>
+                <td>@a.Action</td>
+                <td>@a.EntityType #@a.EntityId</td>
+                <td>@a.Summary</td>
+                <td>@a.IpAddress</td>
+            </tr>
+        }
+        @if (!Model.Items.Any())
+        {
+            <tr><td colspan="6">No activity recorded yet.</td></tr>
+        }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="admin-pagination">
+            @for (var p = 1; p <= Model.TotalPages; p++)
+            {
+                var query = $"?page={p}&entityType={Model.EntityType}";
+                if (p == Model.Page) { <span class="current">@p</span> }
+                else { <a href="/admin/activitylog@query">@p</a> }
+            }
+        </div>
+    }
+</div>

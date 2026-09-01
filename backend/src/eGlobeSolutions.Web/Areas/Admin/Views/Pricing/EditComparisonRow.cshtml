@@ -1,0 +1,22 @@
+@model PricingComparisonRow
+@{ ViewData["Title"] = "Edit Comparison Row"; }
+<h1>Edit Comparison Row</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/pricing/comparison/@Model.Id/edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="admin-field"><label>Module Name</label><input asp-for="ModuleName" /></div>
+        <div class="admin-field"><label>Per Room</label>
+            <select asp-for="PerRoomValue"><option value="included">Included</option><option value="addon">Add-on</option><option value="none">Not available</option></select>
+        </div>
+        <div class="admin-field"><label>Per Property</label>
+            <select asp-for="PerPropertyValue"><option value="included">Included</option><option value="addon">Add-on</option><option value="none">Not available</option></select>
+        </div>
+        <div class="admin-field"><label>Enterprise</label>
+            <select asp-for="EnterpriseValue"><option value="included">Included</option><option value="addon">Add-on</option><option value="none">Not available</option></select>
+        </div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Save</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/pricing">Cancel</a>
+    </form>
+</div>

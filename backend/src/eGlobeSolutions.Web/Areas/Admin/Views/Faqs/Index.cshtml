@@ -1,0 +1,38 @@
+@model List<FaqItem>
+@{ ViewData["Title"] = "FAQs"; string page = ViewBag.Page; }
+
+<div class="admin-toolbar">
+    <h1>FAQs</h1>
+    <a href="/admin/faqs/create?page=@(page)" class="admin-btn admin-btn--primary">+ New FAQ</a>
+</div>
+<div class="admin-filters">
+    <a class="admin-btn @(page == "pricing" ? "admin-btn--primary" : "")" href="/admin/faqs?page=pricing">Pricing</a>
+    <a class="admin-btn @(page == "home" ? "admin-btn--primary" : "")" href="/admin/faqs?page=home">Home</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Question</th><th>Published</th><th>Sort</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var f in Model)
+        {
+            <tr>
+                <td>@f.Question</td>
+                <td>@(f.IsPublished ? "Published" : "Draft")</td>
+                <td>@f.SortOrder</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/faqs/@f.Id/edit">Edit</a>
+                    <form method="post" action="/admin/faqs/@f.Id/delete" onsubmit="return confirm('Delete this FAQ?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="4">No FAQs yet for this page.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

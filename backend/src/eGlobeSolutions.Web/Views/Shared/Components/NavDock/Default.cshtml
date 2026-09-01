@@ -1,0 +1,14 @@
+@model List<MenuItem>
+<div class="nav-dock__links">
+  @foreach (var item in Model)
+  {
+    @if (item.OpenInNewTab)
+    {
+      <a href="@item.Url" target="_blank" rel="noopener">@item.Label</a>
+    }
+    else
+    {
+      <a href="@item.Url">@item.Label</a>
+    }
+  }
+</div>

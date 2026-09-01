@@ -1,0 +1,32 @@
+@using eGlobeSolutions.Web.Areas.Admin.Models
+@model CreateUserModel
+@{ ViewData["Title"] = "New User"; }
+<h1>New Admin User</h1>
+<div class="admin-card">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="admin-alert admin-alert--error">
+            @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@e.ErrorMessage</div>
+            }
+        </div>
+    }
+    <form method="post" action="/admin/users/create">
+        @Html.AntiForgeryToken()
+        <div class="admin-field"><label>Full Name</label><input asp-for="FullName" required /></div>
+        <div class="admin-field"><label>Email</label><input asp-for="Email" type="email" required /></div>
+        <div class="admin-field"><label>Password (min 10 chars, upper/lower/number/symbol)</label><input asp-for="Password" type="password" required /></div>
+        <div class="admin-field">
+            <label>Role</label>
+            <select asp-for="Role" required>
+                @foreach (var r in Model.AvailableRoles)
+                {
+                    <option value="@r">@r</option>
+                }
+            </select>
+        </div>
+        <button class="admin-btn admin-btn--primary" type="submit">Create User</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/users">Cancel</a>
+    </form>
+</div>

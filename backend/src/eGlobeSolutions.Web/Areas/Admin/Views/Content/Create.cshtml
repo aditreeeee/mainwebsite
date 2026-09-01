@@ -1,0 +1,23 @@
+@model ContentBlock
+@{ ViewData["Title"] = "New Content Block"; }
+<h1>New Content Block</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/content/create">
+        @Html.AntiForgeryToken()
+        <div class="admin-field"><label>Page</label>
+            <select asp-for="PageKey"><option value="home">Home</option><option value="reseller">Resellers</option></select>
+        </div>
+        <div class="admin-field"><label>Section Key (unique identifier, e.g. "hero", "ecosystem")</label><input asp-for="SectionKey" required /></div>
+        <div class="admin-field"><label>Kicker</label><input asp-for="Kicker" /></div>
+        <div class="admin-field"><label>Title</label><input asp-for="Title" /></div>
+        <div class="admin-field"><label>Subtitle</label><input asp-for="Subtitle" /></div>
+        <div class="admin-field"><label>Body</label><textarea asp-for="Body" rows="4"></textarea></div>
+        <div class="admin-field"><label>CTA Label</label><input asp-for="CtaLabel" /></div>
+        <div class="admin-field"><label>CTA URL</label><input asp-for="CtaUrl" /></div>
+        <div class="admin-field"><label>Image URL</label><input asp-for="ImageUrl" /></div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" checked /> <label asp-for="IsPublished">Published</label></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Create</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/content">Cancel</a>
+    </form>
+</div>

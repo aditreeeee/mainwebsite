@@ -1,0 +1,11 @@
+# .NET backend build artifacts
+backend/**/bin/
+backend/**/obj/
+backend/**/.vs/
+backend/src/eGlobeSolutions.Web/wwwroot/uploads/
+
+# Editor/OS cruft
+.vs/
+*.user
+.DS_Store
+Thumbs.db

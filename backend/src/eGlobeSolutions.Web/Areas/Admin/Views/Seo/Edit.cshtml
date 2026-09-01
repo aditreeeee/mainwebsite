@@ -1,0 +1,17 @@
+@model SeoMetadata
+@{ ViewData["Title"] = "Edit SEO Entry"; }
+<h1>Edit SEO Entry</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/seo/@Model.Id/edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="admin-field"><label>Page Key</label><input asp-for="PageKey" required /></div>
+        <div class="admin-field"><label>Title</label><input asp-for="Title" required /></div>
+        <div class="admin-field"><label>Description</label><textarea asp-for="Description" rows="3" required></textarea></div>
+        <div class="admin-field"><label>Keywords</label><input asp-for="Keywords" /></div>
+        <div class="admin-field"><label>Canonical URL</label><input asp-for="CanonicalUrl" /></div>
+        <div class="admin-field"><label>OG Image URL</label><input asp-for="OgImageUrl" /></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Save</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/seo">Cancel</a>
+    </form>
+</div>

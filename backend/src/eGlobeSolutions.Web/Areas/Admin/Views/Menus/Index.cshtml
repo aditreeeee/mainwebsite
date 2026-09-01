@@ -1,0 +1,42 @@
+@model List<MenuItem>
+@{ ViewData["Title"] = "Navigation"; string location = ViewBag.Location; }
+
+<div class="admin-toolbar">
+    <h1>Navigation</h1>
+    <a href="/admin/menus/create?location=@location" class="admin-btn admin-btn--primary">+ New Item</a>
+</div>
+<div class="admin-filters">
+    <a class="admin-btn @(location == "topbar" ? "admin-btn--primary" : "")" href="/admin/menus?location=topbar">Top Bar</a>
+    <a class="admin-btn @(location == "nav-dock" ? "admin-btn--primary" : "")" href="/admin/menus?location=nav-dock">Nav Dock</a>
+    <a class="admin-btn @(location == "footer-product" ? "admin-btn--primary" : "")" href="/admin/menus?location=footer-product">Footer: Product</a>
+    <a class="admin-btn @(location == "footer-company" ? "admin-btn--primary" : "")" href="/admin/menus?location=footer-company">Footer: Company</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Label</th><th>URL</th><th>New Tab</th><th>Published</th><th>Sort</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.Label</td>
+                <td><code>@m.Url</code></td>
+                <td>@(m.OpenInNewTab ? "Yes" : "")</td>
+                <td>@(m.IsPublished ? "Published" : "Draft")</td>
+                <td>@m.SortOrder</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/menus/@m.Id/edit">Edit</a>
+                    <form method="post" action="/admin/menus/@m.Id/delete" onsubmit="return confirm('Delete this menu item?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="6">No menu items yet for this location.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

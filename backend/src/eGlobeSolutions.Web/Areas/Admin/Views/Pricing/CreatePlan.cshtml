@@ -1,0 +1,18 @@
+@model PricingPlan
+@{ ViewData["Title"] = "New Pricing Plan"; }
+<h1>New Pricing Plan</h1>
+<div class="admin-card">
+    <form method="post" action="/admin/pricing/plan/create">
+        @Html.AntiForgeryToken()
+        <div class="admin-field"><label>Name</label><input asp-for="Name" /></div>
+        <div class="admin-field"><label>Badge Text</label><input asp-for="BadgeText" /></div>
+        <div class="admin-field"><label>Unit Description</label><textarea asp-for="UnitDescription" rows="2"></textarea></div>
+        <div class="admin-checkbox-row"><input asp-for="IsFeatured" type="checkbox" /> <label asp-for="IsFeatured">Featured plan</label></div>
+        <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" checked /> <label asp-for="IsPublished">Published</label></div>
+        <div class="admin-field"><label>CTA Label</label><input asp-for="CtaLabel" value="Contact Sales" /></div>
+        <div class="admin-field"><label>CTA URL</label><input asp-for="CtaUrl" value="/contact" /></div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <button class="admin-btn admin-btn--primary" type="submit">Create</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/pricing">Cancel</a>
+    </form>
+</div>

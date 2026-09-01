@@ -1,0 +1,62 @@
+@model List<PricingPlan>
+@{ ViewData["Title"] = "Pricing Plans"; var rows = ViewBag.ComparisonRows as List<PricingComparisonRow>; }
+
+<div class="admin-toolbar">
+    <h1>Pricing Plans</h1>
+    <a href="/admin/pricing/plan/create" class="admin-btn admin-btn--primary">+ New Plan</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Name</th><th>Badge</th><th>Featured</th><th>Published</th><th>Features</th><th>Sort</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var plan in Model)
+        {
+            <tr>
+                <td>@plan.Name</td>
+                <td>@plan.BadgeText</td>
+                <td>@(plan.IsFeatured ? "Yes" : "")</td>
+                <td>@(plan.IsPublished ? "Published" : "Draft")</td>
+                <td>@plan.Features.Count</td>
+                <td>@plan.SortOrder</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/pricing/plan/@plan.Id/edit">Edit</a>
+                    <form method="post" action="/admin/pricing/plan/@plan.Id/delete" onsubmit="return confirm('Delete this plan?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="admin-toolbar">
+    <h1>Comparison Table Rows</h1>
+    <a href="/admin/pricing/comparison/create" class="admin-btn admin-btn--primary">+ New Row</a>
+</div>
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Module</th><th>Per Room</th><th>Per Property</th><th>Enterprise</th><th>Sort</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var row in (rows ?? new List<PricingComparisonRow>()))
+        {
+            <tr>
+                <td>@row.ModuleName</td>
+                <td>@row.PerRoomValue</td>
+                <td>@row.PerPropertyValue</td>
+                <td>@row.EnterpriseValue</td>
+                <td>@row.SortOrder</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/pricing/comparison/@row.Id/edit">Edit</a>
+                    <form method="post" action="/admin/pricing/comparison/@row.Id/delete" onsubmit="return confirm('Delete this row?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

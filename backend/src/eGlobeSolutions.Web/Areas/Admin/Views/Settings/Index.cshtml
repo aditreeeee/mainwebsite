@@ -1,0 +1,30 @@
+@model SiteSettingsFormModel
+@{ ViewData["Title"] = "Site Settings"; }
+<h1>Site Settings</h1>
+
+<div class="admin-card">
+    <form method="post" action="/admin/settings">
+        @Html.AntiForgeryToken()
+        <h3>General</h3>
+        <div class="admin-field"><label>Site Name</label><input asp-for="SiteName" /></div>
+        <div class="admin-field"><label>Footer Copyright</label><input asp-for="FooterCopyright" /></div>
+
+        <h3>Contact</h3>
+        <div class="admin-field"><label>Phone</label><input asp-for="Phone" /></div>
+        <div class="admin-field"><label>Email</label><input asp-for="Email" /></div>
+        <div class="admin-field"><label>WhatsApp Number (digits only, with country code)</label><input asp-for="WhatsAppNumber" /></div>
+        <div class="admin-field"><label>Call Us Numbers (landlines, slash-separated)</label><input asp-for="CallUsNumbers" placeholder="+91 11 41717081/ +91 11 41717082/ +91 11 41717021" /></div>
+        <div class="admin-field"><label>Business Hours</label><input asp-for="BusinessHours" /></div>
+
+        <h3>Social</h3>
+        <div class="admin-field"><label>Facebook URL</label><input asp-for="FacebookUrl" /></div>
+        <div class="admin-field"><label>YouTube URL</label><input asp-for="YoutubeUrl" /></div>
+        <div class="admin-field"><label>LinkedIn URL</label><input asp-for="LinkedInUrl" /></div>
+
+        <h3>Apps</h3>
+        <div class="admin-field"><label>App Store URL</label><input asp-for="AppStoreUrl" /></div>
+        <div class="admin-field"><label>Google Play URL</label><input asp-for="GooglePlayUrl" /></div>
+
+        <button class="admin-btn admin-btn--primary" type="submit">Save Settings</button>
+    </form>
+</div>

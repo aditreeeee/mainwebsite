@@ -1,0 +1,44 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace eGlobeSolutions.Web.Areas.Admin.Models;
+
+/// <summary>Typed form over the fixed SiteSettingKeys set, so Settings feels like a real
+/// WordPress-style settings page instead of a raw key/value editor.</summary>
+public class SiteSettingsFormModel
+{
+    [Required, StringLength(150)]
+    public string SiteName { get; set; } = string.Empty;
+
+    [Required, Phone, StringLength(30)]
+    public string Phone { get; set; } = string.Empty;
+
+    [Required, EmailAddress, StringLength(200)]
+    public string Email { get; set; } = string.Empty;
+
+    [StringLength(20)]
+    public string? WhatsAppNumber { get; set; }
+
+    [StringLength(200)]
+    public string? CallUsNumbers { get; set; }
+
+    [StringLength(200)]
+    public string? BusinessHours { get; set; }
+
+    [Url, StringLength(300)]
+    public string? FacebookUrl { get; set; }
+
+    [Url, StringLength(300)]
+    public string? YoutubeUrl { get; set; }
+
+    [Url, StringLength(300)]
+    public string? LinkedInUrl { get; set; }
+
+    [Url, StringLength(300)]
+    public string? AppStoreUrl { get; set; }
+
+    [Url, StringLength(300)]
+    public string? GooglePlayUrl { get; set; }
+
+    [StringLength(200)]
+    public string? FooterCopyright { get; set; }
+}
