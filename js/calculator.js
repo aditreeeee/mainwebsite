@@ -10,17 +10,15 @@
     catalog: null,
     planType: null,
     taxId: null,
-    currencyId: null,
     billingCycleId: null,
     selections: {} // moduleId -> { checked, volume }
   };
 
   var els = {};
-  var currentSymbol = "₹";
 
   function fmtMoney(n) {
     n = Number(n) || 0;
-    return currentSymbol + n.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    return "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 
   function el(tag, attrs, children) {
@@ -67,8 +65,6 @@
   }
 
   function fmtBase(n) {
-    // Base catalog numbers are always in INR (not yet currency-converted); the
-    // live summary applies the selected currency once /calculator/calculate runs.
     return "₹" + (Number(n) || 0).toLocaleString("en-IN");
   }
 
@@ -94,7 +90,7 @@
     recalculate();
   }
 
-  /* ---------- Tax + Currency selects ---------- */
+  /* ---------- Tax select ---------- */
   function renderTaxSelect() {
     els.tax.innerHTML = "";
     state.catalog.taxes.forEach(function (tax) {
@@ -106,23 +102,6 @@
     });
     els.tax.addEventListener("change", function () {
       state.taxId = Number(els.tax.value);
-      recalculate();
-    });
-  }
-
-  function renderCurrencySelect() {
-    els.currency.innerHTML = "";
-    state.catalog.currencies.forEach(function (c) {
-      var opt = el("option", { value: c.id }, [
-        document.createTextNode(c.code + " (" + c.symbol + ") " + c.name)
-      ]);
-      if (c.isDefault) { opt.selected = true; state.currencyId = c.id; currentSymbol = c.symbol; }
-      els.currency.appendChild(opt);
-    });
-    els.currency.addEventListener("change", function () {
-      state.currencyId = Number(els.currency.value);
-      var picked = state.catalog.currencies.find(function (c) { return c.id === state.currencyId; });
-      if (picked) currentSymbol = picked.symbol;
       recalculate();
     });
   }
@@ -242,7 +221,6 @@
       numberOfProperties: Number(els.properties.value) || 1,
       totalRooms: Number(els.rooms.value) || 1,
       taxId: state.taxId,
-      currencyId: state.currencyId,
       billingCycleId: state.billingCycleId,
       selectedModules: selectedModules
     };
@@ -313,8 +291,6 @@
       return;
     }
 
-    currentSymbol = result.currencySymbol || currentSymbol;
-
     body.appendChild(renderMeta());
 
     var linesWrap = el("div", { class: "calc-summary__lines" });
@@ -364,7 +340,6 @@
     els.rooms = document.getElementById("calc-rooms");
     els.customer = document.getElementById("calc-customer");
     els.tax = document.getElementById("calc-tax");
-    els.currency = document.getElementById("calc-currency");
     els.billingCycle = document.getElementById("calc-billing-cycle");
     els.summaryBody = document.getElementById("calc-summary-body");
     var printBtn = document.getElementById("calc-print-btn");
@@ -390,7 +365,6 @@
       .then(function (catalog) {
         state.catalog = catalog;
         renderTaxSelect();
-        renderCurrencySelect();
         renderBillingCycleSelect();
         var defaultPlan = catalog.plans[0] ? catalog.plans[0].planType : "PerRoom";
         selectPlan(defaultPlan);

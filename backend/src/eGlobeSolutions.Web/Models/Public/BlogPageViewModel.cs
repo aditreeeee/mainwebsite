@@ -13,3 +13,8 @@ public class BlogArticleViewModel
 {
     public BlogPost Post { get; set; } = null!;
 }
+
+public class CmsPageViewModel
+{
+    public CmsPage Page { get; set; } = null!;
+}

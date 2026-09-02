@@ -19,20 +19,19 @@ public class CalculatorPricingService : ICalculatorPricingService
 
     public async Task<CalculatorCatalogDto> GetCatalogAsync(CancellationToken ct = default)
     {
-        var plans = await _db.CalculatorPlanBaseRates.OrderBy(p => p.PlanType).ToListAsync(ct);
+        var plans = await _db.CalculatorPlanBaseRates.AsNoTracking().OrderBy(p => p.PlanType).ToListAsync(ct);
         var modules = await _db.CalculatorPricingModules
+            .AsNoTracking()
             .Where(m => m.IsActive)
             .OrderBy(m => m.Category).ThenBy(m => m.SortOrder)
             .ToListAsync(ct);
         var taxes = await _db.CalculatorTaxConfigurations
+            .AsNoTracking()
             .Where(t => t.IsActive)
             .OrderBy(t => t.SortOrder)
             .ToListAsync(ct);
-        var currencies = await _db.CalculatorCurrencyRates
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.SortOrder)
-            .ToListAsync(ct);
         var billingCycles = await _db.CalculatorBillingCycles
+            .AsNoTracking()
             .Where(b => b.IsActive)
             .OrderBy(b => b.SortOrder)
             .ToListAsync(ct);
@@ -55,15 +54,6 @@ public class CalculatorPricingService : ICalculatorPricingService
                 Name = t.Name,
                 RatePercent = t.RatePercent,
                 IsDefault = t.IsDefault
-            }).ToList(),
-            Currencies = currencies.Select(c => new CurrencyDto
-            {
-                Id = c.Id,
-                Code = c.Code,
-                Symbol = c.Symbol,
-                Name = c.Name,
-                RatePerInr = c.RatePerInr,
-                IsDefault = c.IsDefault
             }).ToList(),
             BillingCycles = billingCycles.Select(b => new BillingCycleDto
             {
@@ -108,6 +98,7 @@ public class CalculatorPricingService : ICalculatorPricingService
         if (properties <= 0) errors.Add("Number of properties must be at least 1.");
 
         var plan = await _db.CalculatorPlanBaseRates
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.PlanType == request.PlanType, ct);
         if (plan is null)
         {
@@ -138,7 +129,7 @@ public class CalculatorPricingService : ICalculatorPricingService
         // and filter in memory rather than translating a Contains(list) to SQL,
         // which needs OPENJSON support some SQL Server compatibility levels lack.
         var moduleIds = request.SelectedModules.Select(s => s.ModuleId).Distinct().ToHashSet();
-        var allActiveModules = await _db.CalculatorPricingModules.Where(m => m.IsActive).ToListAsync(ct);
+        var allActiveModules = await _db.CalculatorPricingModules.AsNoTracking().Where(m => m.IsActive).ToListAsync(ct);
         var modules = allActiveModules.Where(m => moduleIds.Contains(m.Id)).ToList();
 
         foreach (var sel in request.SelectedModules)
@@ -214,8 +205,8 @@ public class CalculatorPricingService : ICalculatorPricingService
 
         // ---- Tax ----
         var tax = request.TaxId.HasValue
-            ? await _db.CalculatorTaxConfigurations.FirstOrDefaultAsync(t => t.Id == request.TaxId && t.IsActive, ct)
-            : await _db.CalculatorTaxConfigurations.FirstOrDefaultAsync(t => t.IsDefault && t.IsActive, ct);
+            ? await _db.CalculatorTaxConfigurations.AsNoTracking().FirstOrDefaultAsync(t => t.Id == request.TaxId && t.IsActive, ct)
+            : await _db.CalculatorTaxConfigurations.AsNoTracking().FirstOrDefaultAsync(t => t.IsDefault && t.IsActive, ct);
 
         result.SubscriptionMonthlySubtotal = result.BaseSubscriptionMonthly + result.AddOnMonthlyTotal;
         result.TaxRatePercent = tax?.RatePercent ?? 0m;
@@ -229,8 +220,8 @@ public class CalculatorPricingService : ICalculatorPricingService
 
         // ---- Billing cycle (3/6/12 months, ...) ----
         var cycle = request.BillingCycleId.HasValue
-            ? await _db.CalculatorBillingCycles.FirstOrDefaultAsync(b => b.Id == request.BillingCycleId && b.IsActive, ct)
-            : await _db.CalculatorBillingCycles.FirstOrDefaultAsync(b => b.IsDefault && b.IsActive, ct);
+            ? await _db.CalculatorBillingCycles.AsNoTracking().FirstOrDefaultAsync(b => b.Id == request.BillingCycleId && b.IsActive, ct)
+            : await _db.CalculatorBillingCycles.AsNoTracking().FirstOrDefaultAsync(b => b.IsDefault && b.IsActive, ct);
 
         var cycleMonths = cycle?.Months ?? 1;
         var cycleDiscount = cycle?.DiscountPercent ?? 0m;
@@ -242,36 +233,8 @@ public class CalculatorPricingService : ICalculatorPricingService
         result.BillingCycleRecurringTotal = Round(recurringForCycle);
         result.BillingCycleTotalDue = Round(recurringForCycle + result.OneTimeChargesTotal);
 
-        // ---- Currency conversion (display only, math above is always in INR) ----
-        var currency = request.CurrencyId.HasValue
-            ? await _db.CalculatorCurrencyRates.FirstOrDefaultAsync(c => c.Id == request.CurrencyId && c.IsActive, ct)
-            : await _db.CalculatorCurrencyRates.FirstOrDefaultAsync(c => c.IsDefault && c.IsActive, ct);
-
-        if (currency is not null && currency.RatePerInr != 1m)
-        {
-            var rate = currency.RatePerInr;
-            result.BaseSubscriptionMonthly = Round(result.BaseSubscriptionMonthly * rate);
-            result.AddOnMonthlyTotal = Round(result.AddOnMonthlyTotal * rate);
-            result.SubscriptionMonthlySubtotal = Round(result.SubscriptionMonthlySubtotal * rate);
-            result.OneTimeChargesTotal = Round(result.OneTimeChargesTotal * rate);
-            result.TaxAmount = Round(result.TaxAmount * rate);
-            result.CommissionMonthlyEstimate = Round(result.CommissionMonthlyEstimate * rate);
-            result.TotalMonthlyCost = Round(result.TotalMonthlyCost * rate);
-            result.TotalAnnualCost = Round(result.TotalAnnualCost * rate);
-            if (result.EffectiveCostPerRoom.HasValue) result.EffectiveCostPerRoom = Round(result.EffectiveCostPerRoom.Value * rate);
-            if (result.EffectiveCostPerProperty.HasValue) result.EffectiveCostPerProperty = Round(result.EffectiveCostPerProperty.Value * rate);
-            result.BillingCycleRecurringTotal = Round(result.BillingCycleRecurringTotal * rate);
-            result.BillingCycleTotalDue = Round(result.BillingCycleTotalDue * rate);
-            foreach (var line in result.Lines)
-            {
-                line.MonthlyAmount = Round(line.MonthlyAmount * rate);
-                line.OneTimeAmount = Round(line.OneTimeAmount * rate);
-                if (line.VolumeAmount.HasValue) line.VolumeAmount = Round(line.VolumeAmount.Value * rate);
-            }
-        }
-
-        result.CurrencyCode = currency?.Code ?? "INR";
-        result.CurrencySymbol = currency?.Symbol ?? "₹";
+        result.CurrencyCode = "INR";
+        result.CurrencySymbol = "₹";
 
         return result;
     }

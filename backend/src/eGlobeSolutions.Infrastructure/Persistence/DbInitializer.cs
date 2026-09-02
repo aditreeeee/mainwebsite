@@ -339,7 +339,7 @@ public static class DbInitializer
             // URLs match the actual page routes (index.html / pricing.html /
             // reseller.html), not MVC-style paths, since the rest of the site's
             // markup (brand link, footer links, etc.) links the same way.
-            var topNav = new[] { ("Home", "index.html"), ("Pricing", "pricing.html"), ("Resellers", "reseller.html") };
+            var topNav = new[] { ("Home", "index.html"), ("Products", "index.html#ecosystem"), ("Pricing", "pricing.html"), ("Resellers", "reseller.html") };
             var i = 0;
             foreach (var (label, url) in topNav)
             {
@@ -634,42 +634,83 @@ public static class DbInitializer
                 MetaDescription = "Three AI agents now sit inside every eGlobe property: a Sales Agent, a Smartdesk and an Admin Agent, working across WhatsApp, front desk and your PMS."
             });
 
-            var teasers = new (string Title, string Category, string Excerpt, DateTime Published, int ReadMin)[]
+            var teasers = new (string Title, string Slug, string Category, string Excerpt, DateTime Published, int ReadMin, string Body)[]
             {
-                ("Best Channel Manager for Small Hotels in India (2026)", "Guide",
+                ("Best Channel Manager for Small Hotels in India (2026)", "best-channel-manager-small-hotels-india-2026", "Guide",
                     "Everything a guesthouse or independent property needs to know before choosing a channel manager.",
-                    new DateTime(2026, 1, 28, 0, 0, 0, DateTimeKind.Utc), 7),
-                ("How to Connect MakeMyTrip & Goibibo via Channel Manager", "Guide",
+                    new DateTime(2026, 1, 28, 0, 0, 0, DateTimeKind.Utc), 7,
+                    "<p>For a small, independently run property, the channel manager is doing quiet, constant work in the background: keeping every OTA listing in sync, so a room sold on one site is blocked everywhere else before it can be double-booked somewhere else.</p>" +
+                    "<p>Independent hotels and guesthouses have different needs than a large chain. Setup has to be fast, the day-to-day screen has to make sense without training, and support needs to actually pick up the phone when a rate looks wrong at 11pm on a Friday.</p>" +
+                    "<h2>What to Look For</h2>" +
+                    "<ul><li>Two-way sync, so rate and inventory changes made on an OTA extranet also reflect back into your system, not just one direction.</li>" +
+                    "<li>Coverage for the OTAs your guests actually use locally, not just the big international names.</li>" +
+                    "<li>A rate calendar you can read and edit in under a minute, without a training session.</li>" +
+                    "<li>Support that responds same-day, since a stuck sync during a busy weekend costs real bookings.</li></ul>" +
+                    "<p>eGlobe's Channel Manager was built with exactly this in mind: it connects to 100+ channel partners including Airbnb, Booking.com, Expedia, Agoda and MakeMyTrip, and it's priced per room, so a small property isn't paying for enterprise-scale features it doesn't need.</p>"),
+                ("How to Connect MakeMyTrip & Goibibo via Channel Manager", "connect-makemytrip-goibibo-channel-manager", "Guide",
                     "Step-by-step walkthrough for Indian hoteliers to get live on India's top OTAs fast.",
-                    new DateTime(2026, 1, 14, 0, 0, 0, DateTimeKind.Utc), 6),
-                ("Channel Manager vs Manual OTA Management: What Hotels Lose", "News",
+                    new DateTime(2026, 1, 14, 0, 0, 0, DateTimeKind.Utc), 6,
+                    "<p>MakeMyTrip and Goibibo are two of the highest-traffic OTAs for domestic Indian travel, and getting your property connected correctly is one of the fastest ways to add booking volume.</p>" +
+                    "<h2>The Connection Process</h2>" +
+                    "<ul><li>Confirm your property is already listed and verified on the MakeMyTrip/Goibibo extranet.</li>" +
+                    "<li>In eGlobe's Channel Manager, add MakeMyTrip &amp; Goibibo as a connected channel and authorize the link using your extranet credentials.</li>" +
+                    "<li>Map your room types and rate plans on eGlobe to the matching room types on the OTA side, so the right price reaches the right room.</li>" +
+                    "<li>Push an initial rate and availability sync, then check the OTA extranet to confirm it reflects correctly.</li>" +
+                    "<li>From this point, every update you make inside eGlobe pushes automatically, no manual re-entry needed.</li></ul>" +
+                    "<p>Most properties are fully live within a day. If a mapping looks off, eGlobe's support team can jump in and fix the connection directly.</p>"),
+                ("Channel Manager vs Manual OTA Management: What Hotels Lose", "channel-manager-vs-manual-ota-management", "News",
                     "The real cost of managing OTAs manually, in time, money and missed bookings.",
-                    new DateTime(2025, 12, 20, 0, 0, 0, DateTimeKind.Utc), 4),
-                ("What's New: Rate Parity Alerts & Mobile Inventory Steppers", "Product",
+                    new DateTime(2025, 12, 20, 0, 0, 0, DateTimeKind.Utc), 4,
+                    "<p>Plenty of hotels still update each OTA extranet by hand: log into Booking.com, adjust the rate, log into Expedia, adjust it again, and repeat across every platform, every time occupancy changes.</p>" +
+                    "<h2>Where the Cost Actually Shows Up</h2>" +
+                    "<p><strong>Time.</strong> Updating five or six OTAs manually, every day, adds up to hours a week that could go toward guests instead of spreadsheets.</p>" +
+                    "<p><strong>Double bookings.</strong> A room sold on one OTA has to be manually blocked everywhere else. Miss that window and you have two guests holding the same room.</p>" +
+                    "<p><strong>Rate mismatches.</strong> A rate updated on one channel but forgotten on another creates rate parity issues, which OTAs can penalize in search ranking.</p>" +
+                    "<p>A channel manager removes all three problems at once: one update, pushed everywhere, instantly. For most hotels, it pays for itself in recovered staff time within the first month.</p>"),
+                ("What's New: Rate Parity Alerts & Mobile Inventory Steppers", "rate-parity-alerts-mobile-inventory-steppers", "Product",
                     "Two small dashboard updates that save your revenue team a daily headache.",
-                    new DateTime(2025, 12, 5, 0, 0, 0, DateTimeKind.Utc), 3),
-                ("5 Signs Your Hotel Has Outgrown Manual OTA Management", "Guide",
+                    new DateTime(2025, 12, 5, 0, 0, 0, DateTimeKind.Utc), 3,
+                    "<p>Two small but genuinely useful updates just shipped to the eGlobe Channel Manager dashboard.</p>" +
+                    "<h2>Rate Parity Alerts</h2>" +
+                    "<p>eGlobe now flags a rate the moment it drifts out of parity across your connected OTAs, instead of your team spotting it days later during a manual check. The alert shows exactly which channel is out of line and by how much, so it can be corrected in a couple of clicks.</p>" +
+                    "<h2>Mobile Inventory Steppers</h2>" +
+                    "<p>Adjusting room inventory from the eGlobe mobile app now uses simple + / - steppers instead of a keyboard entry field, making it faster to update counts from the front desk or on the move.</p>" +
+                    "<p>Both updates are already live for every eGlobe Channel Manager customer, no setup required.</p>"),
+                ("5 Signs Your Hotel Has Outgrown Manual OTA Management", "signs-hotel-outgrown-manual-ota-management", "Guide",
                     "If any of these sound familiar, a channel manager will pay for itself within a month.",
-                    new DateTime(2025, 11, 18, 0, 0, 0, DateTimeKind.Utc), 5),
-                ("Why Direct Bookings Are Rising Across Indian Hotels in 2026", "News",
+                    new DateTime(2025, 11, 18, 0, 0, 0, DateTimeKind.Utc), 5,
+                    "<p>Manual OTA management works fine for a single listing on a single platform. Past that, the cracks start to show. Here are five signs it's time to move to a channel manager.</p>" +
+                    "<ul><li><strong>You've had a double booking in the last few months</strong> because a room wasn't blocked on every channel in time.</li>" +
+                    "<li><strong>Someone on your team spends part of every day</strong> logging into multiple OTA extranets just to keep rates aligned.</li>" +
+                    "<li><strong>You've been flagged for a rate parity issue</strong> because a price update didn't make it to every channel.</li>" +
+                    "<li><strong>You're hesitant to list on a new OTA</strong> because it means one more extranet to manage by hand.</li>" +
+                    "<li><strong>You don't have a single, current view</strong> of what's booked and available across every channel at once.</li></ul>" +
+                    "<p>If two or more of these sound familiar, the time a channel manager saves your team usually covers its cost within the first few weeks.</p>"),
+                ("Why Direct Bookings Are Rising Across Indian Hotels in 2026", "why-direct-bookings-rising-india-2026", "News",
                     "Booking engines, Google Hotel Ads and guest trust are reshaping the OTA-versus-direct balance.",
-                    new DateTime(2025, 11, 2, 0, 0, 0, DateTimeKind.Utc), 6),
+                    new DateTime(2025, 11, 2, 0, 0, 0, DateTimeKind.Utc), 6,
+                    "<p>OTAs will always be part of how guests discover a hotel, but more Indian properties are seeing a real shift toward direct bookings, and it's not by accident.</p>" +
+                    "<h2>What's Driving It</h2>" +
+                    "<p><strong>Booking engines that don't feel like a downgrade.</strong> Guests will book direct if the hotel's own site is as easy to use as an OTA, showing real-time rates and availability instead of a stale contact form.</p>" +
+                    "<p><strong>Google Hotel Ads.</strong> When a guest searches a hotel by name on Google, a direct rate now shows up right next to the OTA listings, often at a lower price since it skips the OTA's commission.</p>" +
+                    "<p><strong>Guest trust in direct rates.</strong> As more hotels guarantee their best rate is on their own website, guests are learning to check there first before defaulting to an OTA.</p>" +
+                    "<p>None of this replaces OTAs, they're still a major booking source. But the hotels growing direct revenue fastest are the ones treating their own booking engine as seriously as any OTA listing.</p>"),
             };
 
             var sort = 1;
-            foreach (var (title, category, excerpt, published, readMin) in teasers)
+            foreach (var (title, slug, category, excerpt, published, readMin, body) in teasers)
             {
                 db.BlogPosts.Add(new BlogPost
                 {
                     Title = title,
+                    Slug = slug,
                     Category = category,
                     Excerpt = excerpt,
+                    Body = body,
                     PublishedAtUtc = published,
                     ReadTimeMinutes = readMin,
-                    SortOrder = sort++
-                    // No Slug/Body: these were "#" teaser cards on the original static
-                    // page too, not real linked articles. Give one a Body via the
-                    // admin Blog Posts screen to turn it into a real article page.
+                    SortOrder = sort++,
+                    IsPublished = true
                 });
             }
         }
@@ -682,7 +723,7 @@ public static class DbInitializer
                 BadgeText = "Per Room",
                 UnitDescription = "Priced against total room count, ideal for independent hotels & small groups",
                 IsFeatured = false,
-                CtaLabel = "Contact Sales",
+                CtaLabel = "Get a Per-Room Quote",
                 CtaUrl = "/contact",
                 SortOrder = 0,
                 Features = new List<PricingPlanFeature>
@@ -699,7 +740,7 @@ public static class DbInitializer
                 BadgeText = "Per Property",
                 UnitDescription = "One flat rate covering the full platform for a single property",
                 IsFeatured = true,
-                CtaLabel = "Contact Sales",
+                CtaLabel = "Talk to Sales",
                 CtaUrl = "/contact",
                 SortOrder = 1,
                 Features = new List<PricingPlanFeature>
@@ -716,7 +757,7 @@ public static class DbInitializer
                 BadgeText = "Enterprise",
                 UnitDescription = "For multi-property groups, chains & management companies",
                 IsFeatured = false,
-                CtaLabel = "Contact Sales",
+                CtaLabel = "Request Enterprise Pricing",
                 CtaUrl = "/contact",
                 SortOrder = 2,
                 Features = new List<PricingPlanFeature>

@@ -1,0 +1,37 @@
+@model List<CmsPage>
+@{ ViewData["Title"] = "Pages"; }
+
+<div class="admin-toolbar">
+    <h1>Pages</h1>
+    <a href="/admin/pages/create" class="admin-btn admin-btn--primary">+ New Page</a>
+</div>
+<p class="admin-hint">Create a page here and it's live at /{slug}.html immediately, no code change or redeploy needed. Add it to the site's navigation from <a href="/admin/menus">Menus</a> if it should show up in the header, footer or mobile nav.</p>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <thead><tr><th>Title</th><th>URL</th><th>Published</th><th>Updated</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td><a href="/admin/pages/@p.Id/edit" style="font-weight:600;">@p.Title</a></td>
+                <td>/@(p.Slug).html</td>
+                <td><span class="admin-badge @(p.IsPublished ? "admin-badge--won" : "")">@(p.IsPublished ? "Published" : "Draft")</span></td>
+                <td>@((p.UpdatedAtUtc ?? p.CreatedAtUtc).ToString("yyyy-MM-dd"))</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/pages/@p.Id/edit">Edit</a>
+                    <a class="admin-btn" href="/@(p.Slug).html" target="_blank">View</a>
+                    <form method="post" action="/admin/pages/@p.Id/delete" onsubmit="return confirm('Delete this page?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="5">No pages yet, create one above.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

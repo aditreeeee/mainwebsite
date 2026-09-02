@@ -26,13 +26,14 @@ public class HomeController : Controller
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var blocks = await _db.ContentBlocks
+            .AsNoTracking()
             .Where(b => b.PageKey == "home" && b.IsPublished)
             .ToDictionaryAsync(b => b.SectionKey, ct);
 
         var vm = new ContentPageViewModel
         {
             Blocks = blocks,
-            Seo = await _db.SeoMetadata.FirstOrDefaultAsync(s => s.PageKey == "home", ct)
+            Seo = await _db.SeoMetadata.AsNoTracking().FirstOrDefaultAsync(s => s.PageKey == "home", ct)
         };
         return View(vm);
     }

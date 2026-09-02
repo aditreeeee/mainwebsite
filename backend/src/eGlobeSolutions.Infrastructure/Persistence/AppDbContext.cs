@@ -25,6 +25,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<SeoMetadata> SeoMetadata => Set<SeoMetadata>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+    public DbSet<CmsPage> CmsPages => Set<CmsPage>();
     public DbSet<PricingModule> CalculatorPricingModules => Set<PricingModule>();
     public DbSet<PricingPlanBaseRate> CalculatorPlanBaseRates => Set<PricingPlanBaseRate>();
     public DbSet<TaxConfiguration> CalculatorTaxConfigurations => Set<TaxConfiguration>();

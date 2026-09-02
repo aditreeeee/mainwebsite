@@ -21,13 +21,14 @@ public class PricingController : Controller
         var vm = new PricingPageViewModel
         {
             Plans = await _db.PricingPlans
+                .AsNoTracking()
                 .Where(p => p.IsPublished)
                 .Include(p => p.Features.OrderBy(f => f.SortOrder))
                 .OrderBy(p => p.SortOrder)
                 .ToListAsync(ct),
-            ComparisonRows = await _db.PricingComparisonRows.OrderBy(r => r.SortOrder).ToListAsync(ct),
-            Faqs = await _db.FaqItems.Where(f => f.PageKey == "pricing" && f.IsPublished).OrderBy(f => f.SortOrder).ToListAsync(ct),
-            Seo = await _db.SeoMetadata.FirstOrDefaultAsync(s => s.PageKey == "pricing", ct)
+            ComparisonRows = await _db.PricingComparisonRows.AsNoTracking().OrderBy(r => r.SortOrder).ToListAsync(ct),
+            Faqs = await _db.FaqItems.AsNoTracking().Where(f => f.PageKey == "pricing" && f.IsPublished).OrderBy(f => f.SortOrder).ToListAsync(ct),
+            Seo = await _db.SeoMetadata.AsNoTracking().FirstOrDefaultAsync(s => s.PageKey == "pricing", ct)
         };
         return View(vm);
     }

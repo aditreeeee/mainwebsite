@@ -126,6 +126,7 @@ a{color:inherit; text-decoration:none;}
 /* Enquiry "which form" badges */
 .admin-badge--type-contactsales{background:#EEF2FF; color:var(--blue);}
 .admin-badge--type-resellerpartnership{background:#FFF7ED; color:#C2410C;}
+.admin-badge--type-quickenquiry{background:#ECFDF5; color:#065F46;}
 .admin-badge--type-guide{background:#EEF2FF; color:var(--blue);}
 .admin-badge--type-product{background:#ECFDF5; color:#065F46;}
 .admin-badge--type-news{background:#FFF7ED; color:#C2410C;}

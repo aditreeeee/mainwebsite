@@ -32,6 +32,10 @@
             @foreach (var link in Model.CompanyLinks)
             {
               <a href="@link.Url">@link.Label</a>
+              if (link.Label == "Home")
+              {
+                <a href="/index.html#ecosystem">Products</a>
+              }
             }
           </div>
         </div>
@@ -58,7 +62,7 @@
     </div>
 
     <div class="footer__products-row">
-      <h5>Products</h5>
+      <h5><a href="/index.html#ecosystem">Products</a></h5>
       <div class="footer__links footer__links--grid">
         @foreach (var link in Model.ProductLinks)
         {

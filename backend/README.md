@@ -54,6 +54,45 @@ backend/
   bullet list, plus the module-comparison table rows (included/add-on/none
   per plan). This is **live**: `pricing.html` is now a database-backed Razor
   view (see below), so editing a plan here changes the public page immediately.
+- **Pages** (`/admin/pages`, `CmsPage`/`PagesController`): the WordPress
+  "Pages" equivalent. Create a page (title, URL slug, HTML body, subtitle,
+  SEO fields, published flag) and it's live at `/{slug}.html` immediately,
+  no code change or redeploy, rendered through a shared hero+article
+  template (`Views/Blog/Page.cshtml`). It shares the `/{slug}.html` route
+  with blog articles, `BlogController.Article` checks `BlogPosts` first,
+  then `CmsPages`, so slugs are validated unique across both. A new page
+  isn't linked from anywhere automatically, same as WordPress, wire it into
+  the header/footer/nav-dock from `/admin/menus` if it needs to be
+  reachable from navigation. Not a replacement for Home/Pricing/Contact/
+  Blog/Calculator/Reseller, those stay their own purpose-built views; this
+  is for anything that doesn't have one yet.
+
+  A page can also opt into `UseCustomHero` (a checkbox in the admin form):
+  Body then supplies its own full `<header>` hero and final-CTA section
+  instead of the generic Title/Subtitle one, and `BlogController.ProductPage`
+  adds a second route, `/products/{slug}.html`, alongside the normal
+  `/{slug}.html` one (matched against `CmsPages` where `Slug` is stored with
+  a literal `"products/"` prefix, e.g. `"products/pms"`). That's exactly how
+  the 16 former static product pages (`products/pms.html`, `products/channel-manager.html`,
+  ...) were migrated: their full hero/benefits/use-cases/FAQ/final-CTA
+  markup was extracted byte-for-byte into `CmsPages.Body` with
+  `UseCustomHero = true`, `wwwroot/products/*.html` was deleted so the
+  static files stop shadowing the new dynamic route (same shadowing bug
+  as before, same fix), and every existing internal link kept working
+  unchanged since the public URLs never moved. Two pages (`booking-engine`,
+  `pos`) had a page-specific `<script>` sitting *after* the footer/nav-dock
+  in the original static file, outside the hero-through-final-CTA range the
+  migration extracted, that got missed on the first pass and had to be
+  appended to their `Body` separately, worth checking for on any future
+  page migrated the same way. The 16 root-level
+  `products/*.html` files stay in the repo as the `file://` design
+  reference copies, same convention as every other page, they're just no
+  longer what the live server serves. **Not yet ported into `DbInitializer`**
+  (16 full-page HTML blobs as C# string seed data would be an ongoing
+  maintenance headache, not a one-time cost), so a genuinely fresh database
+  needs these 16 rows created through `/admin/pages` (or a one-off SQL
+  import) before the product pages are reachable, same first-run step as
+  seeding the SuperAdmin account.
 - **Page Content** (`/admin/content`): ordered, publishable content blocks
   (kicker/title/subtitle/body/CTA/image) grouped by page (`home`,
   `reseller`) and a section key, covering homepage-section management and
@@ -280,13 +319,34 @@ antiforgery token (`@@Html.AntiForgeryToken()`), `js/main.js` sends it with
 the submission, and `ContactController.Submit` enforces it with
 `[ValidateAntiForgeryToken]`.
 
-`ResellerController.Submit` (`POST /reseller/submit`) still relies on the
-honeypot field only, no page currently posts to it, the "Reseller /
-Partnership" interest is captured through `#sales-form` on `contact.html`
-instead (see the `EnquiryType` on the model it saves). If a dedicated
-reseller-only form is ever added to `reseller.html`, give it the same
-antiforgery token treatment as `contact.html` before wiring it up.
+`ResellerController.Submit` (`POST /reseller/submit`) now carries
+`[ValidateAntiForgeryToken]` too, for when a dedicated reseller-only form
+gets wired up to it. As of now no page actually posts to this endpoint,
+"Talk to Partnerships" on `reseller.html` is still a plain link to
+`contact.html`, the "Reseller / Partnership" interest is captured through
+`#sales-form` there instead (see the `EnquiryType` on the model it saves).
+Whoever builds the real reseller form needs to render
+`@@Html.AntiForgeryToken()` in it and send the token, same as `contact.html`
+already does, the server-side check is in place and waiting.
 
 The admin panel itself (`/admin/...`) **is** fully CSRF-protected, every
 POST there goes through a real Razor-rendered form with
 `@Html.AntiForgeryToken()`.
+
+## Before deploying to production
+
+- **Set the SuperAdmin seed credentials as real environment variables**,
+  never commit them: `Seed__SuperAdminEmail` / `Seed__SuperAdminPassword`
+  (double underscore, ASP.NET Core's env-var config convention). Leaving
+  `appsettings.json`'s `Seed` section blank is fine, `DbInitializer` just
+  skips seeding silently if either value is empty, but that also means
+  `/admin` is unreachable until you set them somewhere. Check the
+  `AdminUsers` table has at least one row before assuming the panel works.
+- Set `ASPNETCORE_ENVIRONMENT=Production` so the HTTPS redirection + HSTS
+  gate in `Program.cs` (`if (!app.Environment.IsDevelopment())`) actually
+  activates.
+- Point `ConnectionStrings:Default` at the real production SQL Server via
+  config/environment, not the LocalDB connection string committed here.
+- `DbInitializer`'s seeding is idempotent (every block is guarded by an
+  `AnyAsync`/`FindByEmailAsync` check), so it's safe to let it run against
+  an already-seeded production DB on every deploy, it won't duplicate data.

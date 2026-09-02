@@ -40,7 +40,7 @@ public class EnquiryService : IEnquiryService
     {
         try
         {
-            var settings = await _db.SiteSettings.ToDictionaryAsync(s => s.Key, s => s.Value, ct);
+            var settings = await _db.SiteSettings.AsNoTracking().ToDictionaryAsync(s => s.Key, s => s.Value, ct);
             string Get(string key) => settings.TryGetValue(key, out var v) ? v ?? string.Empty : string.Empty;
 
             var notifyEnabled = !bool.TryParse(Get(SiteSettingKeys.SmtpNotifyOnEnquiry), out var enabled) || enabled;

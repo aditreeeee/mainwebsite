@@ -64,9 +64,10 @@
       var vh = window.innerHeight;
       var isMobile = window.innerWidth <= 760;
       /* On mobile the topbar has no page links, so the dock is the only
-         way to navigate, never hide it for the hero on small screens. */
+         way to navigate, never hide it for the hero OR the footer on
+         small screens, it needs to stay reachable everywhere. */
       var inHero = (!isMobile && heroEl) ? heroEl.getBoundingClientRect().bottom > vh * 0.35 : false;
-      var inFooter = footerEl ? footerEl.getBoundingClientRect().top < vh * 0.65 : false;
+      var inFooter = (!isMobile && footerEl) ? footerEl.getBoundingClientRect().top < vh * 0.65 : false;
       dockWrap.classList.toggle('hide', inHero || inFooter);
     }
 
@@ -175,33 +176,109 @@
   /* ---------- Department workspace tabs ---------- */
   function initDeptTabs(){
     var tabs = document.querySelectorAll('.dept-tab');
-    if(!tabs.length) return;
+    var panelsList = document.querySelectorAll('.dept-panel');
+    if(!tabs.length || !panelsList.length) return;
     var tabList = Array.prototype.slice.call(tabs);
+    var panels = Array.prototype.slice.call(panelsList);
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function activate(tab){
+    // Wrap the panels in a single positioned "stage" so switching tabs reads
+    // as one page sliding out while the next slides in from the same edge
+    // (like flipping through a deck), instead of the old panel vanishing
+    // and a new one popping into its place.
+    var stage = document.createElement('div');
+    stage.className = 'dept-stage';
+    panels[0].parentNode.insertBefore(stage, panels[0]);
+    panels.forEach(function(p){ stage.appendChild(p); });
+    stage.classList.add('js-ready');
+
+    var current = stage.querySelector('.dept-panel.active') || panels[0];
+    stage.style.height = current.offsetHeight + 'px';
+    requestAnimationFrame(function(){ stage.classList.add('ready'); });
+
+    var animating = false;
+    var DURATION = reduceMotion ? 1 : 440;
+    var OFFSET = reduceMotion ? 0 : 34;
+
+    function panelIndex(p){ return panels.indexOf(p); }
+
+    function activate(tab, moveFocus){
+      if(tab.classList.contains('active') || animating) return;
       var target = tab.getAttribute('data-dept');
-      tabList.forEach(function(t){ t.classList.remove('active'); t.setAttribute('tabindex','-1'); });
+      var next = stage.querySelector('.dept-panel[data-dept-panel="' + target + '"]');
+      var outgoing = stage.querySelector('.dept-panel.active');
+      if(!next || next === outgoing) return;
+
+      tabList.forEach(function(t){
+        t.classList.remove('active');
+        t.setAttribute('tabindex','-1');
+        t.setAttribute('aria-selected','false');
+      });
       tab.classList.add('active');
       tab.setAttribute('tabindex','0');
-      tab.focus();
-      document.querySelectorAll('.dept-panel').forEach(function(p){
-        p.classList.toggle('active', p.getAttribute('data-dept-panel') === target);
+      tab.setAttribute('aria-selected','true');
+      if(moveFocus) tab.focus();
+
+      var forward = panelIndex(next) > panelIndex(outgoing);
+      animating = true;
+      stage.style.height = next.offsetHeight + 'px';
+
+      next.style.transition = 'none';
+      next.style.transform = 'translateX(' + (forward ? OFFSET : -OFFSET) + 'px)';
+      next.style.opacity = '0';
+      next.classList.add('active');
+      void next.offsetWidth; // flush the starting position before animating
+
+      var easing = 'transform ' + DURATION + 'ms cubic-bezier(.4,0,.2,1), opacity ' + Math.round(DURATION * .85) + 'ms ease';
+      outgoing.style.transition = easing;
+      outgoing.style.transform = 'translateX(' + (forward ? -OFFSET : OFFSET) + 'px)';
+      outgoing.style.opacity = '0';
+      outgoing.classList.remove('active');
+
+      requestAnimationFrame(function(){
+        next.style.transition = easing;
+        next.style.transform = 'translateX(0)';
+        next.style.opacity = '1';
       });
+
+      window.setTimeout(function(){
+        outgoing.removeAttribute('style');
+        next.removeAttribute('style');
+        animating = false;
+      }, DURATION + 40);
     }
 
     tabList.forEach(function(tab, i){
       tab.setAttribute('tabindex', tab.classList.contains('active') ? '0' : '-1');
-      tab.addEventListener('click', function(){ activate(tab); });
+      tab.setAttribute('aria-selected', tab.classList.contains('active') ? 'true' : 'false');
+      tab.addEventListener('click', function(){ activate(tab, false); });
       tab.addEventListener('keydown', function(e){
         var idx = tabList.indexOf(tab);
         if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){
           e.preventDefault();
-          activate(tabList[(idx + 1) % tabList.length]);
+          activate(tabList[(idx + 1) % tabList.length], true);
         } else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
           e.preventDefault();
-          activate(tabList[(idx - 1 + tabList.length) % tabList.length]);
+          activate(tabList[(idx - 1 + tabList.length) % tabList.length], true);
+        } else if(e.key === 'Home'){
+          e.preventDefault();
+          activate(tabList[0], true);
+        } else if(e.key === 'End'){
+          e.preventDefault();
+          activate(tabList[tabList.length - 1], true);
         }
       });
+    });
+
+    // Keep the stage height honest if text reflows at a new viewport width.
+    var resizeTimer;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function(){
+        if(animating) return;
+        var active = stage.querySelector('.dept-panel.active');
+        if(active) stage.style.height = active.offsetHeight + 'px';
+      }, 150);
     });
 
     /* Tasks: click to toggle done, with a small satisfying pop */
@@ -530,9 +607,9 @@
       page:'website-builder.html',
       icon:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/>',
       title:'Website Builder',
-      desc:'Launch a mobile-ready, SEO-optimised hotel website from hospitality-built templates. No coding needed, free hosting included. Update photos, colours and content yourself, show live offers from your Booking Engine, and add TripAdvisor, Facebook and Google Maps widgets to build guest trust before they book.',
-      points:['No-code templates built for hotels', 'SEO-optimised, mobile & Facebook friendly', 'Free hosting, multi-language & currency', 'TripAdvisor, Facebook & Google Maps widgets'],
-      faq:[{q:'Do I need coding or design experience?', a:'No, it\'s built so you can launch and update a professional, conversion-optimised site without any technical skills.'}]
+      desc:'We design and build your hotel website for you, as a single page or a full multi-page site, whichever fits your property. Use a domain you already own, or have us register one for you for an additional charge.',
+      points:['Built for you, one-page or multi-page', 'SEO-optimised, mobile-friendly design', 'Your domain, or ours for an added charge', 'Shows live offers from your Booking Engine'],
+      faq:[{q:'Who buys the domain?', a:'Either works, use a domain you already own, or we can register one for you for an additional charge.'}]
     },
     'reviews': {
       page:'reviews-manager.html',
@@ -680,6 +757,7 @@
     var roomsHint = form.querySelector('#rooms-hint');
     var statusEl = form.querySelector('.form-status');
     var submitBtn = form.querySelector('button[type="submit"]');
+    var submitLabel = submitBtn ? submitBtn.textContent : 'Send';
 
     function fieldGroup(key){ return form.querySelector('.field[data-field="' + key + '"]'); }
     function setMsg(group, msg){
@@ -856,7 +934,7 @@
         .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
         .then(function(result){
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Send to Sales';
+          submitBtn.textContent = submitLabel;
           if(!result.ok){
             if(statusEl){
               statusEl.textContent = (result.data && result.data.message) || 'Something went wrong, please try again or call us directly.';
@@ -881,13 +959,154 @@
         })
         .catch(function(){
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Send to Sales';
+          submitBtn.textContent = submitLabel;
           if(statusEl){
             statusEl.textContent = 'Could not reach the server, please check your connection and try again.';
             statusEl.className = 'form-status error';
           }
         });
     });
+  }
+
+  /* ---------- Quick Enquiry popup (homepage-only mini contact form) ---------- */
+  function initQuickEnquiryPopup(){
+    var overlay = document.getElementById('quick-enquiry-overlay');
+    var form = document.getElementById('quick-enquiry-form');
+    if(!overlay || !form) return;
+
+    var closeBtn = document.getElementById('quick-enquiry-close');
+    var statusEl = form.querySelector('.form-status');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var submitLabel = submitBtn ? submitBtn.textContent : 'Send';
+    var REQUIRED = ['name', 'phone'];
+    var lastFocused = null;
+
+    function fieldGroup(key){ return form.querySelector('.field[data-field="' + key + '"]'); }
+    function setMsg(group, msg){
+      var el = group.querySelector('.field-msg');
+      if(el) el.innerHTML = msg || '';
+    }
+
+    function validateField(key){
+      var group = fieldGroup(key);
+      if(!group) return true;
+      var input = group.querySelector('input');
+      var val = (input && input.value || '').trim();
+
+      if(key === 'name'){
+        var ok = val.length >= 2;
+        group.classList.toggle('invalid', val.length > 0 && !ok);
+        group.classList.toggle('valid', ok);
+        setMsg(group, val.length > 0 && !ok ? 'Enter at least 2 characters.' : '');
+        return ok;
+      }
+      if(key === 'phone'){
+        var digits = val.replace(/\D/g, '');
+        var phoneOk = digits.length >= 7 && digits.length <= 15;
+        group.classList.toggle('invalid', val.length > 0 && !phoneOk);
+        group.classList.toggle('valid', phoneOk);
+        setMsg(group, val.length > 0 && !phoneOk ? 'Enter a valid phone number.' : '');
+        return phoneOk;
+      }
+      return true;
+    }
+
+    REQUIRED.forEach(function(key){
+      var group = fieldGroup(key);
+      if(!group) return;
+      var input = group.querySelector('input');
+      input.addEventListener('blur', function(){ validateField(key); });
+    });
+
+    function open(){
+      lastFocused = document.activeElement;
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      var nameInput = fieldGroup('name');
+      if(nameInput) nameInput.querySelector('input').focus();
+    }
+    function close(){
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      if(lastFocused) lastFocused.focus();
+    }
+
+    if(closeBtn) closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function(e){
+      if(e.target === overlay) close();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && overlay.classList.contains('active')) close();
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var allValid = REQUIRED.map(validateField).every(Boolean);
+      if(!allValid){
+        var firstInvalid = REQUIRED.find(function(key){ return !validateField(key); });
+        if(firstInvalid){
+          var group = fieldGroup(firstInvalid);
+          var input = group.querySelector('input');
+          if(input) input.focus();
+        }
+        if(statusEl){
+          statusEl.textContent = 'A few fields still need your attention above.';
+          statusEl.className = 'form-status error';
+        }
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      var websiteEl = form.querySelector('#qe-website');
+      var tokenEl = form.querySelector('input[name="__RequestVerificationToken"]');
+
+      var body = new URLSearchParams();
+      body.set('FullName', fieldGroup('name').querySelector('input').value.trim());
+      body.set('Phone', fieldGroup('phone').querySelector('input').value.trim());
+      body.set('Website', websiteEl ? websiteEl.value : '');
+      body.set('FormType', 'quick');
+      if(tokenEl) body.set('__RequestVerificationToken', tokenEl.value);
+
+      fetch('/contact/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+        body: body.toString()
+      })
+        .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
+        .then(function(result){
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitLabel;
+          if(!result.ok){
+            if(statusEl){
+              statusEl.textContent = (result.data && result.data.message) || 'Something went wrong, please try again or call us directly.';
+              statusEl.className = 'form-status error';
+            }
+            return;
+          }
+          form.reset();
+          form.querySelectorAll('.field').forEach(function(g){ g.classList.remove('valid', 'invalid'); });
+          form.querySelectorAll('.field-msg').forEach(function(m){ m.innerHTML = ''; });
+          if(statusEl){
+            statusEl.textContent = (result.data && result.data.message) || 'Thanks, your message is on its way to our team.';
+            statusEl.className = 'form-status success';
+          }
+          window.setTimeout(close, 1800);
+        })
+        .catch(function(){
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitLabel;
+          if(statusEl){
+            statusEl.textContent = 'Could not reach the server, please check your connection and try again.';
+            statusEl.className = 'form-status error';
+          }
+        });
+    });
+
+    /* Open immediately when the homepage loads. A 0ms timeout (rather than
+       calling open() inline) still lets the overlay element exist/paint
+       first, so the CSS transition it animates in with actually runs. */
+    window.setTimeout(open, 0);
   }
 
   /* ---------- Login form (UI only, never authenticates) ---------- */
@@ -1007,6 +1226,7 @@
     initHeroDemo();
     initProductModal();
     initContactForm();
+    initQuickEnquiryPopup();
     initLoginForm();
     initPricingToggle();
     initFAQ();

@@ -9,7 +9,6 @@ public class CalculatorCatalogDto
     public List<PlanBaseDto> Plans { get; set; } = new();
     public List<ModuleDto> Modules { get; set; } = new();
     public List<TaxDto> Taxes { get; set; } = new();
-    public List<CurrencyDto> Currencies { get; set; } = new();
     public List<BillingCycleDto> BillingCycles { get; set; } = new();
 }
 
@@ -19,16 +18,6 @@ public class BillingCycleDto
     public string Label { get; set; } = string.Empty;
     public int Months { get; set; }
     public decimal DiscountPercent { get; set; }
-    public bool IsDefault { get; set; }
-}
-
-public class CurrencyDto
-{
-    public int Id { get; set; }
-    public string Code { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public decimal RatePerInr { get; set; }
     public bool IsDefault { get; set; }
 }
 
@@ -80,7 +69,6 @@ public class CalculateRequest
     public int NumberOfProperties { get; set; } = 1;
     public int TotalRooms { get; set; } = 1;
     public int? TaxId { get; set; }
-    public int? CurrencyId { get; set; }
     public int? BillingCycleId { get; set; }
     public List<CalculateModuleSelection> SelectedModules { get; set; } = new();
 }

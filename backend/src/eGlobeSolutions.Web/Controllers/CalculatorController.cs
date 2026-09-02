@@ -3,6 +3,7 @@ using eGlobeSolutions.Web.Models.Public;
 using eGlobeSolutions.Web.Models.Public.Calculator;
 using eGlobeSolutions.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace eGlobeSolutions.Web.Controllers;
@@ -24,11 +25,12 @@ public class CalculatorController : Controller
     }
 
     [HttpGet("/calculator.html")]
+    [HttpGet("/calculator")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var vm = new ContentPageViewModel
         {
-            Seo = await _db.SeoMetadata.FirstOrDefaultAsync(s => s.PageKey == "calculator", ct)
+            Seo = await _db.SeoMetadata.AsNoTracking().FirstOrDefaultAsync(s => s.PageKey == "calculator", ct)
         };
         return View(vm);
     }
@@ -42,6 +44,7 @@ public class CalculatorController : Controller
 
     /// <summary>Authoritative live calculation, formulas + rates all applied server-side.</summary>
     [HttpPost("/calculator/calculate")]
+    [EnableRateLimiting("CalculatorCalculate")]
     public async Task<IActionResult> Calculate([FromBody] CalculateRequest request, CancellationToken ct)
     {
         if (request is null) return BadRequest(new { success = false, errors = new[] { "Invalid request." } });

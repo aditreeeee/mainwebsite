@@ -4,6 +4,7 @@ using eGlobeSolutions.Infrastructure.Persistence;
 using eGlobeSolutions.Web.Models.Public;
 using eGlobeSolutions.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace eGlobeSolutions.Web.Controllers;
@@ -31,14 +32,15 @@ public class ContactController : Controller
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var blocks = await _db.ContentBlocks
+            .AsNoTracking()
             .Where(b => b.PageKey == "contact" && b.IsPublished)
             .ToDictionaryAsync(b => b.SectionKey, ct);
 
         var vm = new ContentPageViewModel
         {
             Blocks = blocks,
-            Seo = await _db.SeoMetadata.FirstOrDefaultAsync(s => s.PageKey == "contact", ct),
-            Settings = await _db.SiteSettings.ToDictionaryAsync(s => s.Key, s => s.Value, ct)
+            Seo = await _db.SeoMetadata.AsNoTracking().FirstOrDefaultAsync(s => s.PageKey == "contact", ct),
+            Settings = await _db.SiteSettings.AsNoTracking().ToDictionaryAsync(s => s.Key, s => s.Value, ct)
         };
         return View(vm);
     }
@@ -52,6 +54,7 @@ public class ContactController : Controller
     /// </summary>
     [HttpPost("submit")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("PublicForms")]
     public async Task<IActionResult> Submit([FromForm] ContactSalesSubmitModel model, CancellationToken ct)
     {
         // Honeypot: a filled hidden field means a bot, accept silently and do nothing.
@@ -72,12 +75,12 @@ public class ContactController : Controller
 
         var enquiry = new Enquiry
         {
-            Type = EnquiryType.ContactSales,
+            Type = model.FormType == "quick" ? EnquiryType.QuickEnquiry : EnquiryType.ContactSales,
             FullName = model.FullName.Trim(),
-            HotelName = model.HotelName.Trim(),
-            Email = model.Email.Trim(),
+            HotelName = model.HotelName?.Trim() ?? string.Empty,
+            Email = model.Email?.Trim() ?? string.Empty,
             Phone = model.Phone.Trim(),
-            RoomsRange = model.RoomsRange,
+            RoomsRange = model.RoomsRange ?? string.Empty,
             InterestedIn = model.InterestedIn,
             OtherInterest = model.OtherInterest,
             Message = model.Message,

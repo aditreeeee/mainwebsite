@@ -1,0 +1,155 @@
+@model CmsPageViewModel
+@{
+    Layout = null;
+    var cmsPage = Model.Page;
+    var metaTitle = cmsPage.MetaTitle ?? $"{cmsPage.Title}, eGlobe Solutions";
+    var metaDesc = cmsPage.MetaDescription ?? cmsPage.Subtitle ?? cmsPage.Title;
+    var pageUrl = $"https://www.eglobe-solutions.com/{cmsPage.Slug}.html";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="~/assets/logo.png">
+<title>@metaTitle</title>
+<meta name="description" content="@metaDesc">
+@if (!string.IsNullOrWhiteSpace(cmsPage.MetaKeywords))
+{
+  <meta name="keywords" content="@cmsPage.MetaKeywords">
+}
+<link rel="canonical" href="@pageUrl">
+<meta property="og:type" content="website">
+<meta property="og:title" content="@metaTitle">
+<meta property="og:description" content="@metaDesc">
+<meta property="og:url" content="@pageUrl">
+<meta property="og:image" content="https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@metaTitle">
+<meta name="twitter:description" content="@metaDesc">
+<link rel="stylesheet" href="~/css/style.css">
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "WebPage",
+  "@@id": "@(pageUrl)#page",
+  "name": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(cmsPage.Title)),
+  "description": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metaDesc)),
+  "url": "@pageUrl"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Organization",
+      "@@id": "https://www.eglobe-solutions.com/#organization",
+      "name": "eGlobe Solutions",
+      "url": "https://www.eglobe-solutions.com/",
+      "logo": "https://www.eglobe-solutions.com/img/logo-dark.webp",
+      "sameAs": [
+        "https://www.facebook.com/eglobesolution",
+        "https://www.youtube.com/@@eglobesolutionspms",
+        "https://www.linkedin.com/company/eglobesolutions/"
+      ],
+      "contactPoint": {
+        "@@type": "ContactPoint",
+        "telephone": "+91-9818880480",
+        "contactType": "sales",
+        "email": "support@@eglobe-solutions.com",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    },
+    {
+      "@@type": "WebSite",
+      "@@id": "https://www.eglobe-solutions.com/#website",
+      "url": "https://www.eglobe-solutions.com/",
+      "name": "eGlobe Solutions",
+      "publisher": { "@@id": "https://www.eglobe-solutions.com/#organization" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="scroll-progress"></div>
+
+<div class="topbar">
+  <div class="topbar__inner">
+    <a href="index.html" class="brand"><img class="mark" src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe Solutions"></a>
+    @await Component.InvokeAsync("TopNav")
+    <div class="topbar__actions">
+      <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Log In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
+    </div>
+    <button class="topbar__burger" id="topbar-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+@if (!cmsPage.UseCustomHero)
+{
+  <header class="page-hero page-hero--compact">
+    <div class="container page-hero__split">
+      <h1 data-reveal>@cmsPage.Title</h1>
+      @if (!string.IsNullOrWhiteSpace(cmsPage.Subtitle))
+      {
+        <p class="lead" data-reveal>@cmsPage.Subtitle</p>
+      }
+    </div>
+  </header>
+
+  <section class="section-tight panel-white">
+    <div class="container" style="max-width:900px;">
+      <div class="article-content">
+        @Html.Raw(cmsPage.Body)
+      </div>
+    </div>
+  </section>
+}
+else
+{
+  @* Body supplies its own full hero + sections + final CTA, e.g. migrated
+     product pages, since a per-product CTA reads better than a generic one. *@
+  @Html.Raw(cmsPage.Body)
+}
+
+@if (!cmsPage.UseCustomHero)
+{
+  <section class="section-tight">
+    <div class="container">
+      <div class="final-cta" data-reveal="scale">
+        <div class="grid-bg" style="opacity:.15"></div>
+        <div style="position:relative;z-index:1;">
+          <h2>See eGlobe sourcing your hotel's stack.</h2>
+          <p>Talk to our team for a live walkthrough tailored to your rooms, modules and portfolio size.</p>
+          <div class="final-cta__row">
+            <a href="contact.html" class="btn btn-dark">Talk to Sales</a>
+            <a href="pricing.html" class="btn btn-ghost">View Pricing</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+@await Component.InvokeAsync("SiteFooter")
+
+<div class="nav-dock-wrap">
+  <nav class="nav-dock">
+    <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="nav-dock__brand"><img src="/assets/logo.png" alt="eGlobe"></span>
+    @await Component.InvokeAsync("NavDock")
+    <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
+  </nav>
+</div>
+
+<script src="~/js/main.js"></script>
+</body>
+</html>

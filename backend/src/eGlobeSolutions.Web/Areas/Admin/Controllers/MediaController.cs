@@ -84,6 +84,20 @@ public class MediaController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost("{id:int}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateAltText(int id, string? altText, CancellationToken ct)
+    {
+        var asset = await _db.MediaAssets.FirstOrDefaultAsync(a => a.Id == id, ct);
+        if (asset is null) return NotFound();
+
+        asset.AltText = altText;
+        await _db.SaveChangesAsync(ct);
+
+        TempData["Success"] = "Alt text updated.";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost("{id:int}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)

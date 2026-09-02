@@ -6,7 +6,12 @@
 <a href="/admin/enquiries" class="admin-btn" style="margin-bottom:16px;display:inline-block;">&larr; Back to Enquiries</a>
 
 @{
-    var typeLabel = Model.Type == EnquiryType.ContactSales ? "Contact Sales form (contact.html)" : "Reseller form (reseller.html)";
+    var typeLabel = Model.Type switch
+    {
+        EnquiryType.ContactSales => "Contact Sales form (contact.html)",
+        EnquiryType.QuickEnquiry => "Quick Enquiry popup (index.html)",
+        _ => "Reseller form (reseller.html)"
+    };
 }
 <div class="admin-card">
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">

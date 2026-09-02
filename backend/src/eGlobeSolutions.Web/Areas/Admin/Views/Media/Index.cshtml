@@ -19,7 +19,7 @@
 
 <div class="admin-card">
     <table class="admin-table">
-        <thead><tr><th></th><th>File</th><th>Type</th><th>Size</th><th>URL</th><th>Uploaded</th><th></th></tr></thead>
+        <thead><tr><th></th><th>File</th><th>Type</th><th>Size</th><th>Alt text</th><th>Uploaded</th><th></th></tr></thead>
         <tbody>
         @foreach (var a in Model)
         {
@@ -30,10 +30,16 @@
                         <img class="admin-thumb" src="@a.Url" alt="@a.AltText" />
                     }
                 </td>
-                <td>@a.OriginalFileName</td>
+                <td>@a.OriginalFileName<br /><code>@a.Url</code></td>
                 <td>@a.ContentType</td>
                 <td>@((a.SizeBytes / 1024.0).ToString("N0")) KB</td>
-                <td><code>@a.Url</code></td>
+                <td>
+                    <form method="post" action="/admin/media/@a.Id/edit" style="display:flex; gap:6px; align-items:center;">
+                        @Html.AntiForgeryToken()
+                        <input type="text" name="altText" value="@a.AltText" placeholder="Describe the image…" style="min-width:160px;" />
+                        <button class="admin-btn" type="submit">Save</button>
+                    </form>
+                </td>
                 <td>@a.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
                 <td>
                     <form method="post" action="/admin/media/@a.Id/delete" onsubmit="return confirm('Remove this file from the library?');">

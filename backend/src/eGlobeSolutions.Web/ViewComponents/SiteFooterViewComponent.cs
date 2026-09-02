@@ -14,9 +14,10 @@ public class SiteFooterViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync()
     {
-        var settings = await _db.SiteSettings.ToDictionaryAsync(s => s.Key, s => s.Value);
+        var settings = await _db.SiteSettings.AsNoTracking().ToDictionaryAsync(s => s.Key, s => s.Value);
 
         var productLinks = await _db.MenuItems
+            .AsNoTracking()
             .Where(m => m.Location == "footer-product" && m.IsPublished)
             .OrderBy(m => m.SortOrder).ToListAsync();
         if (productLinks.Count == 0)
@@ -33,6 +34,7 @@ public class SiteFooterViewComponent : ViewComponent
         }
 
         var companyLinks = await _db.MenuItems
+            .AsNoTracking()
             .Where(m => m.Location == "footer-company" && m.IsPublished)
             .OrderBy(m => m.SortOrder).ToListAsync();
         if (companyLinks.Count == 0)

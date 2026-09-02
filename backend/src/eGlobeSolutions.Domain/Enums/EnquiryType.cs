@@ -8,5 +8,9 @@ namespace eGlobeSolutions.Domain.Enums;
 public enum EnquiryType
 {
     ContactSales = 0,
-    ResellerPartnership = 1
+    ResellerPartnership = 1,
+
+    /// <summary>Submitted from the small "Quick Enquiry" popup shown on the
+    /// homepage, a lighter-weight version of the full Contact Sales form.</summary>
+    QuickEnquiry = 2
 }

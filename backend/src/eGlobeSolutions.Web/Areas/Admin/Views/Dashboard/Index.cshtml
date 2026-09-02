@@ -69,7 +69,7 @@
             <tr onclick="location.href='/admin/enquiries/@e.Id'" style="cursor:pointer;">
                 <td>@e.FullName</td>
                 <td>@e.HotelName</td>
-                <td><span class="admin-badge admin-badge--type-@(e.Type.ToString().ToLower())">@(e.Type == EnquiryType.ContactSales ? "Contact Sales" : "Reseller")</span></td>
+                <td><span class="admin-badge admin-badge--type-@(e.Type.ToString().ToLower())">@(e.Type switch { EnquiryType.ContactSales => "Contact Sales", EnquiryType.QuickEnquiry => "Quick Enquiry", _ => "Reseller" })</span></td>
                 <td><span class="admin-badge admin-badge--@(e.Status.ToString().ToLower())">@e.Status</span></td>
                 <td>@e.CreatedAtUtc.ToLocalTime().ToString("dd MMM, HH:mm")</td>
             </tr>

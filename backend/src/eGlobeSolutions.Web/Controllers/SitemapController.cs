@@ -55,6 +55,7 @@ public class SitemapController : Controller
         }
 
         var posts = await _db.BlogPosts
+            .AsNoTracking()
             .Where(p => p.IsPublished && p.Slug != null && p.Body != null)
             .Select(p => new { p.Slug, p.PublishedAtUtc, p.UpdatedAtUtc })
             .ToListAsync(ct);

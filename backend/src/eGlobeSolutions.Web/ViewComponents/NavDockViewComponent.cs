@@ -14,6 +14,7 @@ public class NavDockViewComponent : ViewComponent
     public async Task<IViewComponentResult> InvokeAsync()
     {
         var items = await _db.MenuItems
+            .AsNoTracking()
             .Where(m => m.Location == "nav-dock" && m.IsPublished)
             .OrderBy(m => m.SortOrder)
             .ToListAsync();

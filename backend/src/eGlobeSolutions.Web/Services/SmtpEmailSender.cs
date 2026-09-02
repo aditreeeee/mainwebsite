@@ -19,7 +19,7 @@ public class SmtpEmailSender : IEmailSender
 
     public async Task<EmailSendResult> SendAsync(string toEmail, string subject, string body, CancellationToken ct = default)
     {
-        var settings = await _db.SiteSettings.ToDictionaryAsync(s => s.Key, s => s.Value, ct);
+        var settings = await _db.SiteSettings.AsNoTracking().ToDictionaryAsync(s => s.Key, s => s.Value, ct);
         string Get(string key) => settings.TryGetValue(key, out var v) ? v ?? string.Empty : string.Empty;
 
         var host = Get(SiteSettingKeys.SmtpHost);

@@ -199,10 +199,15 @@ p{margin:0;color:var(--ink-soft);}
   font-weight:600;
   border-radius:var(--radius-sm);
   border:var(--border);
-  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  /* `color` transitions alongside `background` so a light-text/dark-bg swap
+     (e.g. .btn-ghost on hover) never has a mid-transition moment where the
+     text is already its new color but the background hasn't caught up,
+     which is what made hover text briefly disappear against the fill. */
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
   white-space:nowrap;
   position:relative;
 }
+.btn:focus-visible{outline:2px solid var(--blue); outline-offset:3px;}
 .btn-primary{
   background:var(--blue);
   color:var(--white);
@@ -441,6 +446,10 @@ p{margin:0;color:var(--ink-soft);}
 section{position:relative;}
 .section{padding:80px 0;}
 .section-tight{padding:56px 0;}
+@media (max-width:700px){
+  .section{padding:44px 0;}
+  .section-tight{padding:32px 0;}
+}
 .section-border-top{border-top:var(--border-light);}
 .section-dark{background:var(--navy-deep); color:var(--white);}
 .section-dark p{color:rgba(255,255,255,.65);}
@@ -778,6 +787,10 @@ section{position:relative;}
 .dash__panel.active{
   display:block; max-height:412px; overflow-y:auto; scrollbar-width:thin;
   animation:panel-in .4s cubic-bezier(.16,1,.3,1);
+}
+@keyframes panel-in{
+  0%{opacity:0; transform:translateY(10px);}
+  100%{opacity:1; transform:translateY(0);}
 }
 .dash:hover{box-shadow:0 14px 34px rgba(17,24,39,.14); transform:translateY(-2px);}
 .dash{transition:box-shadow .3s ease, transform .3s ease;}
@@ -1365,33 +1378,25 @@ section{position:relative;}
   .dept-tab:last-child{border-radius:0 0 10px 10px;}
 }
 .dept-panel{display:none;}
-.dept-panel.active{
+.dept-panel.active{display:block;}
+
+/* Once JS wraps the panels in a .dept-stage, they stack on top of one
+   another so a tab switch can slide the outgoing panel out one edge while
+   the incoming panel slides in from the other, like flipping to a new page
+   in a deck, rather than the old panel vanishing and a new one popping in. */
+.dept-stage{position:relative;}
+.dept-stage.ready{transition:height .42s cubic-bezier(.4,0,.2,1);}
+.dept-stage.js-ready{overflow:hidden;}
+.dept-stage.js-ready .dept-panel{
   display:block;
-  backface-visibility:hidden;
-  transform-origin:left center;
-  animation:page-flip-in 1s cubic-bezier(.4,0,.2,1);
+  position:absolute; top:0; left:0; width:100%;
+  opacity:0; pointer-events:none;
 }
-@keyframes page-flip-in{
-  0%{opacity:0; transform:perspective(2200px) rotateY(-26deg) translateX(-18px);}
-  100%{opacity:1; transform:perspective(2200px) rotateY(0deg) translateX(0);}
-}
-.dept-panel.active .dept-layout{position:relative; overflow:hidden;}
-.dept-panel.active .dept-layout::after{
-  content:'';
-  position:absolute; inset:0;
-  background:linear-gradient(100deg, transparent 40%, rgba(255,255,255,.55) 50%, transparent 60%);
-  transform:translateX(-130%);
-  animation:page-flip-sheen 1s cubic-bezier(.4,0,.2,1);
-  pointer-events:none;
-}
-@keyframes page-flip-sheen{
-  0%{transform:translateX(-130%);}
-  100%{transform:translateX(130%);}
+.dept-stage.js-ready .dept-panel.active{
+  opacity:1; pointer-events:auto; z-index:2;
 }
 @media (prefers-reduced-motion: reduce){
-  .dept-panel.active{animation:panel-fade-in .3s ease;}
-  .dept-panel.active .dept-layout::after{animation:none; display:none;}
-  @keyframes panel-fade-in{from{opacity:0;}to{opacity:1;}}
+  .dept-stage.ready{transition:none;}
 }
 
 .dept-panel.active .dept-task{animation:task-in .45s cubic-bezier(.16,1,.3,1) backwards;}
@@ -1581,10 +1586,12 @@ section{position:relative;}
   .product-grid{grid-template-columns:repeat(3,1fr);}
 }
 @media (max-width:700px){
-  .product-grid{grid-template-columns:repeat(2,1fr);}
-}
-@media (max-width:480px){
-  .product-grid{grid-template-columns:1fr;}
+  .product-grid{grid-template-columns:repeat(2,1fr); gap:10px;}
+  .product-card{padding:14px; gap:8px;}
+  .product-card__icon{width:30px; height:30px; border-radius:8px;}
+  .product-card__icon svg{width:15px;height:15px;}
+  .product-card h4{font-size:13.5px; min-height:0; -webkit-line-clamp:2;}
+  .product-card__more{font-size:11.5px; padding-top:0;}
 }
 
 /* ---------- Product detail modal ---------- */
@@ -1650,6 +1657,40 @@ section{position:relative;}
     padding:32px 28px;
     gap:24px;
   }
+}
+
+/* ---------- Quick Enquiry popup (homepage) ---------- */
+.qe-modal{
+  background:var(--white);
+  border-radius:0;
+  border:var(--border);
+  max-width:380px; width:100%;
+  max-height:90vh; overflow-y:auto;
+  padding:28px;
+  position:relative;
+  box-shadow:0 30px 70px rgba(16,25,53,.35);
+  transform:translateY(16px) scale(.97);
+  opacity:0;
+  transition:transform .3s cubic-bezier(.16,1,.3,1), opacity .3s ease;
+}
+.product-modal-overlay.active .qe-modal{transform:translateY(0) scale(1); opacity:1;}
+.qe-modal .product-modal__close{border-radius:0;}
+.qe-modal h3{font-size:19px; margin:10px 0 6px; padding-right:20px;}
+.qe-modal__lead{font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;}
+.qe-form .field{margin-top:0; margin-bottom:10px;}
+.qe-form .field label{font-size:11px; font-weight:600; display:block; margin-bottom:5px;}
+.qe-form .field input{
+  width:100%; padding:11px 12px; border:var(--border-light); border-radius:0; background:var(--canvas);
+  font-size:14px;
+}
+.qe-form .form-status{margin-top:10px; font-size:13px; text-align:center;}
+.qe-form .btn{border-radius:0; margin-top:2px;}
+.qe-form__full-link{
+  display:block; text-align:center; margin-top:12px; font-size:12px; font-weight:600; color:var(--ink-soft);
+}
+.qe-form__full-link:hover{color:var(--blue);}
+@media (max-width:480px){
+  .qe-modal{padding:24px 20px;}
 }
 .product-modal__points{display:flex; flex-direction:column; gap:10px;}
 .product-modal__points div{
@@ -2003,12 +2044,23 @@ section{position:relative;}
   border:var(--border);
   box-shadow:var(--shadow-hard-lg);
 }
+@media (max-width:700px){
+  .final-cta{padding:44px 24px;}
+}
 .final-cta h2{color:#fff; max-width:760px; margin:0 auto 20px;}
 .final-cta p{color:rgba(255,255,255,.85); max-width:560px; margin:0 auto 36px; font-size:17px;}
 .final-cta__row{display:flex; gap:16px; justify-content:center; flex-wrap:wrap;}
-.final-cta .btn-ghost{background:#fff;}
+.final-cta .btn{padding:16px 30px; font-size:15.5px;}
 .final-cta .btn-dark{box-shadow:4px 4px 0 rgba(255,255,255,.4);}
-.final-cta .btn-dark:hover{box-shadow:0 10px 26px rgba(0,0,0,.28);}
+.final-cta .btn-dark:hover{box-shadow:0 10px 26px rgba(0,0,0,.3); transform:translateY(-3px);}
+.final-cta .btn-dark:active{transform:translateY(-1px); box-shadow:2px 2px 0 rgba(255,255,255,.4);}
+.final-cta .btn-ghost{background:#fff; color:var(--navy-deep); border-color:#fff;}
+.final-cta .btn-ghost:hover{
+  background:transparent; color:#fff; border-color:#fff;
+  transform:translateY(-3px); box-shadow:0 10px 26px rgba(0,0,0,.18);
+}
+.final-cta .btn-ghost:active{transform:translateY(-1px);}
+.final-cta .btn:focus-visible{outline-color:#fff; outline-offset:3px;}
 
 /* ==========================================================================
    FOOTER
@@ -2102,6 +2154,14 @@ footer{
   border-top:1px solid rgba(255,255,255,.1);
 }
 .footer__products-row h5{margin-bottom:14px;}
+.footer__products-row h5 a{color:inherit; transition:color .2s ease;}
+.footer__products-row h5 a:hover{color:var(--blue-dim);}
+/* All 16 product links stay on desktop; on mobile they'd add a long block
+   to an already-tall footer, so the single "Products" link already listed
+   under Company (linking to the same #ecosystem section) covers it there. */
+@media (max-width:860px){
+  .footer__products-row{display:none;}
+}
 
 /* One-line legal strip: Terms of Use / Refund & Cancellation / Privacy Policy */
 .footer__legal-strip{
@@ -2182,13 +2242,20 @@ footer{
 .footer__bottom a{color:var(--blue); font-weight:600;}
 
 @media (max-width:860px){
-  .footer__main{grid-template-columns:1fr; gap:36px; padding-top:44px;}
+  .footer__main{grid-template-columns:1fr; gap:28px; padding-top:32px;}
 }
 @media (max-width:560px){
   .footer__link-cols{grid-template-columns:1fr 1fr; gap:28px;}
   .footer__links--grid{grid-template-columns:1fr;}
   .footer__bottom{flex-direction:column; text-align:center;}
   .footer__bottom .status{flex-direction:column; gap:6px;}
+  /* Trim the footer down on small screens: drop the descriptive line under
+     the CTA heading, and only keep phone + email in the contact strip
+     (website URL and business hours are the least useful items to tap
+     from a phone and were adding two extra stacked lines). */
+  .footer__cta p{display:none;}
+  .footer__strip{justify-content:flex-start; gap:8px 20px;}
+  .footer__strip > *:nth-child(n+3){display:none;}
 }
 
 /* ==========================================================================
@@ -2365,6 +2432,9 @@ img.testi-card__avatar{
   position:relative;
   overflow:hidden;
   border-bottom:var(--border-light);
+}
+@media (max-width:700px){
+  .page-hero{padding:120px 0 40px;}
 }
 .page-hero__inner{position:relative; z-index:1; max-width:780px;}
 .page-hero .eyebrow{margin-bottom:22px;}
@@ -2623,7 +2693,7 @@ img.testi-card__avatar{
 .article-content p{margin-bottom:18px; color:var(--ink);}
 .article-content ol,.article-content ul{margin:0 0 18px; padding-left:22px; display:flex; flex-direction:column; gap:10px;}
 .article-content li{color:var(--ink);}
-.article-content a{color:var(--blue); font-weight:600;}
+.article-content a:not(.btn){color:var(--blue); font-weight:600;}
 
 .article-callout{
   background:var(--canvas);

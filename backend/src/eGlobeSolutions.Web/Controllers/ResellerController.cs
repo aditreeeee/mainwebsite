@@ -4,6 +4,7 @@ using eGlobeSolutions.Infrastructure.Persistence;
 using eGlobeSolutions.Web.Models.Public;
 using eGlobeSolutions.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace eGlobeSolutions.Web.Controllers;
@@ -29,19 +30,21 @@ public class ResellerController : Controller
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var blocks = await _db.ContentBlocks
+            .AsNoTracking()
             .Where(b => b.PageKey == "reseller" && b.IsPublished)
             .ToDictionaryAsync(b => b.SectionKey, ct);
 
         var vm = new ContentPageViewModel
         {
             Blocks = blocks,
-            Seo = await _db.SeoMetadata.FirstOrDefaultAsync(s => s.PageKey == "reseller", ct)
+            Seo = await _db.SeoMetadata.AsNoTracking().FirstOrDefaultAsync(s => s.PageKey == "reseller", ct)
         };
         return View(vm);
     }
 
-    // See the identical note in ContactController.Submit re: antiforgery.
     [HttpPost("submit")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("PublicForms")]
     public async Task<IActionResult> Submit([FromForm] ResellerSubmitModel model, CancellationToken ct)
     {
         if (!string.IsNullOrWhiteSpace(model.Website))
