@@ -5,6 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="~/assets/logo.png">
 <title>@(Model.Seo?.Title ?? "Blog, eGlobe Solutions | Hotel Technology Guides & Updates")</title>
 <meta name="description" content="@(Model.Seo?.Description ?? "Guides, product updates and industry news on hotel technology from the eGlobe Solutions team.")">
 <meta name="keywords" content="@(Model.Seo?.Keywords ?? "hotel technology blog")">
@@ -26,7 +27,62 @@
   "@@type": "Blog",
   "name": "eGlobe Solutions Blog",
   "description": "Guides, product updates and industry news on hotel channel managers, PMS, OTA distribution and revenue management.",
-  "url": "https://www.eglobe-solutions.com/blog.html"
+  "url": "https://www.eglobe-solutions.com/blog.html",
+  "publisher": { "@@type": "Organization", "name": "eGlobe Solutions", "logo": { "@@type": "ImageObject", "url": "https://www.eglobe-solutions.com/img/logo-dark.webp" } },
+  "blogPost": [
+    @{ var linkedPosts = Model.Posts.Where(p => !string.IsNullOrWhiteSpace(p.Slug) && !string.IsNullOrWhiteSpace(p.Body)).ToList(); }
+    @for (var i = 0; i < linkedPosts.Count; i++)
+    {
+      var p = linkedPosts[i];
+      @Html.Raw("{\"@type\":\"BlogPosting\",\"headline\":" + System.Text.Json.JsonSerializer.Serialize(p.Title)
+        + ",\"url\":\"https://www.eglobe-solutions.com/" + p.Slug + ".html\",\"datePublished\":\"" + p.PublishedAtUtc.ToString("yyyy-MM-dd") + "\"}")
+      if (i < linkedPosts.Count - 1) { @Html.Raw(",") }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.eglobe-solutions.com/" },
+    { "@@type": "ListItem", "position": 2, "name": "Blog" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Organization",
+      "@@id": "https://www.eglobe-solutions.com/#organization",
+      "name": "eGlobe Solutions",
+      "url": "https://www.eglobe-solutions.com/",
+      "logo": "https://www.eglobe-solutions.com/img/logo-dark.webp",
+      "sameAs": [
+        "https://www.facebook.com/eglobesolution",
+        "https://www.youtube.com/@@eglobesolutionspms",
+        "https://www.linkedin.com/company/eglobesolutions/"
+      ],
+      "contactPoint": {
+        "@@type": "ContactPoint",
+        "telephone": "+91-9818880480",
+        "contactType": "sales",
+        "email": "support@@eglobe-solutions.com",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    },
+    {
+      "@@type": "WebSite",
+      "@@id": "https://www.eglobe-solutions.com/#website",
+      "url": "https://www.eglobe-solutions.com/",
+      "name": "eGlobe Solutions",
+      "publisher": { "@@id": "https://www.eglobe-solutions.com/#organization" }
+    }
+  ]
 }
 </script>
 </head>
@@ -57,14 +113,24 @@
 
 @if (Model.Featured is not null)
 {
+  var fCat = CategoryFilter(Model.Featured.Category);
   <!-- ===================== FEATURED POST ===================== -->
   <section class="section panel-white">
     <div class="container">
       <div class="blog-featured" data-reveal="scale">
-        <div class="ph blog-featured__img"><span class="ph__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Featured image</span></div>
+        @if (!string.IsNullOrWhiteSpace(Model.Featured.CoverImageUrl))
+        {
+          <div class="blog-featured__img"><img src="@Model.Featured.CoverImageUrl" alt="@Model.Featured.Title" loading="lazy"></div>
+        }
+        else
+        {
+          <div class="blog-featured__img blog-visual blog-visual--@fCat" data-glyph="@CategoryGlyph(fCat)">
+            <span class="blog-visual__tag">@Model.Featured.Category</span>
+          </div>
+        }
         <div class="blog-featured__body">
           <div class="blog-meta">
-            <span class="blog-meta__tag">@Model.Featured.Category</span>
+            <span class="blog-meta__tag blog-meta__tag--@fCat">@Model.Featured.Category</span>
             <span>@Model.Featured.PublishedAtUtc.ToString("MMM d, yyyy")</span>
             <span>@Model.Featured.ReadTimeMinutes min read</span>
           </div>
@@ -99,17 +165,37 @@
       {
         var hasArticle = !string.IsNullOrWhiteSpace(post.Slug) && !string.IsNullOrWhiteSpace(post.Body);
         var href = hasArticle ? $"{post.Slug}.html" : "#";
-        var categoryFilter = post.Category.ToLowerInvariant() switch { "product" => "product", "news" => "news", _ => "guide" };
+        var categoryFilter = CategoryFilter(post.Category);
         <a href="@href" class="blog-card" data-category="@categoryFilter">
-          <div class="ph blog-card__img"><span class="ph__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>@post.Category</span></div>
-          <div class="blog-meta"><span class="blog-meta__tag">@post.Category</span><span>@post.PublishedAtUtc.ToString("MMM d, yyyy")</span><span>@post.ReadTimeMinutes min read</span></div>
-          <h3>@post.Title</h3>
-          <p>@post.Excerpt</p>
+          @if (!string.IsNullOrWhiteSpace(post.CoverImageUrl))
+          {
+            <div class="blog-card__img"><img src="@post.CoverImageUrl" alt="@post.Title" loading="lazy"></div>
+          }
+          else
+          {
+            <div class="blog-card__img blog-visual blog-visual--@categoryFilter" data-glyph="@CategoryGlyph(categoryFilter)">
+              <span class="blog-visual__tag">@post.Category</span>
+            </div>
+          }
+          <div class="blog-card__body">
+            <div class="blog-meta"><span class="blog-meta__tag blog-meta__tag--@categoryFilter">@post.Category</span><span>@post.PublishedAtUtc.ToString("MMM d, yyyy")</span><span>@post.ReadTimeMinutes min read</span></div>
+            <h3>@post.Title</h3>
+            <p>@post.Excerpt</p>
+            @if (hasArticle)
+            {
+              <span class="blog-card__more">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+            }
+          </div>
         </a>
       }
     </div>
   </div>
 </section>
+
+@functions {
+    string CategoryFilter(string category) => category.ToLowerInvariant() switch { "product" => "product", "news" => "news", _ => "guide" };
+    string CategoryGlyph(string categoryFilter) => categoryFilter switch { "product" => "P", "news" => "N", _ => "G" };
+}
 
 @await Component.InvokeAsync("SiteFooter")
 
@@ -118,7 +204,7 @@
     <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <span class="nav-dock__brand"><img src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe"></span>
+    <span class="nav-dock__brand"><img src="/assets/logo.png" alt="eGlobe"></span>
     @await Component.InvokeAsync("NavDock")
     <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
   </nav>

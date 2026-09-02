@@ -18,6 +18,11 @@ public class HomeController : Controller
     private readonly AppDbContext _db;
     public HomeController(AppDbContext db) => _db = db;
 
+    // Adding any attribute route below opts this action out of the default
+    // conventional "/" route entirely, so "/" has to be listed explicitly
+    // alongside "index.html", the literal link every page's brand/Home nav uses.
+    [HttpGet("")]
+    [HttpGet("index.html")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var blocks = await _db.ContentBlocks

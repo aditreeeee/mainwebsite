@@ -1,0 +1,22 @@
+# eGlobe Solutions
+
+> eGlobe Solutions sources, connects and manages the hotel technology stack, PMS, channel manager, POS, housekeeping, booking engine, revenue management and AI tools, for independent hotels, multi-property groups and hotel chains in India and beyond.
+
+eGlobe is not a single piece of software: it is the technology partner that sources the right system for each job (PMS, channel manager, POS, housekeeping, booking engine, revenue management, AI tools) and connects them into one working stack, billed either per room, per property, or as a custom enterprise agreement.
+
+## Key pages
+
+- [Homepage](https://www.eglobe-solutions.com/): product overview, the full technology ecosystem eGlobe sources and connects.
+- [Pricing](https://www.eglobe-solutions.com/pricing.html): the three pricing models (Per Room, Per Property, Enterprise) and which modules are included vs. add-on under each.
+- [Price Calculator](https://www.eglobe-solutions.com/calculator.html): interactive tool to build a real quote, choose a plan, rooms/properties, modules, tax, currency and billing cycle.
+- [Resellers](https://www.eglobe-solutions.com/reseller.html): the reseller/referral/white-label partner program, up to 15% recurring commission.
+- [Blog](https://www.eglobe-solutions.com/blog.html): guides, product updates and industry news on hotel PMS, channel managers, OTA distribution and revenue management.
+- [Contact](https://www.eglobe-solutions.com/contact.html): talk to sales, request a demo.
+
+## Products eGlobe sources and connects
+
+PMS (Property Management System), Channel Manager, POS & KOT, Housekeeping, Finance & Revenue Management, Reviews Manager, B2B Stay, OTA Listing & Management, Portfolio Dashboards, Dedicated Account Manager (Enterprise), eGlobe AI Tools (AI Sales Agent, Smartdesk, Admin Agent), Booking Engine (5% commission on direct bookings), Google Hotel Ads, Meta Search Engines, Website Builder, Payment Gateway, PMS APIs.
+
+## Contact
+
+Phone: +91 9818880480 · Email: support@eglobe-solutions.com · Business hours: Monday-Saturday, 9:30 AM-6:30 PM (IST)

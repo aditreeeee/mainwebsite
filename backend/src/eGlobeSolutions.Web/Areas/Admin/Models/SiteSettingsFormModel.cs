@@ -41,4 +41,37 @@ public class SiteSettingsFormModel
 
     [StringLength(200)]
     public string? FooterCopyright { get; set; }
+
+    // ---- SMTP ----
+    [StringLength(200)]
+    public string? SmtpHost { get; set; }
+
+    [Range(1, 65535)]
+    public int? SmtpPort { get; set; } = 587;
+
+    [StringLength(200)]
+    public string? SmtpUsername { get; set; }
+
+    /// <summary>Left blank on save means "keep the existing stored password".</summary>
+    [StringLength(300)]
+    public string? SmtpPassword { get; set; }
+
+    public bool SmtpEnableSsl { get; set; } = true;
+
+    [EmailAddress, StringLength(200)]
+    public string? SmtpFromEmail { get; set; }
+
+    [StringLength(150)]
+    public string? SmtpFromName { get; set; }
+
+    [EmailAddress, StringLength(200)]
+    public string? SmtpNotifyEmail { get; set; }
+
+    public bool SmtpNotifyOnEnquiry { get; set; } = true;
+}
+
+public class SmtpTestModel
+{
+    [Required, EmailAddress]
+    public string ToEmail { get; set; } = string.Empty;
 }

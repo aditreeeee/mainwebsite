@@ -1,3 +1,4 @@
+using eGlobeSolutions.Domain.Entities;
 using eGlobeSolutions.Domain.Enums;
 using eGlobeSolutions.Infrastructure.Persistence;
 using eGlobeSolutions.Web.Areas.Admin.Models;
@@ -27,8 +28,17 @@ public class DashboardController : Controller
         var last7 = now.AddDays(-7);
         var last30 = now.AddDays(-30);
 
+        var settings = await _db.SiteSettings.ToDictionaryAsync(s => s.Key, s => s.Value, ct);
+        string GetSetting(string key) => settings.TryGetValue(key, out var v) ? v ?? string.Empty : string.Empty;
+
         var vm = new DashboardViewModel
         {
+            ActiveCalculatorModules = await _db.CalculatorPricingModules.CountAsync(m => m.IsActive, ct),
+            CalculatorPlansConfigured = await _db.CalculatorPlanBaseRates.AnyAsync(ct),
+            CalculatorTaxConfigured = await _db.CalculatorTaxConfigurations.AnyAsync(t => t.IsActive, ct),
+            CalculatorCurrencyConfigured = await _db.CalculatorCurrencyRates.AnyAsync(c => c.IsActive, ct),
+            SmtpConfigured = !string.IsNullOrWhiteSpace(GetSetting(SiteSettingKeys.SmtpHost)),
+            EnquiryNotificationsEnabled = !bool.TryParse(GetSetting(SiteSettingKeys.SmtpNotifyOnEnquiry), out var notify) || notify,
             NewEnquiriesLast7Days = await _db.Enquiries.CountAsync(e => e.CreatedAtUtc >= last7, ct),
             NewEnquiriesLast30Days = await _db.Enquiries.CountAsync(e => e.CreatedAtUtc >= last30, ct),
             OpenEnquiries = await _db.Enquiries.CountAsync(

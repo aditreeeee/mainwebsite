@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="~/assets/logo.png">
     <title>@ViewData["Title"] &middot; eGlobe Admin</title>
     <link rel="stylesheet" href="~/admin/admin.css">
 </head>
@@ -17,6 +18,7 @@
                 <a href="/admin/dashboard" class="@(ctrl == "Dashboard" ? "active" : "")">Dashboard</a>
                 <a href="/admin/enquiries" class="@(ctrl == "Enquiries" ? "active" : "")">Enquiries</a>
                 <a href="/admin/pricing" class="@(ctrl == "Pricing" ? "active" : "")">Pricing Plans</a>
+                <a href="/admin/calculator" class="@(ctrl == "Calculator" ? "active" : "")">Price Calculator</a>
                 <a href="/admin/content" class="@(ctrl == "Content" ? "active" : "")">Page Content</a>
                 <a href="/admin/blog" class="@(ctrl == "BlogPosts" ? "active" : "")">Blog Posts</a>
                 <a href="/admin/faqs" class="@(ctrl == "Faqs" ? "active" : "")">FAQs</a>

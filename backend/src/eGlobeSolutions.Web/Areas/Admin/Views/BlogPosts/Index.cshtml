@@ -12,15 +12,20 @@
         <tbody>
         @foreach (var p in Model)
         {
+            var hasArticle = !string.IsNullOrWhiteSpace(p.Slug) && !string.IsNullOrWhiteSpace(p.Body);
             <tr>
-                <td>@p.Title</td>
-                <td>@p.Category</td>
-                <td>@(string.IsNullOrWhiteSpace(p.Slug) ? "—" : p.Slug + ".html")</td>
-                <td>@(p.IsFeatured ? "Yes" : "")</td>
-                <td>@(p.IsPublished ? "Published" : "Draft")</td>
+                <td><a href="/admin/blog/@p.Id/edit" style="font-weight:600;">@p.Title</a></td>
+                <td><span class="admin-badge admin-badge--type-@(p.Category.ToLower())">@p.Category</span></td>
+                <td>@(hasArticle ? $"/{p.Slug}.html" : "Teaser only")</td>
+                <td>@(p.IsFeatured ? "★" : "")</td>
+                <td><span class="admin-badge @(p.IsPublished ? "admin-badge--won" : "")">@(p.IsPublished ? "Published" : "Draft")</span></td>
                 <td>@p.PublishedAtUtc.ToString("yyyy-MM-dd")</td>
                 <td class="admin-row-actions">
                     <a class="admin-btn" href="/admin/blog/@p.Id/edit">Edit</a>
+                    @if (hasArticle)
+                    {
+                        <a class="admin-btn" href="/@(p.Slug).html" target="_blank">View</a>
+                    }
                     <form method="post" action="/admin/blog/@p.Id/delete" onsubmit="return confirm('Delete this post?');">
                         @Html.AntiForgeryToken()
                         <button class="admin-btn admin-btn--danger" type="submit">Delete</button>

@@ -1,0 +1,222 @@
+@model ContentPageViewModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="~/assets/logo.png">
+<title>@(Model.Seo?.Title ?? "Price Calculator, eGlobe Solutions | Build a Hotel Software Quote")</title>
+<meta name="description" content="@(Model.Seo?.Description ?? "Build an instant, accurate quotation across eGlobe's Per Room, Per Property and Enterprise pricing models.")">
+<meta name="keywords" content="@(Model.Seo?.Keywords ?? "hotel management software price calculator, hotel PMS quote")">
+<link rel="canonical" href="@(Model.Seo?.CanonicalUrl ?? "https://www.eglobe-solutions.com/calculator.html")">
+<meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="~/css/style.css">
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Organization",
+      "@@id": "https://www.eglobe-solutions.com/#organization",
+      "name": "eGlobe Solutions",
+      "url": "https://www.eglobe-solutions.com/",
+      "logo": "https://www.eglobe-solutions.com/img/logo-dark.webp",
+      "sameAs": [
+        "https://www.facebook.com/eglobesolution",
+        "https://www.youtube.com/@@eglobesolutionspms",
+        "https://www.linkedin.com/company/eglobesolutions/"
+      ],
+      "contactPoint": {
+        "@@type": "ContactPoint",
+        "telephone": "+91-9818880480",
+        "contactType": "sales",
+        "email": "support@@eglobe-solutions.com",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    },
+    {
+      "@@type": "WebSite",
+      "@@id": "https://www.eglobe-solutions.com/#website",
+      "url": "https://www.eglobe-solutions.com/",
+      "name": "eGlobe Solutions",
+      "publisher": { "@@id": "https://www.eglobe-solutions.com/#organization" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="scroll-progress"></div>
+
+<div class="topbar">
+  <div class="topbar__inner">
+    <a href="index.html" class="brand"><img class="mark" src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe Solutions"></a>
+    @await Component.InvokeAsync("TopNav")
+    <div class="topbar__actions">
+      <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Log In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
+    </div>
+    <button class="topbar__burger" id="topbar-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+<header class="page-hero page-hero--compact">
+  <div class="container page-hero__split">
+    <h1 data-reveal><span class="accent">Price</span> Calculator</h1>
+    <p class="lead" data-reveal>No hidden fees, no confusing tiers disguised as "value." Pick a model, add your rooms and modules, and see the full monthly and annual breakdown instantly.</p>
+  </div>
+</header>
+
+<!-- ===================== PRICING MODEL ===================== -->
+<section class="section panel-white" id="models">
+  <div class="container">
+    <div class="section-head center" style="margin-left:auto;margin-right:auto;">
+      <span class="section-kicker">Step 1 &middot; Choose Your Model</span>
+      <h2 data-reveal>Three ways to license eGlobe.</h2>
+      <p class="lead" style="margin:16px auto 0;">Every plan starts from the same flat base fee, no matter how many rooms or properties you run. Pick the unit that matches how your property is structured.</p>
+    </div>
+
+    <div class="price-teaser" id="calc-plan-picker" data-reveal-group>
+      <!-- populated by calculator.js from /calculator/catalog -->
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BUILDER + LIVE SUMMARY ===================== -->
+<section class="section section-border-top panel-white calc-section">
+  <div class="container">
+    <div class="calc-layout">
+
+      <div class="calc-builder">
+
+        <div class="calc-card" data-reveal>
+          <div class="calc-card__head"><span class="calc-step">1</span><h3>Customer</h3></div>
+          <div class="calc-grid">
+            <div class="field">
+              <label for="calc-customer">Customer / Hotel name</label>
+              <input type="text" id="calc-customer" placeholder="e.g. The Grand Palace Hotel">
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-card" data-reveal>
+          <div class="calc-card__head"><span class="calc-step">2</span><h3>Properties &amp; Rooms</h3></div>
+          <div class="calc-grid calc-grid--2">
+            <div class="field">
+              <label for="calc-properties">Number of properties</label>
+              <input type="number" id="calc-properties" min="1" step="1" value="1">
+            </div>
+            <div class="field">
+              <label for="calc-rooms">Total rooms</label>
+              <input type="number" id="calc-rooms" min="1" step="1" value="50">
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-card" data-reveal>
+          <div class="calc-card__head"><span class="calc-step">3</span><h3>Modules</h3></div>
+          <p class="calc-card__hint">Included modules are bundled into your base subscription automatically. Add-ons are priced on top; unavailable modules are disabled for the selected plan.</p>
+          <div class="calc-module-list" id="calc-core-modules"></div>
+        </div>
+
+        <div class="calc-card" data-reveal>
+          <div class="calc-card__head"><span class="calc-step">4</span><h3>Additional Products</h3></div>
+          <p class="calc-card__hint">Standalone products, priced separately from the subscription. Commission-based products need an estimated volume to calculate.</p>
+          <div class="calc-module-list" id="calc-addon-modules"></div>
+        </div>
+
+        <div class="calc-card" data-reveal>
+          <div class="calc-card__head"><span class="calc-step">5</span><h3>Billing, Tax &amp; Currency</h3></div>
+          <div class="calc-grid calc-grid--3">
+            <div class="field">
+              <label for="calc-billing-cycle">Billing cycle</label>
+              <select id="calc-billing-cycle"></select>
+            </div>
+            <div class="field">
+              <label for="calc-tax">Tax</label>
+              <select id="calc-tax"></select>
+            </div>
+            <div class="field">
+              <label for="calc-currency">Display currency</label>
+              <select id="calc-currency"></select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===================== LIVE SUMMARY ===================== -->
+      <aside class="calc-summary" data-reveal>
+        <div class="calc-summary__card">
+          <div class="calc-print-header">
+            <div class="calc-print-header__brand">
+              <img src="~/assets/logo.png" alt="eGlobe Solutions">
+              <div class="calc-print-header__co">
+                <strong>eGlobe Solutions</strong>
+                <span>+91 9818880480 &middot; support@eglobe-solutions.com</span>
+                <span>www.eglobe-solutions.com</span>
+              </div>
+            </div>
+            <div class="calc-print-header__title">
+              <strong>Price Quotation</strong>
+              <span id="calc-print-quoteno"></span>
+            </div>
+          </div>
+          <h3>Live Quotation Summary</h3>
+          <div id="calc-summary-body">
+            <p class="calc-empty">Fill in the details to see your live quote.</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-block calc-summary__cta" id="calc-print-btn">
+            Print / Save Quotation
+          </button>
+          <p class="calc-summary__note">Estimate only, final pricing is confirmed by our sales team.</p>
+          <div class="calc-print-footer">
+            <strong>eGlobe Solutions</strong> &middot; +91 9818880480 &middot; support@eglobe-solutions.com &middot; www.eglobe-solutions.com<br>
+            This is an estimate generated by the eGlobe price calculator, not a final invoice. Contact our sales team to confirm pricing.
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINAL CTA ===================== -->
+<section class="section-tight">
+  <div class="container">
+    <div class="final-cta" data-reveal="scale">
+      <div class="grid-bg" style="opacity:.15"></div>
+      <div style="position:relative;z-index:1;">
+        <h2>Want This Quote Finalised?</h2>
+        <p>Share this estimate with our sales team and we'll confirm final pricing for your property.</p>
+        <div class="final-cta__row">
+          <a href="contact.html" class="btn btn-dark">Contact Sales</a>
+          <a href="pricing.html" class="btn btn-ghost">View Pricing Plans</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@await Component.InvokeAsync("SiteFooter")
+
+<div class="nav-dock-wrap">
+  <nav class="nav-dock">
+    <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="nav-dock__brand"><img src="/assets/logo.png" alt="eGlobe"></span>
+    @await Component.InvokeAsync("NavDock")
+    <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
+  </nav>
+</div>
+
+<script src="~/js/main.js"></script>
+<script src="~/js/calculator.js"></script>
+</body>
+</html>

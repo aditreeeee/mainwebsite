@@ -1,5 +1,45 @@
 User-agent: *
 Allow: /
 Disallow: /404.html
+Disallow: /admin/
+
+# ---- AI answer/generative engine crawlers (AEO/GEO) ----
+# Explicitly allowed so eGlobe content can be cited by AI search and
+# answer engines (ChatGPT, Perplexity, Google AI Overviews, Claude, ...).
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
 
 Sitemap: https://www.eglobe-solutions.com/sitemap.xml

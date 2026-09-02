@@ -252,16 +252,40 @@
     var dash = document.querySelector('.dash');
     if(!dash) return;
 
-    var tabs = dash.querySelectorAll('.dash__tab');
+    var tabs = Array.prototype.slice.call(dash.querySelectorAll('.dash__tab'));
     var panels = dash.querySelectorAll('.dash__panel');
+
+    function activateTab(tab){
+      tabs.forEach(function(t){ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+      tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+      var target = tab.getAttribute('data-dash-tab');
+      panels.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-dash-panel') === target); });
+    }
+
     tabs.forEach(function(tab){
-      tab.addEventListener('click', function(){
-        tabs.forEach(function(t){ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
-        tab.classList.add('active'); tab.setAttribute('aria-selected','true');
-        var target = tab.getAttribute('data-dash-tab');
-        panels.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-dash-panel') === target); });
-      });
+      tab.addEventListener('click', function(){ activateTab(tab); pauseAutoCycle(); });
     });
+
+    /* Auto-cycle through tabs so the demo feels alive on first view; pauses
+       as soon as the visitor interacts with it (click/hover/touch) so it
+       never fights a user who's exploring a panel. */
+    var autoCycleTimer = null;
+    var autoCyclePaused = false;
+    function startAutoCycle(){
+      if(autoCycleTimer || autoCyclePaused) return;
+      autoCycleTimer = setInterval(function(){
+        var activeIdx = tabs.findIndex(function(t){ return t.classList.contains('active'); });
+        var next = tabs[(activeIdx + 1) % tabs.length];
+        activateTab(next);
+      }, 4200);
+    }
+    function pauseAutoCycle(){
+      autoCyclePaused = true;
+      if(autoCycleTimer){ clearInterval(autoCycleTimer); autoCycleTimer = null; }
+    }
+    dash.addEventListener('pointerenter', pauseAutoCycle);
+    dash.addEventListener('touchstart', pauseAutoCycle, { passive: true });
+    startAutoCycle();
 
     /* Rate cells: click to edit */
     dash.querySelectorAll('.demo-cell').forEach(function(cell){
@@ -415,6 +439,7 @@
   var CHEVRON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
   var productModalData = {
     'pms': {
+      page:'pms.html',
       icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>',
       title:'Property Management System',
       desc:'A smart, secure and scalable cloud PMS, fully integrated with Channel Manager for real-time OTA sync. Trusted by 7,000+ properties worldwide, it streamlines front desk tasks, auto-assigns rooms on booking, and gives you remote access from any device. No on-site servers, no IT maintenance.',
@@ -422,6 +447,7 @@
       faq:[{q:'What is a Property Management System (PMS)?', a:'Hotel management software hosted on the cloud that lets you manage bookings, check-ins, housekeeping and billing from any device with an internet connection.'}]
     },
     'channel-manager': {
+      page:'channel-manager.html',
       icon:'<circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 010 18a15 15 0 010-18"/>',
       title:'Channel Manager',
       desc:'Keeps rates, availability and inventory in sync across 100+ Indian and global OTAs (Booking.com, Expedia, MakeMyTrip, Goibibo and more) from one dashboard, in real time. A pooled inventory model means no room ever sits blocked on one channel while available on another.',
@@ -429,6 +455,7 @@
       faq:[{q:'Will it prevent overbookings?', a:'Yes, real-time two-way sync updates every connected OTA within seconds of a booking, virtually eliminating double bookings.'}]
     },
     'finance': {
+      page:'finance-revenue.html',
       icon:'<path d="M3 3v18h18M7 15l4-4 3 3 5-6"/>',
       title:'Finance & Revenue',
       desc:'Dynamic pricing and demand forecasting that adjusts your rates automatically as occupancy and demand shift, backed by financial reporting that stays accurate without manual spreadsheet work. See RevPAR, ADR and forecasted demand on one screen, and let the system suggest rate changes before you lose a booking to a competitor.',
@@ -436,6 +463,7 @@
       faq:[{q:'Does it set rates automatically?', a:'It suggests rate changes based on demand, your revenue team approves before anything goes live.'}]
     },
     'pos': {
+      page:'pos.html',
       icon:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4M2 11h20"/>',
       title:'Point of Sale',
       desc:'Manage restaurant orders, table assignments and billing from any device, fully integrated with your hotel PMS. Post charges from the restaurant, bar, spa or room service straight to the guest room with one click, and run every outlet, including delivery and takeaway, from a single dashboard.',
@@ -443,6 +471,7 @@
       faq:[{q:'Does it connect to my hotel PMS?', a:'Yes, bills post directly to the guest folio and sync in real time with eGlobe Cloud PMS.'}]
     },
     'kot': {
+      page:'kot.html',
       icon:'<path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
       title:'Kitchen Order Ticket (KOT)',
       desc:'Orders taken at the POS route instantly to a live kitchen display, so the kitchen starts cooking the moment a guest orders instead of waiting on a paper ticket to be walked over. It cuts down mix-ups between what a guest ordered and what the kitchen prepares, especially during a busy service.',
@@ -450,6 +479,7 @@
       faq:[{q:'Does it need a separate kitchen device?', a:'Just a screen or printer at the kitchen pass, no special hardware or software installation required.'}]
     },
     'housekeeping': {
+      page:'housekeeping.html',
       icon:'<path d="M3 6l9-4 9 4M4 10h16v10H4z"/>',
       title:'Housekeeping',
       desc:'Room status updates flow instantly between front desk and housekeeping staff on mobile, replacing radios and phone calls with a live board everyone can see. The moment a room is marked clean, front desk can sell it, cutting the gap between checkout and a new guest checking into a ready room.',
@@ -457,6 +487,7 @@
       faq:[{q:'Do staff need a special device?', a:'No, it works from any smartphone or tablet housekeeping already carries.'}]
     },
     'booking-engine': {
+      page:'booking-engine.html',
       icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
       title:'Booking Engine',
       desc:'A single-page, 4-step direct booking flow fully integrated with your PMS, Channel Manager and Payment Gateway, so guests book straight from your website instead of an OTA. Sell packages, apply discounts (early bird, last-minute, coupons) and accept payment through multiple gateways, with GST-compliant invoices generated automatically.',
@@ -464,6 +495,7 @@
       faq:[{q:'Is it fully integrated with my other systems?', a:'Yes, the Booking Engine is fully integrated with your PMS, Channel Manager, and Payment Gateway.'}]
     },
     'ota-listing': {
+      page:'ota-management.html',
       icon:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/>',
       title:'OTA Listing & Management',
       desc:'A fully managed OTA listing service. We set up and optimise your profiles on Booking.com, Expedia, MakeMyTrip and 100+ more, then connect them to your Channel Manager for real-time inventory and rate sync. Includes professional descriptions, photo optimisation, and rate-parity & promotions management.',
@@ -471,6 +503,7 @@
       faq:[{q:'How long does OTA listing take?', a:'Usually 2 to 5 working days, depending on each platform\'s approval process and how complete your property details are.'}]
     },
     'google-ads': {
+      page:'google-hotel-ads.html',
       icon:'<circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/>',
       title:'Google Hotel Ads',
       desc:'Display your live rates and availability on Google Search, Google Maps and your Google Business listing, and pay only for confirmed bookings. No setup fees, no rental costs. Available as fixed-rental or Pay Per Conversion plans, it\'s how 7,000+ properties reach travellers already searching on Google.',
@@ -478,6 +511,7 @@
       faq:[{q:'Is there a cost to participate?', a:'No setup fees or rental costs, you pay a low commission only on confirmed bookings, under the Pay Per Conversion model.'}]
     },
     'meta-search': {
+      page:'meta-search.html',
       icon:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
       title:'Meta Search Engines',
       desc:'eGlobe is an official Google Hotel Ads partner in India, connecting your booking engine to the world\'s leading hotel meta search platforms, including direct Google Maps integration, so your live rates surface right where travellers are searching, alongside OTA rates, at the moment of decision.',
@@ -485,6 +519,7 @@
       faq:[{q:'Which meta search platforms are supported?', a:'Google Hotel Ads and Google Maps Integration, with your rates shown alongside major OTAs at the point of search.'}]
     },
     'stay-b2b': {
+      page:'b2b-stay.html',
       icon:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
       title:'Stay B2B',
       desc:'A dedicated network for your corporate clients and travel agents to book your inventory at special rates, through their own branded mobile app or secure, role-based corporate logins, either online or via city ledger. Set custom commission structures per partner, with real-time inventory and automated invoicing.',
@@ -492,6 +527,7 @@
       faq:[{q:'Can partners see my public rates too?', a:'No, role-based access means each partner only sees the rates and inventory you assign to them.'}]
     },
     'website-builder': {
+      page:'website-builder.html',
       icon:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/>',
       title:'Website Builder',
       desc:'Launch a mobile-ready, SEO-optimised hotel website from hospitality-built templates. No coding needed, free hosting included. Update photos, colours and content yourself, show live offers from your Booking Engine, and add TripAdvisor, Facebook and Google Maps widgets to build guest trust before they book.',
@@ -499,6 +535,7 @@
       faq:[{q:'Do I need coding or design experience?', a:'No, it\'s built so you can launch and update a professional, conversion-optimised site without any technical skills.'}]
     },
     'reviews': {
+      page:'reviews-manager.html',
       icon:'<path d="M12 17.75l-6.16 3.24 1.18-6.88L2 9.24l6.92-1.01L12 2l3.08 6.23L22 9.24l-5.02 4.87 1.18 6.88z"/>',
       title:'Reviews Manager',
       desc:'Brings guest reviews from every platform (Google, Booking.com, TripAdvisor and more) into a single inbox, so nothing gets missed and nothing waits days for a reply. Respond to a review once from the same screen it arrived in, and track how your rating is trending over time.',
@@ -506,6 +543,7 @@
       faq:[{q:'Which review platforms are covered?', a:'Google, Booking.com, TripAdvisor and the other major platforms your guests already review you on.'}]
     },
     'ai-tools': {
+      page:'ai-tools.html',
       icon:'<path d="M12 2a4 4 0 014 4c0 1.5-.8 2.5-1.5 3.3-.7.8-1.3 1.4-1.3 2.7v1h-2.4v-1c0-1.3-.6-1.9-1.3-2.7C8.8 8.5 8 7.5 8 6a4 4 0 014-4zM9 18h6M10 21h4"/>',
       title:'eGlobe AI Tools',
       desc:'Three AI agents built into your daily workflow: a Sales Agent that answers WhatsApp and website enquiries and pushes bookings to your PMS 24/7, a Smartdesk that assists staff at check-in/out and answers guest queries, and an Admin Agent that answers questions like "What was my occupancy last week?" instantly.',
@@ -513,6 +551,7 @@
       faq:[{q:'Does this replace my front-desk staff?', a:'No, it handles routine enquiries and check-in support so your team can focus on guests, reducing workload rather than replacing staff.'}]
     },
     'payment-gateway': {
+      page:'payment-gateway.html',
       icon:'<path d="M1 10h22M5 15h1M10 15h1"/><rect x="1" y="4" width="22" height="16" rx="2"/>',
       title:'Payment Gateway',
       desc:'Secure card and digital payment processing that posts straight to the guest folio the moment a transaction clears, with no manual entry required by front desk. It supports the major payment methods guests expect, and every charge reconciles automatically against the correct reservation.',
@@ -520,6 +559,7 @@
       faq:[{q:'Is it PCI compliant?', a:'Yes, all card processing runs through PCI-certified payment partners.'}]
     },
     'apis': {
+      page:'pms-apis.html',
       icon:'<path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3"/>',
       title:'APIs for PMS',
       desc:'Bi-directional, OAuth 2.0-secured endpoints for revenue-management tools, analytics platforms and PMS providers who need direct programmatic access. Extract booking data, push or pull inventory and rates in real time, backed by a 99.9% uptime guarantee, full documentation and dedicated developer support.',
@@ -539,181 +579,13 @@
     var faqEl = document.getElementById('product-modal-faq');
     var demoEl = document.getElementById('product-modal-demo');
     var closeBtn = document.getElementById('product-modal-close');
+    var readMoreEl = document.getElementById('product-modal-readmore');
     var lastFocused = null;
 
     function buildModalDemo(key){
       if(!demoEl) return;
 
-      if(key === 'channel-manager'){
-        demoEl.innerHTML =
-          '<p class="demo-hint" style="padding-left:0;">Try it, click a rate, then sync.</p>' +
-          '<div class="demo-box">' +
-            '<div class="demo-rates">' +
-              '<div class="demo-rates__row demo-rates__row--head"><span>Room</span><span>Jun 17</span><span>Jun 18</span></div>' +
-              '<div class="demo-rates__row"><span class="demo-rates__room">Standard Double</span>' +
-                '<button class="demo-cell" type="button" data-val="80">80</button>' +
-                '<button class="demo-cell" type="button" data-val="95">95</button></div>' +
-              '<div class="demo-rates__row"><span class="demo-rates__room">Deluxe Suite</span>' +
-                '<button class="demo-cell" type="button" data-val="210">210</button>' +
-                '<button class="demo-cell" type="button" data-val="245">245</button></div>' +
-            '</div>' +
-            '<button class="demo-sync-btn" type="button" id="modal-demo-sync">Sync With Master Channel</button>' +
-            '<div class="demo-sync-list" id="modal-demo-sync-list">' +
-              '<div class="demo-sync-item" data-ota="Booking.com"><span class="demo-sync-item__name">Booking.com</span><span class="demo-sync-item__state"></span></div>' +
-              '<div class="demo-sync-item" data-ota="MakeMyTrip"><span class="demo-sync-item__name">MakeMyTrip</span><span class="demo-sync-item__state"></span></div>' +
-            '</div>' +
-          '</div>';
-        wireRateCells(demoEl);
-        wireSyncButton(demoEl.querySelector('#modal-demo-sync'), demoEl);
-      }
-
-      else if(key === 'pos'){
-        var menu = [
-          {name:'Vegetable Cutlet', price:150},
-          {name:'French Fries', price:80},
-          {name:'Paneer Pakora', price:200},
-          {name:'Peanut Masala', price:90}
-        ];
-        demoEl.innerHTML =
-          '<p class="demo-hint" style="padding-left:0;">Try it, tap items to build an order.</p>' +
-          '<div class="demo-box demo-pos">' +
-            '<div class="demo-pos__menu">' + menu.map(function(m){
-              return '<button class="demo-pos__chip" type="button" data-name="' + m.name + '" data-price="' + m.price + '">' + m.name + ' · ₹' + m.price + '</button>';
-            }).join('') + '</div>' +
-            '<div class="demo-pos__order" id="modal-demo-order"><span class="demo-pos__empty">No items yet, tap a dish above.</span></div>' +
-            '<div class="demo-pos__total"><span>Total Payable</span><b id="modal-demo-total">₹0.00</b></div>' +
-          '</div>';
-        wirePosDemo(demoEl);
-      }
-
-      else if(key === 'booking-engine'){
-        var rooms = [
-          {name:'Standard Double or Twin Room', rate:9503},
-          {name:'Deluxe Double Pool View', rate:10309}
-        ];
-        demoEl.innerHTML =
-          '<p class="demo-hint" style="padding-left:0;">Try it, pick room quantities.</p>' +
-          '<div class="demo-box demo-book">' + rooms.map(function(r, i){
-            return '<div class="demo-book__room" data-rate="' + r.rate + '" data-qty="0">' +
-              '<div><span class="demo-book__room-name">' + r.name + '</span><span class="demo-book__room-rate">₹' + r.rate.toLocaleString('en-IN') + ' / night</span></div>' +
-              '<span class="demo-inv__stepper"><button type="button" data-d="-1">−</button><span class="demo-inv__qty-val">0</span><button type="button" data-d="1">+</button></span>' +
-            '</div>';
-          }).join('') +
-            '<div class="demo-book__total"><span>Grand Total</span><b id="modal-demo-book-total">₹0</b></div>' +
-          '</div>';
-        wireBookingDemo(demoEl);
-      }
-
-      else if(key === 'ai-tools'){
-        demoEl.innerHTML =
-          '<div class="product-modal__mascot">' +
-            '<img src="https://www.eglobe-solutions.com/img/ai-img1.png" alt="eGlobe AI mascot">' +
-            '<div class="product-modal__mascot-text"><b>Meet eGlobe AI</b>Your Sales Agent, Smartdesk and Admin Agent, working across WhatsApp, front desk and your PMS.</div>' +
-          '</div>';
-      }
-
-      else {
-        demoEl.innerHTML = '';
-      }
-    }
-
-    function wireRateCells(scope){
-      scope.querySelectorAll('.demo-cell').forEach(function(cell){
-        cell.addEventListener('click', function(){
-          if(cell.classList.contains('editing')) return;
-          var current = cell.getAttribute('data-val');
-          cell.classList.add('editing');
-          cell.innerHTML = '<input type="text" inputmode="numeric" value="' + current + '">';
-          var input = cell.querySelector('input');
-          input.focus(); input.select();
-          function commit(){
-            var val = parseInt(input.value, 10);
-            if(isNaN(val) || val < 0) val = parseInt(current, 10);
-            cell.setAttribute('data-val', val);
-            cell.classList.remove('editing');
-            cell.textContent = val;
-            cell.classList.add('saved');
-            setTimeout(function(){ cell.classList.remove('saved'); }, 650);
-          }
-          input.addEventListener('blur', commit);
-          input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); input.blur(); } });
-        });
-      });
-    }
-
-    function wireSyncButton(btn, scope){
-      if(!btn) return;
-      btn.addEventListener('click', function(){
-        if(btn.disabled) return;
-        btn.disabled = true;
-        var label = btn.textContent;
-        btn.textContent = 'Syncing…';
-        var items = scope.querySelectorAll('.demo-sync-item__state');
-        items.forEach(function(el){ el.className = 'demo-sync-item__state'; el.textContent = ''; });
-        items.forEach(function(el, i){
-          setTimeout(function(){ el.classList.add('checking'); }, i * 250);
-          setTimeout(function(){ el.className = 'demo-sync-item__state done'; el.textContent = '✓ Synced'; }, i * 250 + 500);
-        });
-        setTimeout(function(){ btn.disabled = false; btn.textContent = label; }, items.length * 250 + 600);
-      });
-    }
-
-    function wirePosDemo(scope){
-      var orderEl = scope.querySelector('#modal-demo-order');
-      var totalEl = scope.querySelector('#modal-demo-total');
-      var order = [];
-      function render(){
-        if(!order.length){
-          orderEl.innerHTML = '<span class="demo-pos__empty">No items yet, tap a dish above.</span>';
-          totalEl.textContent = '₹0.00';
-          return;
-        }
-        var total = 0;
-        orderEl.innerHTML = order.map(function(item, i){
-          total += item.price * item.qty;
-          return '<div class="demo-pos__row"><span>' + item.name + ' × ' + item.qty + '</span><span>₹' + (item.price * item.qty).toFixed(2) + '<span class="rm" data-i="' + i + '">✕</span></span></div>';
-        }).join('');
-        totalEl.textContent = '₹' + total.toFixed(2);
-        orderEl.querySelectorAll('.rm').forEach(function(rm){
-          rm.addEventListener('click', function(){
-            order.splice(parseInt(rm.getAttribute('data-i'), 10), 1);
-            render();
-          });
-        });
-      }
-      scope.querySelectorAll('.demo-pos__chip').forEach(function(chip){
-        chip.addEventListener('click', function(){
-          var name = chip.getAttribute('data-name');
-          var price = parseFloat(chip.getAttribute('data-price'));
-          var existing = order.find(function(o){ return o.name === name; });
-          if(existing) existing.qty += 1;
-          else order.push({name:name, price:price, qty:1});
-          render();
-        });
-      });
-    }
-
-    function wireBookingDemo(scope){
-      var totalEl = scope.querySelector('#modal-demo-book-total');
-      function updateTotal(){
-        var total = 0;
-        scope.querySelectorAll('.demo-book__room').forEach(function(room){
-          total += parseInt(room.getAttribute('data-rate'), 10) * parseInt(room.getAttribute('data-qty'), 10);
-        });
-        totalEl.textContent = '₹' + total.toLocaleString('en-IN');
-      }
-      scope.querySelectorAll('.demo-book__room').forEach(function(room){
-        var valEl = room.querySelector('.demo-inv__qty-val');
-        room.querySelectorAll('.demo-inv__stepper button').forEach(function(btn){
-          btn.addEventListener('click', function(){
-            var qty = parseInt(room.getAttribute('data-qty'), 10) + parseInt(btn.getAttribute('data-d'), 10);
-            if(qty < 0) qty = 0;
-            room.setAttribute('data-qty', qty);
-            valEl.textContent = qty;
-            updateTotal();
-          });
-        });
-      });
+      demoEl.innerHTML = '';
     }
 
     function open(key){
@@ -743,6 +615,14 @@
         faqEl.classList.remove('active');
       }
       buildModalDemo(key);
+      if(readMoreEl){
+        if(data.page){
+          readMoreEl.href = 'products/' + data.page;
+          readMoreEl.style.display = 'inline-flex';
+        } else {
+          readMoreEl.style.display = 'none';
+        }
+      }
       lastFocused = document.activeElement;
       overlay.classList.add('active');
       closeBtn.focus();

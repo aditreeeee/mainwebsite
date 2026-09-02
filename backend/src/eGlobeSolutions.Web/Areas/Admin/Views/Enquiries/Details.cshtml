@@ -5,12 +5,19 @@
 
 <a href="/admin/enquiries" class="admin-btn" style="margin-bottom:16px;display:inline-block;">&larr; Back to Enquiries</a>
 
+@{
+    var typeLabel = Model.Type == EnquiryType.ContactSales ? "Contact Sales form (contact.html)" : "Reseller form (reseller.html)";
+}
 <div class="admin-card">
-    <h2>@Model.FullName</h2>
-    <p style="color:#6B7280;">@Model.HotelName &middot; @Model.Type &middot; Received @Model.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</p>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <h2 style="margin:0;">@Model.FullName</h2>
+        <span class="admin-badge admin-badge--type-@(Model.Type.ToString().ToLower())">@typeLabel</span>
+        <span class="admin-badge admin-badge--@(Model.Status.ToString().ToLower())">@Model.Status</span>
+    </div>
+    <p style="color:#6B7280;">@Model.HotelName &middot; Received @Model.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</p>
 
     <table class="admin-table">
-        <tr><th style="width:160px;">Email</th><td><a href="mailto:@Model.Email">@Model.Email</a></td></tr>
+        <tr><th style="width:180px;">Email</th><td><a href="mailto:@Model.Email">@Model.Email</a></td></tr>
         <tr><th>Phone</th><td><a href="tel:@Model.Phone">@Model.Phone</a></td></tr>
         @if (!string.IsNullOrEmpty(Model.RoomsRange))
         {
@@ -28,12 +35,22 @@
         {
             <tr><th>Company Type</th><td>@Model.CompanyType</td></tr>
         }
+        @if (!string.IsNullOrEmpty(Model.ExpectedPropertyVolume))
+        {
+            <tr><th>Expected Property Volume</th><td>@Model.ExpectedPropertyVolume</td></tr>
+        }
         @if (!string.IsNullOrEmpty(Model.Message))
         {
             <tr><th>Message</th><td>@Model.Message</td></tr>
         }
-        <tr><th>Source Page</th><td>@Model.SourcePage</td></tr>
     </table>
+
+    <h3 style="margin-top:22px;">Submission Source</h3>
+    <div class="admin-source-panel">
+        <div><span class="lbl">Page</span>@(Model.SourcePage ?? "-")</div>
+        <div><span class="lbl">IP Address</span>@(Model.SourceIpAddress ?? "-")</div>
+        <div><span class="lbl">Browser</span>@(Model.SourceUserAgent ?? "-")</div>
+    </div>
 </div>
 
 <div class="admin-card">

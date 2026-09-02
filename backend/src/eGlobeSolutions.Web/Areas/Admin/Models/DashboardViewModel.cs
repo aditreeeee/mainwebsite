@@ -12,4 +12,12 @@ public class DashboardViewModel
 
     public IReadOnlyList<Enquiry> RecentEnquiries { get; init; } = Array.Empty<Enquiry>();
     public IReadOnlyList<ActivityLog> RecentActivity { get; init; } = Array.Empty<ActivityLog>();
+
+    // ---- System health / quick observability ----
+    public int ActiveCalculatorModules { get; init; }
+    public bool CalculatorPlansConfigured { get; init; }
+    public bool CalculatorTaxConfigured { get; init; }
+    public bool CalculatorCurrencyConfigured { get; init; }
+    public bool SmtpConfigured { get; init; }
+    public bool EnquiryNotificationsEnabled { get; init; }
 }

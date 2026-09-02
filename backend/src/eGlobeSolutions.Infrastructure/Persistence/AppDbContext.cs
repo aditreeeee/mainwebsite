@@ -1,4 +1,5 @@
 using eGlobeSolutions.Domain.Entities;
+using eGlobeSolutions.Domain.Entities.Calculator;
 using eGlobeSolutions.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -24,6 +25,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<SeoMetadata> SeoMetadata => Set<SeoMetadata>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+    public DbSet<PricingModule> CalculatorPricingModules => Set<PricingModule>();
+    public DbSet<PricingPlanBaseRate> CalculatorPlanBaseRates => Set<PricingPlanBaseRate>();
+    public DbSet<TaxConfiguration> CalculatorTaxConfigurations => Set<TaxConfiguration>();
+    public DbSet<CurrencyRate> CalculatorCurrencyRates => Set<CurrencyRate>();
+    public DbSet<BillingCycle> CalculatorBillingCycles => Set<BillingCycle>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

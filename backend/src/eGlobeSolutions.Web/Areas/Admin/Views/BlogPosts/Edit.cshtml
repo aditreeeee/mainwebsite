@@ -1,41 +1,118 @@
 @model BlogPost
 @{ ViewData["Title"] = "Edit Blog Post"; }
-<h1>Edit Blog Post</h1>
-<div class="admin-card">
-    @if (!ViewData.ModelState.IsValid)
-    {
-        <div class="admin-alert admin-alert--error">
-            @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <div>@e.ErrorMessage</div>
-            }
+<div class="admin-toolbar">
+    <h1>Edit Blog Post</h1>
+    <a class="admin-btn" href="/admin/blog">&larr; Back to Blog Posts</a>
+</div>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="admin-alert admin-alert--error">
+        @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@e.ErrorMessage</div>
+        }
+    </div>
+}
+<p class="admin-hint">
+    @(Model.IsPublished ? "Live on the site" : "Draft, not shown on blog.html")
+    @(string.IsNullOrWhiteSpace(Model.Slug) || string.IsNullOrWhiteSpace(Model.Body) ? " · teaser card only (no dedicated page)" : $" · public URL: /{Model.Slug}.html")
+</p>
+<form method="post" action="/admin/blog/@Model.Id/edit">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="admin-card">
+        <h2>Content</h2>
+        <div class="admin-field"><label>Title</label><input asp-for="Title" id="bp-title" required /></div>
+        <div class="admin-grid-2">
+            <div class="admin-field">
+                <label>Slug (URL, leave blank for a teaser-only card with no article page)</label>
+                <input asp-for="Slug" id="bp-slug" />
+            </div>
+            <div class="admin-field"><label>Category</label>
+                <select asp-for="Category"><option value="Guide">Guide</option><option value="Product">Product</option><option value="News">News</option></select>
+            </div>
         </div>
-    }
-    <form method="post" action="/admin/blog/@Model.Id/edit">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Id" />
-        <div class="admin-field"><label>Title</label><input asp-for="Title" required /></div>
-        <div class="admin-field"><label>Slug (leave blank for a teaser-only card with no article page)</label><input asp-for="Slug" /></div>
-        <div class="admin-field"><label>Category</label>
-            <select asp-for="Category"><option value="Guide">Guide</option><option value="Product">Product</option><option value="News">News</option></select>
+        <div class="admin-field"><label>Excerpt (also used as the AEO "quick answer" summary at the top of the article)</label><textarea asp-for="Excerpt" rows="2" required></textarea></div>
+        <div class="admin-field">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label style="margin-bottom:0;">Body (HTML, leave blank for a teaser-only card)</label>
+                <button type="button" class="admin-btn" id="bp-preview-toggle">Preview</button>
+            </div>
+            <textarea asp-for="Body" id="bp-body" rows="16" style="font-family:monospace; font-size:12.5px; margin-top:8px;"></textarea>
+            <div id="bp-preview" class="admin-body-preview" style="display:none;"></div>
         </div>
-        <div class="admin-field"><label>Excerpt</label><textarea asp-for="Excerpt" rows="2" required></textarea></div>
-        <div class="admin-field"><label>Body (HTML, leave blank for a teaser-only card)</label><textarea asp-for="Body" rows="10"></textarea></div>
-        <div class="admin-field"><label>Cover Image URL</label><input asp-for="CoverImageUrl" /></div>
-        <div class="admin-field"><label>Author Name</label><input asp-for="AuthorName" /></div>
-        <div class="admin-field"><label>Author Role</label><input asp-for="AuthorRole" /></div>
-        <div class="admin-field"><label>Read Time (minutes)</label><input asp-for="ReadTimeMinutes" type="number" /></div>
-        <div class="admin-field"><label>Published Date</label><input asp-for="PublishedAtUtc" type="date" value="@Model.PublishedAtUtc.ToString("yyyy-MM-dd")" /></div>
-        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" /></div>
+        <div class="admin-field"><label>Cover Image URL (optional, falls back to a themed graphic if left blank)</label><input asp-for="CoverImageUrl" /></div>
+    </div>
+
+    <div class="admin-card">
+        <h2>Author &amp; Publishing</h2>
+        <div class="admin-grid-2">
+            <div class="admin-field"><label>Author Name</label><input asp-for="AuthorName" /></div>
+            <div class="admin-field"><label>Author Role</label><input asp-for="AuthorRole" /></div>
+        </div>
+        <div class="admin-grid-2">
+            <div class="admin-field"><label>Read Time (minutes)</label><input asp-for="ReadTimeMinutes" type="number" /></div>
+            <div class="admin-field"><label>Published Date</label><input asp-for="PublishedAtUtc" type="date" value="@Model.PublishedAtUtc.ToString("yyyy-MM-dd")" /></div>
+        </div>
+        <div class="admin-field"><label>Sort Order</label><input asp-for="SortOrder" type="number" style="max-width:120px;" /></div>
         <div class="admin-checkbox-row"><input asp-for="IsFeatured" type="checkbox" /> <label asp-for="IsFeatured">Featured (shown at top of blog.html)</label></div>
         <div class="admin-checkbox-row"><input asp-for="IsPublished" type="checkbox" /> <label asp-for="IsPublished">Published</label></div>
+    </div>
 
-        <h3>SEO (optional, falls back to Title/Excerpt)</h3>
+    <div class="admin-card">
+        <h2>SEO</h2>
+        <p class="admin-hint">Falls back to Title/Excerpt if left blank. Drives the &lt;title&gt;, meta description, and Open Graph/Twitter tags.</p>
         <div class="admin-field"><label>Meta Title</label><input asp-for="MetaTitle" /></div>
         <div class="admin-field"><label>Meta Description</label><input asp-for="MetaDescription" /></div>
         <div class="admin-field"><label>Meta Keywords</label><input asp-for="MetaKeywords" /></div>
+    </div>
 
-        <button class="admin-btn admin-btn--primary" type="submit">Save</button>
-        <a class="admin-btn admin-btn--ghost" href="/admin/blog">Cancel</a>
+    <button class="admin-btn admin-btn--primary admin-btn--save-bar" type="submit">Save Changes</button>
+    @if (!string.IsNullOrWhiteSpace(Model.Slug) && !string.IsNullOrWhiteSpace(Model.Body))
+    {
+        <a class="admin-btn" style="margin-top:4px; float:right; margin-right:10px;" href="/@(Model.Slug).html" target="_blank">View live &#8599;</a>
+    }
+</form>
+
+<div class="admin-card" style="margin-top:16px;">
+    <h2>Danger Zone</h2>
+    <form method="post" action="/admin/blog/@Model.Id/delete" onsubmit="return confirm('Delete this post?');">
+        @Html.AntiForgeryToken()
+        <button class="admin-btn admin-btn--danger" type="submit">Delete Post</button>
     </form>
 </div>
+
+<script>
+(function () {
+    "use strict";
+    var titleEl = document.getElementById("bp-title");
+    var slugEl = document.getElementById("bp-slug");
+    var slugTouched = false;
+    slugEl.addEventListener("input", function () { slugTouched = true; });
+    titleEl.addEventListener("input", function () {
+        if (slugTouched || slugEl.value) return;
+        slugEl.value = titleEl.value.trim().toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-");
+    });
+
+    var bodyEl = document.getElementById("bp-body");
+    var previewEl = document.getElementById("bp-preview");
+    var toggleBtn = document.getElementById("bp-preview-toggle");
+    toggleBtn.addEventListener("click", function () {
+        var showing = previewEl.style.display !== "none";
+        if (showing) {
+            previewEl.style.display = "none";
+            bodyEl.style.display = "block";
+            toggleBtn.textContent = "Preview";
+        } else {
+            previewEl.innerHTML = bodyEl.value || "<p style=\"color:#6B7280;\">Nothing to preview yet.</p>";
+            previewEl.style.display = "block";
+            bodyEl.style.display = "none";
+            toggleBtn.textContent = "Edit HTML";
+        }
+    });
+})();
+</script>

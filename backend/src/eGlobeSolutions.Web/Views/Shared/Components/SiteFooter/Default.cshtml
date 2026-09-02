@@ -27,15 +27,6 @@
 
       <div class="footer__link-cols">
         <div>
-          <h5>Product</h5>
-          <div class="footer__links">
-            @foreach (var link in Model.ProductLinks)
-            {
-              <a href="@link.Url">@link.Label</a>
-            }
-          </div>
-        </div>
-        <div>
           <h5>Company</h5>
           <div class="footer__links">
             @foreach (var link in Model.CompanyLinks)
@@ -64,6 +55,22 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="footer__products-row">
+      <h5>Products</h5>
+      <div class="footer__links footer__links--grid">
+        @foreach (var link in Model.ProductLinks)
+        {
+          <a href="@link.Url">@link.Label</a>
+        }
+      </div>
+    </div>
+
+    <div class="footer__legal-strip">
+      <a href="terms-of-use.html">Terms of Use</a>
+      <a href="refund-and-cancellation.html">Refund &amp; Cancellation</a>
+      <a href="privacy-policy.html">Privacy Policy</a>
     </div>
 
     <div class="footer__strip">

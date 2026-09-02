@@ -1,0 +1,637 @@
+@{
+    ViewData["Title"] = "Price Calculator";
+    var modules = (List<PricingModule>)ViewBag.Modules;
+    var plans = (List<PricingPlanBaseRate>)ViewBag.Plans;
+    var taxes = (List<TaxConfiguration>)ViewBag.Taxes;
+    var currencies = (List<CurrencyRate>)ViewBag.Currencies;
+    var billingCycles = (List<BillingCycle>)ViewBag.BillingCycles;
+    var availabilityOptions = Enum.GetValues<ModuleAvailability>();
+    var chargeTypeOptions = Enum.GetValues<ModuleChargeType>();
+    var categoryOptions = Enum.GetValues<ModuleCategory>();
+}
+
+<div class="admin-toolbar">
+    <h1>Price Calculator Pricing</h1>
+</div>
+<p class="admin-hint">
+    Every number on the public price calculator (calculator.html) comes from this page. Edit a row and click Save,
+    changes go live immediately, no code or deploy required. Use "Save All" in a section to save every edited row in
+    that table in one click.
+</p>
+
+<nav class="admin-quicknav">
+    <a href="#preview">Live Preview</a>
+    <a href="#plans">Plan Pricing</a>
+    <a href="#modules">Modules</a>
+    <a href="#tax">Tax</a>
+    <a href="#currency">Currency</a>
+    <a href="#billingcycles">Billing Cycles</a>
+</nav>
+
+<div id="calc-admin-status"></div>
+
+<!-- ===================== LIVE PREVIEW ===================== -->
+<div class="admin-preview-card" id="preview">
+    <h2>Live Preview</h2>
+    <p class="admin-preview-card__hint">See how a real quote looks with the pricing below, before your Sales team does. Updates instantly as you change the inputs, this calls the same API the public calculator uses.</p>
+    <div class="admin-preview-card__grid">
+        <div class="field">
+            <label>Plan</label>
+            <select id="preview-plan">
+                @foreach (var plan in plans)
+                {
+                    <option value="@plan.PlanType">@plan.DisplayName</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label>Properties</label>
+            <input type="number" id="preview-properties" min="1" value="1">
+        </div>
+        <div class="field">
+            <label>Rooms</label>
+            <input type="number" id="preview-rooms" min="1" value="50">
+        </div>
+        <div class="field">
+            <label>Billing cycle</label>
+            <select id="preview-cycle">
+                @foreach (var cycle in billingCycles)
+                {
+                    <option value="@cycle.Id">@cycle.Label</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="admin-preview-card__result" id="preview-result">
+        <div><span class="k">Monthly</span><div class="v">-</div></div>
+        <div><span class="k">Annual</span><div class="v">-</div></div>
+        <div><span class="k">This cycle</span><div class="v">-</div></div>
+        <div><span class="k">/ room</span><div class="v">-</div></div>
+    </div>
+</div>
+
+<!-- ===================== PLAN BASE RATES ===================== -->
+<div class="admin-card" id="plans">
+    <div class="admin-toolbar">
+        <h2 style="margin:0;">Plan Base Pricing</h2>
+        <button type="button" class="admin-btn btn-saveall" data-target="calc-plan-table">Save All</button>
+    </div>
+    <p class="admin-hint">The subscription rate covering every module marked "Included" for that plan.</p>
+    <table class="admin-table" id="calc-plan-table">
+        <thead>
+            <tr>
+                <th>Plan</th><th>Display name</th><th>Unit description</th>
+                <th>Monthly rate / unit</th><th>One-time setup</th><th>Custom quote?</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plan in plans)
+            {
+                <tr data-plan-type="@plan.PlanType">
+                    <td><strong>@plan.PlanType</strong></td>
+                    <td><input class="pb-name" type="text" value="@plan.DisplayName" style="width:140px"></td>
+                    <td><input class="pb-unit" type="text" value="@plan.UnitDescription" style="width:260px"></td>
+                    <td><input class="pb-rate" type="number" step="0.01" min="0" value="@plan.MonthlyRatePerUnit" style="width:110px"></td>
+                    <td><input class="pb-setup" type="number" step="0.01" min="0" value="@plan.OneTimeSetupFee" style="width:100px"></td>
+                    <td><input class="pb-custom" type="checkbox" @(plan.IsCustomQuote ? "checked" : "")></td>
+                    <td><button type="button" class="admin-btn admin-btn--primary btn-save-plan">Save</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ===================== MODULES ===================== -->
+<div class="admin-card" id="modules">
+    <div class="admin-toolbar">
+        <h2 style="margin:0;">Modules &amp; Additional Products</h2>
+        <button type="button" class="admin-btn btn-saveall" data-target="calc-module-table">Save All</button>
+    </div>
+    <p class="admin-hint">
+        Set availability per plan (Included / Add-on / Not available). Rates apply only when a module is an add-on for
+        that plan (or, for additional products, whichever plans allow it). Commission modules charge a % of the volume
+        Sales enters on the calculator.
+    </p>
+    <div style="overflow-x:auto;">
+    <table class="admin-table" id="calc-module-table">
+        <thead>
+            <tr>
+                <th>Name / Code</th><th>Category</th><th>Charge type</th>
+                <th>Per Room</th><th>Per Property</th><th>Enterprise</th>
+                <th>Monthly rate</th><th>Setup fee</th><th>Commission %</th>
+                <th>Volume label / Tooltip</th><th>Sort</th><th>Active</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in modules)
+            {
+                <tr data-module-id="@m.Id">
+                    <td>
+                        <input class="m-name" type="text" value="@m.Name" style="width:150px" placeholder="Name"><br>
+                        <input class="m-code" type="text" value="@m.Code" style="width:150px;margin-top:4px;font-size:11px;" placeholder="code-key">
+                    </td>
+                    <td>
+                        <select class="m-category">
+                            @foreach (var c in categoryOptions)
+                            {
+                                <option value="@c" selected="@(c == m.Category)">@c</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <select class="m-chargetype">
+                            @foreach (var c in chargeTypeOptions)
+                            {
+                                <option value="@c" selected="@(c == m.ChargeType)">@c</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <select class="m-avail-perroom">
+                            @foreach (var a in availabilityOptions)
+                            {
+                                <option value="@a" selected="@(a == m.PerRoomAvailability)">@a</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <select class="m-avail-perproperty">
+                            @foreach (var a in availabilityOptions)
+                            {
+                                <option value="@a" selected="@(a == m.PerPropertyAvailability)">@a</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <select class="m-avail-enterprise">
+                            @foreach (var a in availabilityOptions)
+                            {
+                                <option value="@a" selected="@(a == m.EnterpriseAvailability)">@a</option>
+                            }
+                        </select>
+                    </td>
+                    <td><input class="m-monthlyrate" type="number" step="0.01" min="0" value="@m.MonthlyRate" style="width:90px"></td>
+                    <td><input class="m-setupfee" type="number" step="0.01" min="0" value="@m.OneTimeSetupFee" style="width:90px"></td>
+                    <td><input class="m-commission" type="number" step="0.01" min="0" max="100" value="@m.CommissionPercent" style="width:70px"></td>
+                    <td>
+                        <input class="m-volumelabel" type="text" value="@m.VolumeInputLabel" style="width:160px" placeholder="Volume input label"><br>
+                        <input class="m-tooltip" type="text" value="@m.Tooltip" style="width:160px;margin-top:4px;" placeholder="Tooltip">
+                    </td>
+                    <td><input class="m-sort" type="number" value="@m.SortOrder" style="width:55px"></td>
+                    <td><input class="m-active" type="checkbox" @(m.IsActive ? "checked" : "")></td>
+                    <td>
+                        <div class="admin-row-actions">
+                            <button type="button" class="admin-btn admin-btn--primary btn-save-module">Save</button>
+                            <button type="button" class="admin-btn admin-btn--danger btn-delete-module">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+            <tr data-module-id="0">
+                <td>
+                    <input class="m-name" type="text" style="width:150px" placeholder="New module name"><br>
+                    <input class="m-code" type="text" style="width:150px;margin-top:4px;font-size:11px;" placeholder="code-key">
+                </td>
+                <td>
+                    <select class="m-category">
+                        @foreach (var c in categoryOptions)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <select class="m-chargetype">
+                        @foreach (var c in chargeTypeOptions)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <select class="m-avail-perroom">
+                        @foreach (var a in availabilityOptions)
+                        {
+                            <option value="@a" selected="@(a == ModuleAvailability.NotAvailable)">@a</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <select class="m-avail-perproperty">
+                        @foreach (var a in availabilityOptions)
+                        {
+                            <option value="@a" selected="@(a == ModuleAvailability.NotAvailable)">@a</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <select class="m-avail-enterprise">
+                        @foreach (var a in availabilityOptions)
+                        {
+                            <option value="@a" selected="@(a == ModuleAvailability.NotAvailable)">@a</option>
+                        }
+                    </select>
+                </td>
+                <td><input class="m-monthlyrate" type="number" step="0.01" min="0" value="0" style="width:90px"></td>
+                <td><input class="m-setupfee" type="number" step="0.01" min="0" value="0" style="width:90px"></td>
+                <td><input class="m-commission" type="number" step="0.01" min="0" max="100" value="0" style="width:70px"></td>
+                <td>
+                    <input class="m-volumelabel" type="text" style="width:160px" placeholder="Volume input label"><br>
+                    <input class="m-tooltip" type="text" style="width:160px;margin-top:4px;" placeholder="Tooltip">
+                </td>
+                <td><input class="m-sort" type="number" value="@(modules.Count)" style="width:55px"></td>
+                <td><input class="m-active" type="checkbox" checked></td>
+                <td><button type="button" class="admin-btn admin-btn--primary btn-add-module">Add Module</button></td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- ===================== TAX CONFIGURATION ===================== -->
+<div class="admin-card" id="tax">
+    <div class="admin-toolbar">
+        <h2 style="margin:0;">Tax Configuration</h2>
+        <button type="button" class="admin-btn btn-saveall" data-target="calc-tax-table">Save All</button>
+    </div>
+    <p class="admin-hint">The tax marked "Default" is applied automatically on the calculator.</p>
+    <table class="admin-table" id="calc-tax-table">
+        <thead>
+            <tr><th>Name</th><th>Rate %</th><th>Default</th><th>Active</th><th>Sort</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var t in taxes)
+            {
+                <tr data-tax-id="@t.Id">
+                    <td><input class="t-name" type="text" value="@t.Name" style="width:140px"></td>
+                    <td><input class="t-rate" type="number" step="0.01" min="0" max="100" value="@t.RatePercent" style="width:90px"></td>
+                    <td><input class="t-default" type="checkbox" @(t.IsDefault ? "checked" : "")></td>
+                    <td><input class="t-active" type="checkbox" @(t.IsActive ? "checked" : "")></td>
+                    <td><input class="t-sort" type="number" value="@t.SortOrder" style="width:55px"></td>
+                    <td>
+                        <div class="admin-row-actions">
+                            <button type="button" class="admin-btn admin-btn--primary btn-save-tax">Save</button>
+                            <button type="button" class="admin-btn admin-btn--danger btn-delete-tax">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+            <tr data-tax-id="0">
+                <td><input class="t-name" type="text" style="width:140px" placeholder="e.g. GST"></td>
+                <td><input class="t-rate" type="number" step="0.01" min="0" max="100" value="0" style="width:90px"></td>
+                <td><input class="t-default" type="checkbox"></td>
+                <td><input class="t-active" type="checkbox" checked></td>
+                <td><input class="t-sort" type="number" value="@(taxes.Count)" style="width:55px"></td>
+                <td><button type="button" class="admin-btn admin-btn--primary btn-add-tax">Add Tax</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ===================== CURRENCY CONVERTER ===================== -->
+<div class="admin-card" id="currency">
+    <div class="admin-toolbar">
+        <h2 style="margin:0;">Currency Converter</h2>
+        <button type="button" class="admin-btn btn-saveall" data-target="calc-currency-table">Save All</button>
+    </div>
+    <p class="admin-hint">
+        All pricing is calculated in INR, then converted for display using the rate below (units of that currency per 1 INR).
+        The currency marked "Default" is applied automatically on the calculator.
+    </p>
+    <table class="admin-table" id="calc-currency-table">
+        <thead>
+            <tr><th>Code</th><th>Symbol</th><th>Name</th><th>Rate per ₹1</th><th>Default</th><th>Active</th><th>Sort</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var c in currencies)
+            {
+                <tr data-currency-id="@c.Id">
+                    <td><input class="c-code" type="text" value="@c.Code" style="width:70px;text-transform:uppercase;"></td>
+                    <td><input class="c-symbol" type="text" value="@c.Symbol" style="width:60px"></td>
+                    <td><input class="c-name" type="text" value="@c.Name" style="width:140px"></td>
+                    <td><input class="c-rate" type="number" step="0.000001" min="0" value="@c.RatePerInr" style="width:110px"></td>
+                    <td><input class="c-default" type="checkbox" @(c.IsDefault ? "checked" : "")></td>
+                    <td><input class="c-active" type="checkbox" @(c.IsActive ? "checked" : "")></td>
+                    <td><input class="c-sort" type="number" value="@c.SortOrder" style="width:55px"></td>
+                    <td>
+                        <div class="admin-row-actions">
+                            <button type="button" class="admin-btn admin-btn--primary btn-save-currency">Save</button>
+                            <button type="button" class="admin-btn admin-btn--danger btn-delete-currency">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+            <tr data-currency-id="0">
+                <td><input class="c-code" type="text" style="width:70px;text-transform:uppercase;" placeholder="USD"></td>
+                <td><input class="c-symbol" type="text" style="width:60px" placeholder="$"></td>
+                <td><input class="c-name" type="text" style="width:140px" placeholder="US Dollar"></td>
+                <td><input class="c-rate" type="number" step="0.000001" min="0" value="1" style="width:110px"></td>
+                <td><input class="c-default" type="checkbox"></td>
+                <td><input class="c-active" type="checkbox" checked></td>
+                <td><input class="c-sort" type="number" value="@(currencies.Count)" style="width:55px"></td>
+                <td><button type="button" class="admin-btn admin-btn--primary btn-add-currency">Add Currency</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ===================== BILLING CYCLES ===================== -->
+<div class="admin-card" id="billingcycles">
+    <div class="admin-toolbar">
+        <h2 style="margin:0;">Billing Cycles</h2>
+        <button type="button" class="admin-btn btn-saveall" data-target="calc-billingcycle-table">Save All</button>
+    </div>
+    <p class="admin-hint">
+        The number of months a quote covers and the upfront discount for paying that cycle in one go (e.g. 10% off for
+        6 months upfront). One-time setup fees are unaffected by the cycle discount.
+    </p>
+    <table class="admin-table" id="calc-billingcycle-table">
+        <thead>
+            <tr><th>Label</th><th>Months</th><th>Discount %</th><th>Default</th><th>Active</th><th>Sort</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var b in billingCycles)
+            {
+                <tr data-cycle-id="@b.Id">
+                    <td><input class="bc-label" type="text" value="@b.Label" style="width:120px"></td>
+                    <td><input class="bc-months" type="number" min="1" step="1" value="@b.Months" style="width:80px"></td>
+                    <td><input class="bc-discount" type="number" step="0.01" min="0" max="100" value="@b.DiscountPercent" style="width:90px"></td>
+                    <td><input class="bc-default" type="checkbox" @(b.IsDefault ? "checked" : "")></td>
+                    <td><input class="bc-active" type="checkbox" @(b.IsActive ? "checked" : "")></td>
+                    <td><input class="bc-sort" type="number" value="@b.SortOrder" style="width:55px"></td>
+                    <td>
+                        <div class="admin-row-actions">
+                            <button type="button" class="admin-btn admin-btn--primary btn-save-cycle">Save</button>
+                            <button type="button" class="admin-btn admin-btn--danger btn-delete-cycle">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+            <tr data-cycle-id="0">
+                <td><input class="bc-label" type="text" style="width:120px" placeholder="9 Months"></td>
+                <td><input class="bc-months" type="number" min="1" step="1" value="1" style="width:80px"></td>
+                <td><input class="bc-discount" type="number" step="0.01" min="0" max="100" value="0" style="width:90px"></td>
+                <td><input class="bc-default" type="checkbox"></td>
+                <td><input class="bc-active" type="checkbox" checked></td>
+                <td><input class="bc-sort" type="number" value="@(billingCycles.Count)" style="width:55px"></td>
+                <td><button type="button" class="admin-btn admin-btn--primary btn-add-cycle">Add Cycle</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+(function () {
+    "use strict";
+    var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    var statusEl = document.getElementById("calc-admin-status");
+
+    function showStatus(ok, message) {
+        statusEl.innerHTML = '<div class="admin-alert ' + (ok ? "admin-alert--success" : "admin-alert--error") + '">' + message + '</div>';
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(function () { statusEl.innerHTML = ""; }, 4000);
+    }
+
+    function post(url, data) {
+        var body = new URLSearchParams(data);
+        body.append("__RequestVerificationToken", token);
+        return fetch(url, { method: "POST", body: body })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); });
+    }
+
+    function val(row, cls) { return row.querySelector("." + cls).value; }
+    function checked(row, cls) { return row.querySelector("." + cls).checked; }
+
+    // ---- Plan base rates ----
+    document.querySelectorAll(".btn-save-plan").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var row = btn.closest("tr");
+            post("/admin/calculator/planbase/save", {
+                PlanType: row.dataset.planType,
+                DisplayName: val(row, "pb-name"),
+                UnitDescription: val(row, "pb-unit"),
+                MonthlyRatePerUnit: val(row, "pb-rate"),
+                OneTimeSetupFee: val(row, "pb-setup"),
+                IsCustomQuote: checked(row, "pb-custom")
+            }).then(function (res) { showStatus(res.ok, res.json.message || (res.ok ? "Saved." : "Save failed.")); });
+        });
+    });
+
+    // ---- Modules ----
+    function moduleRowData(row) {
+        return {
+            Id: row.dataset.moduleId,
+            Code: val(row, "m-code"),
+            Name: val(row, "m-name"),
+            Category: val(row, "m-category"),
+            ChargeType: val(row, "m-chargetype"),
+            VolumeInputLabel: val(row, "m-volumelabel"),
+            Tooltip: val(row, "m-tooltip"),
+            PerRoomAvailability: val(row, "m-avail-perroom"),
+            PerPropertyAvailability: val(row, "m-avail-perproperty"),
+            EnterpriseAvailability: val(row, "m-avail-enterprise"),
+            MonthlyRate: val(row, "m-monthlyrate"),
+            OneTimeSetupFee: val(row, "m-setupfee"),
+            CommissionPercent: val(row, "m-commission"),
+            SortOrder: val(row, "m-sort"),
+            IsActive: checked(row, "m-active")
+        };
+    }
+
+    function saveModuleRow(row, isNew) {
+        post("/admin/calculator/module/save", moduleRowData(row)).then(function (res) {
+            showStatus(res.ok, res.json.message || (res.ok ? "Saved." : "Save failed."));
+            if (res.ok && isNew) window.location.reload();
+        });
+    }
+
+    document.querySelectorAll(".btn-save-module").forEach(function (btn) {
+        btn.addEventListener("click", function () { saveModuleRow(btn.closest("tr"), false); });
+    });
+    var addModuleBtn = document.querySelector(".btn-add-module");
+    if (addModuleBtn) addModuleBtn.addEventListener("click", function () { saveModuleRow(addModuleBtn.closest("tr"), true); });
+
+    document.querySelectorAll(".btn-delete-module").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var row = btn.closest("tr");
+            if (!confirm("Remove this module from the calculator?")) return;
+            post("/admin/calculator/module/" + row.dataset.moduleId + "/delete", {}).then(function (res) {
+                showStatus(res.ok, res.json.message || (res.ok ? "Removed." : "Failed."));
+                if (res.ok) row.remove();
+            });
+        });
+    });
+
+    // ---- Tax ----
+    function taxRowData(row) {
+        return {
+            Id: row.dataset.taxId,
+            Name: val(row, "t-name"),
+            RatePercent: val(row, "t-rate"),
+            IsDefault: checked(row, "t-default"),
+            IsActive: checked(row, "t-active"),
+            SortOrder: val(row, "t-sort")
+        };
+    }
+
+    function saveTaxRow(row, isNew) {
+        post("/admin/calculator/tax/save", taxRowData(row)).then(function (res) {
+            showStatus(res.ok, res.json.message || (res.ok ? "Saved." : "Save failed."));
+            if (res.ok && isNew) window.location.reload();
+        });
+    }
+
+    document.querySelectorAll(".btn-save-tax").forEach(function (btn) {
+        btn.addEventListener("click", function () { saveTaxRow(btn.closest("tr"), false); });
+    });
+    var addTaxBtn = document.querySelector(".btn-add-tax");
+    if (addTaxBtn) addTaxBtn.addEventListener("click", function () { saveTaxRow(addTaxBtn.closest("tr"), true); });
+
+    document.querySelectorAll(".btn-delete-tax").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var row = btn.closest("tr");
+            if (!confirm("Remove this tax?")) return;
+            post("/admin/calculator/tax/" + row.dataset.taxId + "/delete", {}).then(function (res) {
+                showStatus(res.ok, res.json.message || (res.ok ? "Removed." : "Failed."));
+                if (res.ok) row.remove();
+            });
+        });
+    });
+
+    // ---- Currency converter ----
+    function currencyRowData(row) {
+        return {
+            Id: row.dataset.currencyId,
+            Code: val(row, "c-code"),
+            Symbol: val(row, "c-symbol"),
+            Name: val(row, "c-name"),
+            RatePerInr: val(row, "c-rate"),
+            IsDefault: checked(row, "c-default"),
+            IsActive: checked(row, "c-active"),
+            SortOrder: val(row, "c-sort")
+        };
+    }
+
+    function saveCurrencyRow(row, isNew) {
+        post("/admin/calculator/currency/save", currencyRowData(row)).then(function (res) {
+            showStatus(res.ok, res.json.message || (res.ok ? "Saved." : "Save failed."));
+            if (res.ok && isNew) window.location.reload();
+        });
+    }
+
+    document.querySelectorAll(".btn-save-currency").forEach(function (btn) {
+        btn.addEventListener("click", function () { saveCurrencyRow(btn.closest("tr"), false); });
+    });
+    var addCurrencyBtn = document.querySelector(".btn-add-currency");
+    if (addCurrencyBtn) addCurrencyBtn.addEventListener("click", function () { saveCurrencyRow(addCurrencyBtn.closest("tr"), true); });
+
+    document.querySelectorAll(".btn-delete-currency").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var row = btn.closest("tr");
+            if (!confirm("Remove this currency?")) return;
+            post("/admin/calculator/currency/" + row.dataset.currencyId + "/delete", {}).then(function (res) {
+                showStatus(res.ok, res.json.message || (res.ok ? "Removed." : "Failed."));
+                if (res.ok) row.remove();
+            });
+        });
+    });
+
+    // ---- Billing cycles ----
+    function cycleRowData(row) {
+        return {
+            Id: row.dataset.cycleId,
+            Label: val(row, "bc-label"),
+            Months: val(row, "bc-months"),
+            DiscountPercent: val(row, "bc-discount"),
+            IsDefault: checked(row, "bc-default"),
+            IsActive: checked(row, "bc-active"),
+            SortOrder: val(row, "bc-sort")
+        };
+    }
+
+    function saveCycleRow(row, isNew) {
+        post("/admin/calculator/billingcycle/save", cycleRowData(row)).then(function (res) {
+            showStatus(res.ok, res.json.message || (res.ok ? "Saved." : "Save failed."));
+            if (res.ok && isNew) window.location.reload();
+        });
+    }
+
+    document.querySelectorAll(".btn-save-cycle").forEach(function (btn) {
+        btn.addEventListener("click", function () { saveCycleRow(btn.closest("tr"), false); });
+    });
+    var addCycleBtn = document.querySelector(".btn-add-cycle");
+    if (addCycleBtn) addCycleBtn.addEventListener("click", function () { saveCycleRow(addCycleBtn.closest("tr"), true); });
+
+    document.querySelectorAll(".btn-delete-cycle").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var row = btn.closest("tr");
+            if (!confirm("Remove this billing cycle?")) return;
+            post("/admin/calculator/billingcycle/" + row.dataset.cycleId + "/delete", {}).then(function (res) {
+                showStatus(res.ok, res.json.message || (res.ok ? "Removed." : "Failed."));
+                if (res.ok) row.remove();
+            });
+        });
+    });
+
+    // ---- Save All: click every row-level Save button in a table at once ----
+    document.querySelectorAll(".btn-saveall").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var table = document.getElementById(btn.dataset.target);
+            if (!table) return;
+            var saveButtons = table.querySelectorAll("[class*='btn-save-']");
+            saveButtons.forEach(function (b) { b.click(); });
+            showStatus(true, "Saving " + saveButtons.length + " row(s)...");
+        });
+    });
+
+    // ---- Live preview ----
+    (function initPreview() {
+        var planEl = document.getElementById("preview-plan");
+        var propsEl = document.getElementById("preview-properties");
+        var roomsEl = document.getElementById("preview-rooms");
+        var cycleEl = document.getElementById("preview-cycle");
+        var resultEl = document.getElementById("preview-result");
+        if (!planEl) return;
+
+        function fmt(n) { return "₹" + (Number(n) || 0).toLocaleString("en-IN"); }
+
+        var timer = null;
+        function schedule() { clearTimeout(timer); timer = setTimeout(run, 200); }
+
+        function run() {
+            fetch("/calculator/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    planType: planEl.value,
+                    numberOfProperties: Number(propsEl.value) || 1,
+                    totalRooms: Number(roomsEl.value) || 1,
+                    billingCycleId: Number(cycleEl.value) || null,
+                    selectedModules: []
+                })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (!res.success) {
+                        resultEl.innerHTML = '<div style="color:#FCA5A5;">' + (res.errors || []).join(" ") + '</div>';
+                        return;
+                    }
+                    resultEl.innerHTML =
+                        '<div><span class="k">Monthly</span><div class="v">' + fmt(res.totalMonthlyCost) + '</div></div>' +
+                        '<div><span class="k">Annual</span><div class="v">' + fmt(res.totalAnnualCost) + '</div></div>' +
+                        '<div><span class="k">This cycle (' + res.billingCycleLabel + ')</span><div class="v">' + fmt(res.billingCycleRecurringTotal) + '</div></div>' +
+                        '<div><span class="k">/ room</span><div class="v">' + (res.effectiveCostPerRoom ? fmt(res.effectiveCostPerRoom) : "-") + '</div></div>';
+                })
+                .catch(function () { resultEl.innerHTML = '<div style="color:#FCA5A5;">Preview unavailable.</div>'; });
+        }
+
+        [planEl, propsEl, roomsEl, cycleEl].forEach(function (el) {
+            el.addEventListener("input", schedule);
+            el.addEventListener("change", schedule);
+        });
+        run();
+    })();
+})();
+</script>

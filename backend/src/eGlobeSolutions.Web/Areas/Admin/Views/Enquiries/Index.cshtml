@@ -4,6 +4,10 @@
 }
 
 <h1>Enquiries @(Model.ShowTrashed ? "· Trash" : "")</h1>
+<p class="admin-hint">
+    Every submission from the <strong>Contact Sales</strong> form (contact.html) and the <strong>Reseller</strong> "Talk to
+    Partnerships" form (reseller.html) lands in this one inbox, the "Type" column shows which form it came from.
+</p>
 
 <form method="get" class="admin-filters">
     <input type="text" name="search" value="@Model.Search" placeholder="Search name, hotel, email, phone..." />
@@ -46,7 +50,7 @@
                 <td>@e.FullName</td>
                 <td>@e.HotelName</td>
                 <td>@e.Email</td>
-                <td>@e.Type</td>
+                <td><span class="admin-badge admin-badge--type-@(e.Type.ToString().ToLower())">@TypeLabel(e.Type)</span></td>
                 <td>
                     <span class="admin-badge admin-badge--@(e.Status.ToString().ToLower())">@e.Status</span>
                 </td>
@@ -59,6 +63,14 @@
         }
         </tbody>
     </table>
+    @functions {
+        string TypeLabel(EnquiryType t) => t switch
+        {
+            EnquiryType.ContactSales => "Contact Sales form",
+            EnquiryType.ResellerPartnership => "Reseller form",
+            _ => t.ToString()
+        };
+    }
 
     @if (Model.TotalPages > 1)
     {

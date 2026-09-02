@@ -1,0 +1,50 @@
+using eGlobeSolutions.Infrastructure.Persistence;
+using eGlobeSolutions.Web.Models.Public;
+using eGlobeSolutions.Web.Models.Public.Calculator;
+using eGlobeSolutions.Web.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace eGlobeSolutions.Web.Controllers;
+
+/// <summary>
+/// Serves calculator.html and the JSON endpoints it calls for the live
+/// quotation summary. All pricing is read from the DB-driven catalog via
+/// ICalculatorPricingService, the page never hardcodes a rate.
+/// </summary>
+public class CalculatorController : Controller
+{
+    private readonly AppDbContext _db;
+    private readonly ICalculatorPricingService _pricing;
+
+    public CalculatorController(AppDbContext db, ICalculatorPricingService pricing)
+    {
+        _db = db;
+        _pricing = pricing;
+    }
+
+    [HttpGet("/calculator.html")]
+    public async Task<IActionResult> Index(CancellationToken ct)
+    {
+        var vm = new ContentPageViewModel
+        {
+            Seo = await _db.SeoMetadata.FirstOrDefaultAsync(s => s.PageKey == "calculator", ct)
+        };
+        return View(vm);
+    }
+
+    /// <summary>Full pricing catalog as JSON, used to render the module picker client-side.</summary>
+    [HttpGet("/calculator/catalog")]
+    public async Task<IActionResult> Catalog(CancellationToken ct)
+    {
+        return Json(await _pricing.GetCatalogAsync(ct));
+    }
+
+    /// <summary>Authoritative live calculation, formulas + rates all applied server-side.</summary>
+    [HttpPost("/calculator/calculate")]
+    public async Task<IActionResult> Calculate([FromBody] CalculateRequest request, CancellationToken ct)
+    {
+        if (request is null) return BadRequest(new { success = false, errors = new[] { "Invalid request." } });
+        return Json(await _pricing.CalculateAsync(request, ct));
+    }
+}

@@ -16,6 +16,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="~/assets/logo.png">
 <title>@(Model.Seo?.Title ?? "eGlobe Solutions, Every Hotel System, Sourced by One Partner")</title>
 <meta name="description" content="@(Model.Seo?.Description ?? "eGlobe Solutions sources and connects the PMS, channel manager, POS, housekeeping and revenue tools your hotel needs.")">
 <meta name="keywords" content="@(Model.Seo?.Keywords ?? "hotel management software, hotel PMS")">
@@ -63,6 +64,40 @@
     {"@@type":"ListItem","position":14,"item":{"@@type":"SoftwareApplication","name":"eGlobe AI Tools","description":"AI-assisted pricing, guest messaging drafts and operational insights."}},
     {"@@type":"ListItem","position":15,"item":{"@@type":"SoftwareApplication","name":"Payment Gateway","description":"Payment processing that posts straight to the guest folio."}},
     {"@@type":"ListItem","position":16,"item":{"@@type":"SoftwareApplication","name":"APIs for PMS","description":"Pull rates and inventory or push bookings, built for revenue, analytics and PMS partners."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Organization",
+      "@@id": "https://www.eglobe-solutions.com/#organization",
+      "name": "eGlobe Solutions",
+      "url": "https://www.eglobe-solutions.com/",
+      "logo": "https://www.eglobe-solutions.com/img/logo-dark.webp",
+      "sameAs": [
+        "https://www.facebook.com/eglobesolution",
+        "https://www.youtube.com/@@eglobesolutionspms",
+        "https://www.linkedin.com/company/eglobesolutions/"
+      ],
+      "contactPoint": {
+        "@@type": "ContactPoint",
+        "telephone": "+91-9818880480",
+        "contactType": "sales",
+        "email": "support@@eglobe-solutions.com",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    },
+    {
+      "@@type": "WebSite",
+      "@@id": "https://www.eglobe-solutions.com/#website",
+      "url": "https://www.eglobe-solutions.com/",
+      "name": "eGlobe Solutions",
+      "publisher": { "@@id": "https://www.eglobe-solutions.com/#organization" }
+    }
   ]
 }
 </script>
@@ -801,7 +836,7 @@
     <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <span class="nav-dock__brand"><img src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe"></span>
+    <span class="nav-dock__brand"><img src="/assets/logo.png" alt="eGlobe"></span>
     @await Component.InvokeAsync("NavDock")
     <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
   </nav>
@@ -817,6 +852,7 @@
       <div class="product-modal__icon" id="product-modal-icon"></div>
       <h3 id="product-modal-title"></h3>
       <p class="product-modal__desc" id="product-modal-desc"></p>
+      <a class="product-modal__readmore" id="product-modal-readmore" href="#" style="display:none;">+ Read More<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
       <div class="product-modal__demo" id="product-modal-demo"></div>
     </div>
     <div class="product-modal__col">

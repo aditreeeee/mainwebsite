@@ -4,34 +4,99 @@
     var post = Model.Post;
     var metaTitle = post.MetaTitle ?? $"{post.Title}, eGlobe Solutions Blog";
     var metaDesc = post.MetaDescription ?? post.Excerpt;
+    var articleUrl = $"https://www.eglobe-solutions.com/{post.Slug}.html";
+    var coverImage = post.CoverImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png";
+    var modified = (post.UpdatedAtUtc ?? post.PublishedAtUtc).ToString("yyyy-MM-dd");
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="~/assets/logo.png">
 <title>@metaTitle</title>
 <meta name="description" content="@metaDesc">
 @if (!string.IsNullOrWhiteSpace(post.MetaKeywords))
 {
   <meta name="keywords" content="@post.MetaKeywords">
 }
-<link rel="canonical" href="https://www.eglobe-solutions.com/@(post.Slug).html">
+<link rel="canonical" href="@articleUrl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="@metaTitle">
 <meta property="og:description" content="@metaDesc">
-<meta property="og:url" content="https://www.eglobe-solutions.com/@(post.Slug).html">
-<meta property="og:image" content="@(post.CoverImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
+<meta property="og:url" content="@articleUrl">
+<meta property="og:image" content="@coverImage">
+<meta property="article:published_time" content="@post.PublishedAtUtc.ToString("yyyy-MM-dd")">
+<meta property="article:modified_time" content="@modified">
+<meta property="article:author" content="@post.AuthorName">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@metaTitle">
+<meta name="twitter:description" content="@metaDesc">
+<meta name="twitter:image" content="@coverImage">
 <link rel="stylesheet" href="~/css/style.css">
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
   "@@type": "BlogPosting",
+  "@@id": "@(articleUrl)#article",
+  "mainEntityOfPage": { "@@type": "WebPage", "@@id": "@articleUrl" },
   "headline": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(post.Title)),
+  "description": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metaDesc)),
+  "image": "@coverImage",
   "datePublished": "@post.PublishedAtUtc.ToString("yyyy-MM-dd")",
-  "author": {"@@type": "Organization", "name": "eGlobe Solutions"},
-  "publisher": {"@@type": "Organization", "name": "eGlobe Solutions"}
+  "dateModified": "@modified",
+  "articleSection": "@post.Category",
+  "author": { "@@type": "Person", "name": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(post.AuthorName)), "jobTitle": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(post.AuthorRole)) },
+  "publisher": {
+    "@@type": "Organization",
+    "name": "eGlobe Solutions",
+    "logo": { "@@type": "ImageObject", "url": "https://www.eglobe-solutions.com/img/logo-dark.webp" }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.eglobe-solutions.com/" },
+    { "@@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.eglobe-solutions.com/blog.html" },
+    { "@@type": "ListItem", "position": 3, "name": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(post.Title)) }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@graph": [
+    {
+      "@@type": "Organization",
+      "@@id": "https://www.eglobe-solutions.com/#organization",
+      "name": "eGlobe Solutions",
+      "url": "https://www.eglobe-solutions.com/",
+      "logo": "https://www.eglobe-solutions.com/img/logo-dark.webp",
+      "sameAs": [
+        "https://www.facebook.com/eglobesolution",
+        "https://www.youtube.com/@@eglobesolutionspms",
+        "https://www.linkedin.com/company/eglobesolutions/"
+      ],
+      "contactPoint": {
+        "@@type": "ContactPoint",
+        "telephone": "+91-9818880480",
+        "contactType": "sales",
+        "email": "support@@eglobe-solutions.com",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    },
+    {
+      "@@type": "WebSite",
+      "@@id": "https://www.eglobe-solutions.com/#website",
+      "url": "https://www.eglobe-solutions.com/",
+      "name": "eGlobe Solutions",
+      "publisher": { "@@id": "https://www.eglobe-solutions.com/#organization" }
+    }
+  ]
 }
 </script>
 </head>
@@ -71,12 +136,25 @@
   </div>
 </section>
 
+@{
+    var catFilter = post.Category.ToLowerInvariant() switch { "product" => "product", "news" => "news", _ => "guide" };
+    var catGlyph = catFilter switch { "product" => "P", "news" => "N", _ => "G" };
+}
 <!-- ===================== HERO BANNER ===================== -->
 <section class="panel-white">
   <div class="container" style="max-width:1100px;">
-    <div class="article-banner" data-reveal="scale">
-      <img src="@(post.CoverImageUrl ?? "https://www.eglobe-solutions.com/img/logo-dark.webp")" alt="@post.Title" class="article-banner__mark">
-    </div>
+    @if (!string.IsNullOrWhiteSpace(post.CoverImageUrl))
+    {
+      <div class="article-banner" data-reveal="scale">
+        <img src="@post.CoverImageUrl" alt="@post.Title">
+      </div>
+    }
+    else
+    {
+      <div class="article-banner blog-visual--@catFilter" data-glyph="@catGlyph" data-reveal="scale">
+        <img src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="@post.Title" class="article-banner__mark">
+      </div>
+    }
   </div>
 </section>
 
@@ -85,6 +163,13 @@
   <div class="container" style="max-width:900px;">
     <div class="article-layout">
       <div class="article-content">
+        @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+        {
+          <div class="article-quick-answer" data-nosnippet="false">
+            <span class="article-quick-answer__label">Quick answer</span>
+            <p>@post.Excerpt</p>
+          </div>
+        }
         @Html.Raw(post.Body)
       </div>
 
@@ -125,7 +210,7 @@
     <button class="nav-dock__burger" id="nav-dock-burger" aria-label="Toggle menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <span class="nav-dock__brand"><img src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe"></span>
+    <span class="nav-dock__brand"><img src="/assets/logo.png" alt="eGlobe"></span>
     @await Component.InvokeAsync("NavDock")
     <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
   </nav>

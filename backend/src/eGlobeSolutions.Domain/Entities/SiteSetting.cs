@@ -36,9 +36,23 @@ public static class SiteSettingKeys
     /// <summary>Landline "Call Us" numbers, slash-separated (e.g. "+91 11 41717081/ +91 11 41717082/ +91 11 41717021"), shown as a separate line from the main mobile Phone number.</summary>
     public const string CallUsNumbers = "CallUsNumbers";
 
+    // ---- SMTP (outbound mail: new-enquiry notifications) ----
+    public const string SmtpHost = "Smtp.Host";
+    public const string SmtpPort = "Smtp.Port";
+    public const string SmtpUsername = "Smtp.Username";
+    public const string SmtpPassword = "Smtp.Password";
+    public const string SmtpEnableSsl = "Smtp.EnableSsl";
+    public const string SmtpFromEmail = "Smtp.FromEmail";
+    public const string SmtpFromName = "Smtp.FromName";
+    /// <summary>Where "new enquiry received" notifications are sent. Defaults to the general contact Email if unset.</summary>
+    public const string SmtpNotifyEmail = "Smtp.NotifyEmail";
+    public const string SmtpNotifyOnEnquiry = "Smtp.NotifyOnEnquiry";
+
     public static readonly string[] All =
     {
         SiteName, Phone, Email, WhatsAppNumber, CallUsNumbers, BusinessHours,
-        FacebookUrl, YoutubeUrl, LinkedInUrl, AppStoreUrl, GooglePlayUrl, FooterCopyright
+        FacebookUrl, YoutubeUrl, LinkedInUrl, AppStoreUrl, GooglePlayUrl, FooterCopyright,
+        SmtpHost, SmtpPort, SmtpUsername, SmtpPassword, SmtpEnableSsl, SmtpFromEmail, SmtpFromName,
+        SmtpNotifyEmail, SmtpNotifyOnEnquiry
     };
 }

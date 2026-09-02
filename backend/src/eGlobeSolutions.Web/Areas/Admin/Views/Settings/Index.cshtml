@@ -1,30 +1,129 @@
 @model SiteSettingsFormModel
 @{ ViewData["Title"] = "Site Settings"; }
-<h1>Site Settings</h1>
 
-<div class="admin-card">
-    <form method="post" action="/admin/settings">
-        @Html.AntiForgeryToken()
-        <h3>General</h3>
+<div class="admin-toolbar">
+    <h1>Site Settings</h1>
+</div>
+<p class="admin-hint">Everything here drives the live site and admin notifications, changes apply the moment you save.</p>
+
+<nav class="admin-quicknav">
+    <a href="#general">General</a>
+    <a href="#contact">Contact</a>
+    <a href="#social">Social</a>
+    <a href="#apps">Apps</a>
+    <a href="#smtp">SMTP &amp; Notifications</a>
+</nav>
+
+<div id="settings-status"></div>
+
+<form method="post" action="/admin/settings">
+    @Html.AntiForgeryToken()
+
+    <div class="admin-card" id="general">
+        <h2>General</h2>
+        <p class="admin-hint">Site name and footer text shown across every page.</p>
         <div class="admin-field"><label>Site Name</label><input asp-for="SiteName" /></div>
         <div class="admin-field"><label>Footer Copyright</label><input asp-for="FooterCopyright" /></div>
+    </div>
 
-        <h3>Contact</h3>
+    <div class="admin-card" id="contact">
+        <h2>Contact</h2>
+        <p class="admin-hint">Shown on the Contact page, footer and site-wide "Talk to Sales" links.</p>
         <div class="admin-field"><label>Phone</label><input asp-for="Phone" /></div>
         <div class="admin-field"><label>Email</label><input asp-for="Email" /></div>
         <div class="admin-field"><label>WhatsApp Number (digits only, with country code)</label><input asp-for="WhatsAppNumber" /></div>
         <div class="admin-field"><label>Call Us Numbers (landlines, slash-separated)</label><input asp-for="CallUsNumbers" placeholder="+91 11 41717081/ +91 11 41717082/ +91 11 41717021" /></div>
         <div class="admin-field"><label>Business Hours</label><input asp-for="BusinessHours" /></div>
+    </div>
 
-        <h3>Social</h3>
+    <div class="admin-card" id="social">
+        <h2>Social</h2>
         <div class="admin-field"><label>Facebook URL</label><input asp-for="FacebookUrl" /></div>
         <div class="admin-field"><label>YouTube URL</label><input asp-for="YoutubeUrl" /></div>
         <div class="admin-field"><label>LinkedIn URL</label><input asp-for="LinkedInUrl" /></div>
+    </div>
 
-        <h3>Apps</h3>
+    <div class="admin-card" id="apps">
+        <h2>Apps</h2>
         <div class="admin-field"><label>App Store URL</label><input asp-for="AppStoreUrl" /></div>
         <div class="admin-field"><label>Google Play URL</label><input asp-for="GooglePlayUrl" /></div>
+    </div>
 
-        <button class="admin-btn admin-btn--primary" type="submit">Save Settings</button>
-    </form>
-</div>
+    <div class="admin-card" id="smtp">
+        <h2>SMTP &amp; Notifications</h2>
+        <p class="admin-hint">
+            Used to email your team whenever a Contact Sales or Reseller enquiry comes in. Works with any standard SMTP
+            provider (Gmail/Google Workspace, Outlook/Microsoft 365, SendGrid, Amazon SES, your own mail server, ...).
+        </p>
+        <div class="admin-grid-2">
+            <div class="admin-field"><label>SMTP Host</label><input asp-for="SmtpHost" placeholder="smtp.gmail.com" /></div>
+            <div class="admin-field"><label>Port</label><input asp-for="SmtpPort" type="number" placeholder="587" /></div>
+        </div>
+        <div class="admin-grid-2">
+            <div class="admin-field"><label>Username</label><input asp-for="SmtpUsername" placeholder="you@eglobe-solutions.com" /></div>
+            <div class="admin-field">
+                <label>Password @(ViewBag.SmtpPasswordIsSet == true ? "(saved, leave blank to keep it)" : "")</label>
+                <input asp-for="SmtpPassword" type="password" autocomplete="new-password" placeholder="@(ViewBag.SmtpPasswordIsSet == true ? "••••••••" : "")" />
+            </div>
+        </div>
+        <div class="admin-checkbox-row">
+            <input asp-for="SmtpEnableSsl" type="checkbox" />
+            <label asp-for="SmtpEnableSsl">Use SSL/TLS (recommended, on for almost every provider)</label>
+        </div>
+        <div class="admin-grid-2">
+            <div class="admin-field"><label>From Email</label><input asp-for="SmtpFromEmail" placeholder="no-reply@eglobe-solutions.com" /></div>
+            <div class="admin-field"><label>From Name</label><input asp-for="SmtpFromName" placeholder="eGlobe Solutions" /></div>
+        </div>
+        <div class="admin-field"><label>Send new-enquiry alerts to</label><input asp-for="SmtpNotifyEmail" placeholder="Defaults to the Contact email above" /></div>
+        <div class="admin-checkbox-row">
+            <input asp-for="SmtpNotifyOnEnquiry" type="checkbox" />
+            <label asp-for="SmtpNotifyOnEnquiry">Email the team automatically when a new enquiry is submitted</label>
+        </div>
+
+        <div class="admin-test-email">
+            <label>Send a test email to confirm this works</label>
+            <div class="admin-test-email__row">
+                <input type="email" id="smtp-test-to" placeholder="you@eglobe-solutions.com" />
+                <button type="button" class="admin-btn" id="smtp-test-btn">Send Test Email</button>
+            </div>
+            <p class="admin-hint" id="smtp-test-result" style="margin:8px 0 0;"></p>
+            <p class="admin-hint" style="margin-top:6px;">Tests against the <strong>saved</strong> settings, save this form first if you just changed anything above.</p>
+        </div>
+    </div>
+
+    <button class="admin-btn admin-btn--primary admin-btn--save-bar" type="submit">Save Settings</button>
+</form>
+
+<script>
+(function () {
+    "use strict";
+    var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    var btn = document.getElementById("smtp-test-btn");
+    var result = document.getElementById("smtp-test-result");
+    if (!btn) return;
+
+    btn.addEventListener("click", function () {
+        var to = document.getElementById("smtp-test-to").value.trim();
+        if (!to) { result.textContent = "Enter an email address first."; return; }
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+        result.textContent = "";
+
+        var body = new URLSearchParams({ ToEmail: to, __RequestVerificationToken: token });
+        fetch("/admin/settings/smtp/test", { method: "POST", body: body })
+            .then(function (r) { return r.json(); })
+            .then(function (json) {
+                result.textContent = json.message || (json.success ? "Sent." : "Failed.");
+                result.style.color = json.success ? "#16A34A" : "#DC2626";
+            })
+            .catch(function () {
+                result.textContent = "Request failed, please try again.";
+                result.style.color = "#DC2626";
+            })
+            .finally(function () {
+                btn.disabled = false;
+                btn.textContent = "Send Test Email";
+            });
+    });
+})();
+</script>

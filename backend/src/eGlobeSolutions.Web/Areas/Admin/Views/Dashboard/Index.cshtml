@@ -28,6 +28,35 @@
     </div>
 </div>
 
+@{
+    (bool ok, string label) Health(bool ok, string good, string bad) => (ok, ok ? good : bad);
+    var checks = new[]
+    {
+        ("Price Calculator", Health(Model.CalculatorPlansConfigured, "Plans configured", "No plans configured"), "/admin/calculator"),
+        ("Modules & Add-ons", Health(Model.ActiveCalculatorModules > 0, $"{Model.ActiveCalculatorModules} active", "None active"), "/admin/calculator#modules"),
+        ("Tax", Health(Model.CalculatorTaxConfigured, "Configured", "Not configured"), "/admin/calculator#tax"),
+        ("Currency Converter", Health(Model.CalculatorCurrencyConfigured, "Configured", "Not configured"), "/admin/calculator#currency"),
+        ("SMTP Email", Health(Model.SmtpConfigured, "Configured", "Not set up"), "/admin/settings#smtp"),
+        ("Enquiry Alerts", Health(Model.SmtpConfigured && Model.EnquiryNotificationsEnabled, "On", Model.SmtpConfigured ? "Off" : "Needs SMTP"), "/admin/settings#smtp"),
+    };
+}
+<div class="admin-card">
+    <h2>System Health</h2>
+    <p class="admin-hint">A quick glance at whether the price calculator and outbound email are ready to go.</p>
+    <div class="admin-health-grid">
+        @foreach (var (name, status, url) in checks)
+        {
+            <a href="@url" class="admin-health-item admin-health-item--@(status.ok ? "ok" : "warn")">
+                <span class="dot"></span>
+                <span>
+                    <strong>@name</strong>
+                    <small>@status.label</small>
+                </span>
+            </a>
+        }
+    </div>
+</div>
+
 <div class="admin-card">
     <h2>Recent Enquiries</h2>
     <table class="admin-table">
@@ -40,8 +69,8 @@
             <tr onclick="location.href='/admin/enquiries/@e.Id'" style="cursor:pointer;">
                 <td>@e.FullName</td>
                 <td>@e.HotelName</td>
-                <td>@e.Type</td>
-                <td><span class="admin-badge">@e.Status</span></td>
+                <td><span class="admin-badge admin-badge--type-@(e.Type.ToString().ToLower())">@(e.Type == EnquiryType.ContactSales ? "Contact Sales" : "Reseller")</span></td>
+                <td><span class="admin-badge admin-badge--@(e.Status.ToString().ToLower())">@e.Status</span></td>
                 <td>@e.CreatedAtUtc.ToLocalTime().ToString("dd MMM, HH:mm")</td>
             </tr>
         }

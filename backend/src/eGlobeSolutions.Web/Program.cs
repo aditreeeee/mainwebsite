@@ -7,11 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 // ---------- Services ----------
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IEnquiryService, EnquiryService>();
+builder.Services.AddScoped<ICalculatorPricingService, CalculatorPricingService>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
 builder.Services.AddControllersWithViews()
     // Requirement: Razor views must not be precompiled, so admins/devs can
     // edit .cshtml files and see changes without a rebuild.
-    .AddRazorRuntimeCompilation();
+    .AddRazorRuntimeCompilation()
+    // Calculator DTOs use enums (CalculatorPlanType, ...) serialized as strings
+    // so the JSON payloads stay readable; this lets [FromBody] bind them back.
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
 builder.Services.AddAuthorization(options =>
 {

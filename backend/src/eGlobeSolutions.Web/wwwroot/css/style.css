@@ -366,17 +366,17 @@ p{margin:0;color:var(--ink-soft);}
   font-weight:700; font-size:19px; letter-spacing:-.01em;
 }
 .brand .mark{
-  height:68px; width:auto;
-  max-width:260px;
+  height:92px; width:auto;
+  max-width:320px;
   object-fit:contain;
   display:block;
   flex-shrink:0;
 }
 @media (max-width:760px){
-  .brand .mark{height:38px; max-width:150px;}
+  .brand .mark{height:50px; max-width:190px;}
 }
 @media (max-width:480px){
-  .brand .mark{height:26px; max-width:110px;}
+  .brand .mark{height:34px; max-width:140px;}
 }
 .footer .brand .mark{filter:brightness(0) invert(1);}
 .topbar__links{display:flex; align-items:center; gap:28px; margin-left:auto; margin-right:36px;}
@@ -421,37 +421,15 @@ p{margin:0;color:var(--ink-soft);}
 .topbar__burger[aria-expanded="true"] .l3{transform:translateY(-6px) rotate(-45deg);}
 
 @media (max-width:760px){
+  /* Mobile navigation lives entirely in the floating nav-dock pill, the
+     topbar's own link list/hamburger is redundant with it and is dropped
+     here rather than duplicated, one nav surface on mobile, not two. */
   .topbar__inner{padding:12px 20px;}
-  .topbar__links{
-    display:flex;
-    flex-direction:column;
-    align-items:stretch;
-    gap:0;
-    position:absolute;
-    left:0; right:0; top:100%;
-    background:var(--white);
-    border-bottom:var(--border-light);
-    box-shadow:0 16px 30px rgba(16,25,53,.12);
-    margin:0;
-    padding:8px 20px;
-    max-height:0;
-    overflow:hidden;
-    opacity:0;
-    transition:max-height .3s cubic-bezier(.16,1,.3,1), opacity .25s ease;
-  }
-  .topbar__links.open{max-height:260px; opacity:1; padding:10px 20px 16px;}
-  .topbar__links a{padding:13px 4px; font-size:15px;}
-  .topbar__links a::after{display:none;}
-  .topbar__links a.active{color:var(--blue);}
-  .topbar__links-login{
-    display:block;
-    margin-top:6px; padding-top:16px !important;
-    border-top:var(--border-light);
-    color:var(--blue) !important;
-  }
+  .topbar__links{display:none !important;}
+  .topbar__links-login{display:none !important;}
   .topbar{position:relative;}
   .topbar__actions .btn-ghost{display:none;}
-  .topbar__burger{display:flex;}
+  .topbar__burger{display:none !important;}
 }
 @media (max-width:420px){
   .topbar__actions{gap:8px;}
@@ -793,9 +771,16 @@ section{position:relative;}
 }
 .dash__tab:hover{color:var(--ink);}
 .dash__tab.active{color:var(--blue); border-bottom-color:var(--blue);}
-.dash__panels{position:relative;}
+/* Fixed height so the card never resizes/reflows as tabs switch, sized to
+   fit the tallest panel (Rates); shorter panels just top-align inside it. */
+.dash__panels{position:relative; min-height:412px;}
 .dash__panel{display:none;}
-.dash__panel.active{display:block; animation:panel-in .4s cubic-bezier(.16,1,.3,1);}
+.dash__panel.active{
+  display:block; max-height:412px; overflow-y:auto; scrollbar-width:thin;
+  animation:panel-in .4s cubic-bezier(.16,1,.3,1);
+}
+.dash:hover{box-shadow:0 14px 34px rgba(17,24,39,.14); transform:translateY(-2px);}
+.dash{transition:box-shadow .3s ease, transform .3s ease;}
 .demo-hint{
   font-size:11.5px; color:var(--ink-soft); padding:14px 22px 0;
   font-family:var(--font-mono);
@@ -1651,6 +1636,12 @@ section{position:relative;}
 .product-modal__icon svg{width:22px;height:22px;color:#fff;}
 .product-modal h3{font-size:20px; margin-bottom:12px; padding-right:20px;}
 .product-modal p.product-modal__desc{font-size:14px; line-height:1.6; color:var(--ink-soft);}
+.product-modal__readmore{
+  display:inline-flex; align-items:center; gap:6px; margin-top:10px;
+  font-size:12.5px; font-weight:700; color:var(--blue);
+}
+.product-modal__readmore svg{width:13px; height:13px; transition:transform .2s ease;}
+.product-modal__readmore:hover svg{transform:translateX(3px);}
 @media (max-width:720px){
   .product-modal{
     grid-template-columns:1fr;
@@ -1686,17 +1677,27 @@ section{position:relative;}
 .product-modal__faq-item.open .product-modal__faq-a{max-height:240px; padding:0 12px 12px;}
 
 /* ---------- Product modal: embedded live-preview demo ---------- */
+/* .demo-widget is the same wrapper reused standalone on product pages
+   (Try it, ... cards), outside the modal. */
 .product-modal__demo{margin-top:18px;}
 .product-modal__demo:empty{display:none;}
-.product-modal__demo .demo-box{
+.product-modal__demo .demo-box,
+.demo-widget .demo-box{
   border:var(--border-light); border-radius:10px; background:var(--canvas); overflow:hidden;
 }
 .product-modal__demo .demo-rates,
 .product-modal__demo .demo-sync-list,
 .product-modal__demo .demo-inv,
-.product-modal__demo .demo-promo{padding-left:14px; padding-right:14px;}
-.product-modal__demo .demo-sync-btn{width:calc(100% - 28px); margin:6px 14px 0;}
-.product-modal__demo .demo-hint{padding:12px 14px 0;}
+.product-modal__demo .demo-promo,
+.demo-widget .demo-rates,
+.demo-widget .demo-sync-list,
+.demo-widget .demo-inv,
+.demo-widget .demo-promo{padding-left:14px; padding-right:14px;}
+.product-modal__demo .demo-sync-btn,
+.demo-widget .demo-sync-btn{width:calc(100% - 28px); margin:6px 14px 0;}
+.product-modal__demo .demo-hint,
+.demo-widget .demo-hint{padding:12px 14px 0;}
+.demo-widget{max-width:380px; margin-top:22px;}
 
 /* POS mini order builder */
 .demo-pos{display:flex; flex-direction:column; gap:0;}
@@ -1745,6 +1746,19 @@ section{position:relative;}
 }
 .product-modal__mascot-text{font-size:12px; line-height:1.5; color:var(--ink-soft);}
 .product-modal__mascot-text b{display:block; font-size:12.5px; color:var(--ink); margin-bottom:2px;}
+
+/* Larger mascot card for the AI Tools product page hero */
+.pp-mascot{
+  display:inline-flex; align-items:center; gap:16px;
+  background:var(--white); border:var(--border); border-radius:var(--radius-lg);
+  padding:16px 22px; margin-top:22px; box-shadow:var(--shadow-card);
+}
+.pp-mascot img{
+  width:60px; height:60px; border-radius:50%; object-fit:cover; flex-shrink:0;
+  border:2px solid var(--canvas); box-shadow:0 2px 8px rgba(16,25,53,.18);
+}
+.pp-mascot-text{font-size:13.5px; line-height:1.5; color:var(--ink-soft); max-width:360px;}
+.pp-mascot-text b{display:block; font-size:14.5px; color:var(--ink); margin-bottom:3px;}
 
 /* ==========================================================================
    ECOSYSTEM / INTEGRATIONS NETWORK
@@ -1827,6 +1841,8 @@ section{position:relative;}
 .why-item p{font-size:14px;}
 
 .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.stat-grid--4{grid-template-columns:repeat(4, 1fr);}
+@media (max-width:760px){ .stat-grid--4{grid-template-columns:1fr 1fr;} }
 .stat-card{
   background:var(--navy-deep); color:#fff; border-radius:var(--radius-md); padding:26px;
   border:var(--border);
@@ -2050,9 +2066,8 @@ footer{
   position:relative; z-index:1;
   display:grid;
   grid-template-columns:1.15fr 1fr;
-  gap:80px;
-  padding:80px 0 72px;
-  border-bottom:1px solid rgba(255,255,255,.1);
+  gap:60px;
+  padding:52px 0 28px;
 }
 .footer__cta h3{
   color:#fff; font-size:clamp(1.8rem,3vw,2.4rem); font-weight:700; letter-spacing:-.015em;
@@ -2070,13 +2085,42 @@ footer{
 
 .footer__link-cols{
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:1fr 1fr;
   gap:40px;
 }
-.footer h5{color:#fff; font-size:12px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:22px; font-family:var(--font-mono); font-weight:700;}
-.footer__links{display:flex; flex-direction:column; gap:14px;}
+.footer h5{color:#fff; font-size:12px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px; font-family:var(--font-mono); font-weight:700;}
+.footer__links{display:flex; flex-direction:column; gap:10px;}
 .footer__links a{font-size:14.5px; transition:color .2s;}
 .footer__links a:hover{color:#fff;}
+
+/* Full-width product directory row, its own band below the CTA/Company/Follow
+   Us row so 16 links spread across the whole footer width instead of
+   towering in one narrow column and leaving the rest of the footer empty. */
+.footer__products-row{
+  position:relative; z-index:1;
+  padding:18px 0 20px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.footer__products-row h5{margin-bottom:14px;}
+
+/* One-line legal strip: Terms of Use / Refund & Cancellation / Privacy Policy */
+.footer__legal-strip{
+  position:relative; z-index:1;
+  display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
+  gap:8px 28px;
+  padding:14px 0;
+  border-top:1px solid rgba(255,255,255,.1);
+  font-size:12.5px;
+}
+.footer__legal-strip a{color:rgba(255,255,255,.7); font-weight:600; transition:color .2s ease;}
+.footer__legal-strip a:hover{color:#fff;}
+.footer__links--grid{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:10px 28px;
+}
+.footer__links--grid a{font-size:12.5px; line-height:1.3;}
+@media (max-width:760px){
+  .footer__links--grid{grid-template-columns:repeat(2, 1fr);}
+}
 
 .footer__social{display:flex; gap:10px;}
 .footer__social a{
@@ -2113,7 +2157,7 @@ footer{
   position:relative; z-index:1;
   display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
   gap:10px 32px;
-  padding:20px 0;
+  padding:14px 0;
   border-bottom:1px solid rgba(255,255,255,.1);
   font-size:13px;
   color:rgba(255,255,255,.85);
@@ -2125,7 +2169,7 @@ footer{
 
 .footer__bottom{
   position:relative; z-index:1;
-  display:flex; justify-content:space-between; align-items:center; padding:20px 0; font-size:12.5px; flex-wrap:wrap; gap:10px;
+  display:flex; justify-content:space-between; align-items:center; padding:14px 0; font-size:12.5px; flex-wrap:wrap; gap:10px;
 }
 .footer__bottom .status{display:flex; align-items:center; gap:18px;}
 .footer__bottom .status-dot{
@@ -2138,11 +2182,11 @@ footer{
 .footer__bottom a{color:var(--blue); font-weight:600;}
 
 @media (max-width:860px){
-  .footer__main{grid-template-columns:1fr; gap:44px; padding-top:70px;}
-  .footer__link-cols{grid-template-columns:repeat(3,1fr); gap:24px;}
+  .footer__main{grid-template-columns:1fr; gap:36px; padding-top:44px;}
 }
 @media (max-width:560px){
   .footer__link-cols{grid-template-columns:1fr 1fr; gap:28px;}
+  .footer__links--grid{grid-template-columns:1fr;}
   .footer__bottom{flex-direction:column; text-align:center;}
   .footer__bottom .status{flex-direction:column; gap:6px;}
 }
@@ -2402,10 +2446,20 @@ img.testi-card__avatar{
 }
 .blog-meta__tag{color:var(--blue); font-weight:700;}
 
+/* Category → accent colour, used across the featured visual, card accents
+   and tag chips so the blog reads as a designed system, not bare wireframes. */
+:root{
+  --cat-guide:#3B52E8; --cat-guide-soft:#EEF1FF;
+  --cat-product:#16A34A; --cat-product-soft:#ECFDF5;
+  --cat-news:#D97706; --cat-news-soft:#FFF7ED;
+}
+.blog-meta__tag--guide{color:var(--cat-guide);}
+.blog-meta__tag--product{color:var(--cat-product);}
+.blog-meta__tag--news{color:var(--cat-news);}
+
 .blog-featured{
   display:grid; grid-template-columns:1.1fr 1fr; gap:44px; align-items:stretch;
 }
-.blog-featured__img{min-height:340px;}
 .blog-featured__body{display:flex; flex-direction:column; justify-content:center;}
 .blog-featured__body h2{font-size:clamp(24px,2.6vw,32px); margin-bottom:14px;}
 .blog-featured__body p{font-size:15px; line-height:1.6; margin-bottom:24px;}
@@ -2425,6 +2479,35 @@ img.testi-card__avatar{
 .blog-read-link svg{width:15px; height:15px; transition:transform .2s ease;}
 .blog-read-link:hover svg{transform:translateX(4px);}
 
+/* Editorial gradient visual used in place of a photo when a post has no
+   CoverImageUrl, category-tinted, with a large decorative initial/icon. */
+.blog-visual{
+  position:relative; min-height:170px; border-radius:var(--radius-lg); overflow:hidden;
+  display:flex; align-items:flex-end; padding:18px;
+  background:linear-gradient(135deg, var(--navy-deep) 0%, var(--blue) 130%);
+  isolation:isolate;
+}
+.blog-visual::before{
+  content:''; position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size:26px 26px; z-index:0;
+}
+.blog-visual::after{
+  content:attr(data-glyph);
+  position:absolute; right:-14px; top:-30px; font-family:var(--font-display); font-weight:800;
+  font-size:9rem; line-height:1; color:rgba(255,255,255,.1); z-index:0; pointer-events:none;
+}
+.blog-visual__tag{
+  position:relative; z-index:1;
+  font-family:var(--font-mono); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3);
+  padding:5px 12px; border-radius:20px; backdrop-filter:blur(4px);
+}
+.blog-visual--product{background:linear-gradient(135deg, #0B3D24 0%, var(--cat-product) 130%);}
+.blog-visual--news{background:linear-gradient(135deg, #4A2E06 0%, var(--cat-news) 130%);}
+.blog-featured__img.blog-visual{min-height:340px; padding:28px;}
+.blog-featured__img img,.blog-card__img img{width:100%; height:100%; object-fit:cover; display:block;}
+
 .blog-filters{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px;}
 .blog-filter{
   font-family:var(--font-mono); font-size:12.5px; font-weight:700;
@@ -2441,13 +2524,22 @@ img.testi-card__avatar{
 }
 .blog-card{
   display:flex; flex-direction:column;
-  transition:transform .25s cubic-bezier(.16,1,.3,1);
+  background:var(--white); border:var(--border); border-radius:var(--radius-lg);
+  padding:14px; box-shadow:var(--shadow-card);
+  transition:transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s ease, border-color .25s ease;
 }
-.blog-card:hover{transform:translateY(-4px);}
+.blog-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-hard-lg); border-color:var(--blue);}
 .blog-card__img{min-height:170px; margin-bottom:16px;}
-.blog-card h3{font-size:17px; margin-bottom:8px; transition:color .2s ease;}
+.blog-card__body{padding:2px 6px 6px; display:flex; flex-direction:column; flex:1;}
+.blog-card h3{font-size:17px; margin-bottom:8px; transition:color .2s ease; line-height:1.35;}
 .blog-card:hover h3{color:var(--blue);}
-.blog-card p{font-size:13.5px; line-height:1.5;}
+.blog-card p{font-size:13.5px; line-height:1.5; color:var(--ink-soft); flex:1;}
+.blog-card__more{
+  display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+  font-size:12.5px; font-weight:700; color:var(--blue);
+}
+.blog-card__more svg{width:13px; height:13px; transition:transform .2s ease;}
+.blog-card:hover .blog-card__more svg{transform:translateX(3px);}
 .blog-card.blog-hide{display:none;}
 
 @media (max-width:900px){
@@ -2499,14 +2591,34 @@ img.testi-card__avatar{
   overflow:hidden;
   background:linear-gradient(135deg, var(--blue) 0%, var(--navy-deep) 100%);
   display:flex; align-items:center; justify-content:center;
+  isolation:isolate;
 }
-.article-banner__mark{height:64px; width:auto; filter:brightness(0) invert(1); opacity:.95;}
+.article-banner::before{
+  content:''; position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px);
+  background-size:34px 34px; z-index:0;
+}
+.article-banner.blog-visual--product{background:linear-gradient(135deg, var(--cat-product) 0%, #0B3D24 100%);}
+.article-banner.blog-visual--news{background:linear-gradient(135deg, var(--cat-news) 0%, #4A2E06 100%);}
+.article-banner__mark{position:relative; z-index:1; height:64px; width:auto; filter:brightness(0) invert(1); opacity:.95;}
+.article-banner img{position:relative; z-index:1; width:100%; height:100%; object-fit:cover;}
 
 .article-layout{
   display:grid; grid-template-columns:1fr 220px; gap:56px; margin-top:48px;
   align-items:start;
 }
 .article-content{font-size:16px; line-height:1.75; color:var(--ink);}
+/* AEO: a short, directly-quotable answer block at the top of every article,
+   easy for search snippets and AI answer/generative engines to extract. */
+.article-quick-answer{
+  background:var(--canvas); border:1.5px solid var(--grid-line-strong); border-radius:var(--radius-md);
+  padding:18px 20px; margin-bottom:28px;
+}
+.article-quick-answer__label{
+  display:block; font-family:var(--font-mono); font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--blue); margin-bottom:8px;
+}
+.article-quick-answer p{margin:0; font-size:15.5px; font-weight:600; color:var(--ink); line-height:1.6;}
 .article-content h2{font-size:22px; margin-top:44px; margin-bottom:16px;}
 .article-content p{margin-bottom:18px; color:var(--ink);}
 .article-content ol,.article-content ul{margin:0 0 18px; padding-left:22px; display:flex; flex-direction:column; gap:10px;}
@@ -2532,4 +2644,215 @@ img.testi-card__avatar{
 @media (max-width:860px){
   .article-layout{grid-template-columns:1fr;}
   .article-sidebar{position:static; order:-1;}
+}
+
+/* ==========================================================================
+   PRICE CALCULATOR (calculator.html)
+   ========================================================================== */
+.calc-layout{display:grid; grid-template-columns:1.35fr .85fr; gap:40px; align-items:start;}
+@media (max-width:900px){ .calc-layout{grid-template-columns:1fr;} }
+
+.calc-builder{display:flex; flex-direction:column; gap:20px;}
+
+.calc-card{
+  background:var(--white); border:var(--border); border-radius:var(--radius-lg);
+  padding:28px; box-shadow:var(--shadow-card);
+}
+.calc-card__head{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+.calc-card__head h3{margin:0; font-size:17px;}
+.calc-card__hint{font-size:13px; color:var(--ink-soft); margin:-6px 0 16px;}
+.calc-step{
+  width:26px; height:26px; border-radius:50%; background:var(--navy-deep); color:#fff;
+  font-family:var(--font-mono); font-size:12.5px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+
+.calc-grid{display:grid; grid-template-columns:1fr; gap:16px;}
+.calc-grid--2{grid-template-columns:1fr 1fr;}
+.calc-grid--3{grid-template-columns:1fr 1fr 1fr;}
+@media (max-width:640px){ .calc-grid--3{grid-template-columns:1fr;} }
+@media (max-width:520px){ .calc-grid--2{grid-template-columns:1fr;} }
+.calc-grid .field label{font-size:12px; font-weight:600; display:block; margin-bottom:8px;}
+.calc-grid .field input,.calc-grid .field select{
+  width:100%; padding:13px 14px; border:var(--border-light); border-radius:8px; background:var(--canvas);
+  font-family:inherit; font-size:14px; color:var(--ink);
+}
+
+/* Plan picker reuses .price-teaser / .price-teaser-card (same look as
+   pricing.html) but each card is a real <button>, so reset button chrome
+   and add a clear selected/hover state on top of the shared card styles. */
+#calc-plan-picker .price-teaser-card.calc-plan-select{
+  font-family:inherit; cursor:pointer; width:100%; display:block;
+}
+.calc-plan-select:hover{transform:translateY(-3px); box-shadow:var(--shadow-hard-lg);}
+.calc-plan-select.featured{outline:2px solid var(--blue); outline-offset:-2px;}
+
+.calc-module-list{display:flex; flex-direction:column; gap:2px;}
+.calc-module-row{border-bottom:1px solid var(--grid-line); padding:12px 0;}
+.calc-module-row:last-child{border-bottom:none;}
+.calc-module-row.is-disabled{opacity:.5;}
+.calc-module-row__main{display:flex; align-items:center; gap:10px; flex-wrap:wrap; cursor:pointer;}
+.calc-module-row.is-disabled .calc-module-row__main{cursor:not-allowed;}
+.calc-module-row__main input[type="checkbox"]{width:17px; height:17px; accent-color:var(--blue); flex-shrink:0;}
+.calc-module-row__name{font-weight:600; font-size:14px; flex-shrink:0;}
+.calc-module-row__price{margin-left:auto; font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);}
+.calc-tooltip{
+  display:inline-block; color:var(--blue); font-size:12px; cursor:help; font-weight:700;
+}
+.calc-badge{
+  font-family:var(--font-mono); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:3px 8px; border-radius:10px;
+}
+.calc-badge--included{background:rgba(22,163,74,.12); color:var(--success);}
+.calc-badge--addon{background:var(--blue-glow); color:var(--blue);}
+.calc-badge--disabled{background:#F1F2F4; color:var(--ink-soft);}
+.calc-module-volume{margin:10px 0 0 27px;}
+.calc-module-volume label{display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:6px;}
+.calc-module-volume input{
+  width:100%; max-width:280px; padding:10px 12px; border:var(--border-light); border-radius:8px; background:var(--canvas);
+}
+
+.calc-summary{position:sticky; top:100px;}
+.calc-summary__card{
+  background:var(--navy-deep); color:#fff; border-radius:var(--radius-lg); padding:28px;
+  box-shadow:var(--shadow-hard-lg-solid);
+}
+.calc-summary__card h3{color:#fff; margin:0 0 18px;}
+
+/* Prepared-for / plan / date context, shown on screen and carried into print */
+.calc-summary__meta{
+  display:flex; flex-direction:column; gap:6px;
+  background:rgba(255,255,255,.06); border-radius:8px; padding:12px 14px; margin-bottom:16px;
+}
+.calc-summary__meta-row{display:flex; justify-content:space-between; gap:12px; font-size:12px; color:rgba(255,255,255,.7);}
+.calc-summary__meta-row span:last-child{color:#fff; font-weight:600; text-align:right;}
+
+.calc-summary__lines{display:flex; flex-direction:column; gap:10px;}
+.calc-summary__line{display:flex; justify-content:space-between; gap:12px; font-size:13.5px; color:rgba(255,255,255,.8);}
+.calc-summary__line.strong{font-size:16px; font-weight:700; color:#fff;}
+.calc-summary__divider{height:1px; background:rgba(255,255,255,.15); margin:16px 0;}
+.calc-summary__cta{margin-top:22px;}
+.calc-summary__note{font-size:11.5px; color:rgba(255,255,255,.5); text-align:center; margin:12px 0 0;}
+.calc-empty{font-size:13.5px; color:rgba(255,255,255,.6);}
+
+/* Print-only letterhead + footer, hidden on screen */
+.calc-print-header,.calc-print-footer{display:none;}
+
+@media print{
+  /* Print only the live quotation summary, nothing else on the page. Hide
+     everything, then re-show just the summary's own ancestor chain (section
+     > container > layout) plus the summary card and its contents. */
+  body *{display:none !important;}
+  .calc-section,.calc-section > .container,.calc-summary,.calc-summary *{display:revert !important;}
+  .calc-layout{display:block !important;}
+  .calc-summary__cta,.calc-summary__note{display:none !important;}
+  body{background:#fff;}
+  .calc-section{padding:0 !important;}
+  .calc-summary{position:static; width:100%; max-width:680px; margin:0 auto; padding:0;}
+  .calc-summary__card{background:#fff; color:#000; box-shadow:none; border:none; padding:0;}
+  .calc-summary__card h3{display:none;}
+  .calc-summary__line.strong{color:#000;}
+  .calc-summary__line{color:#333;}
+  .calc-summary__divider{background:#ccc;}
+
+  /* Letterhead: logo + company block + document title */
+  .calc-print-header{
+    display:flex !important; align-items:center; justify-content:space-between;
+    border-bottom:2px solid #000; padding-bottom:14px; margin-bottom:18px;
+  }
+  .calc-print-header__brand{display:flex; align-items:center; gap:12px;}
+  .calc-print-header__brand img{height:48px; width:auto;}
+  .calc-print-header__co strong{display:block; font-size:16px;}
+  .calc-print-header__co span{display:block; font-size:11px; color:#444;}
+  .calc-print-header__title{text-align:right;}
+  .calc-print-header__title strong{display:block; font-size:20px; letter-spacing:.02em;}
+  .calc-print-header__title span{display:block; font-size:11px; color:#444;}
+
+  .calc-summary__meta{
+    background:none; border:1px solid #ccc; border-radius:0; padding:12px 14px; margin-bottom:18px;
+  }
+  .calc-summary__meta-row{color:#444;}
+  .calc-summary__meta-row span:last-child{color:#000;}
+
+  /* Footer: contact details, page bottom */
+  .calc-print-footer{
+    display:block !important; margin-top:24px; padding-top:14px; border-top:1px solid #ccc;
+    font-size:11px; color:#555; text-align:center;
+  }
+  .calc-print-footer strong{color:#000;}
+}
+
+/* ==========================================================================
+   PRODUCT LANDING PAGES (/products/*.html)
+   Compact by design: tighter section padding than standard pages so a full
+   page approximates one viewport on desktop without an internal scrollbar.
+   ========================================================================== */
+.pp-section{padding:40px 0;}
+.pp-breadcrumb{
+  display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-soft);
+  margin-bottom:16px; flex-wrap:wrap;
+}
+.pp-breadcrumb a{color:var(--ink-soft); font-weight:600;}
+.pp-breadcrumb a:hover{color:var(--blue);}
+.pp-breadcrumb span{color:var(--grid-line-strong);}
+.pp-breadcrumb .current{color:var(--ink); font-weight:700;}
+
+.pp-hero{padding:100px 0 32px;}
+.pp-hero__badge{
+  display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em; color:var(--blue); background:var(--blue-glow);
+  padding:5px 12px; border-radius:20px; margin-bottom:14px;
+}
+.pp-hero h1{font-size:clamp(28px,3.4vw,40px); line-height:1.15;}
+.pp-hero .lead{max-width:640px; margin-top:14px;}
+.pp-hero__actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:26px;}
+
+/* Two-column hero: content left, interactive widget/mascot right (only used
+   on the pages that have one, other product pages stay single-column). */
+.pp-hero__grid{display:grid; grid-template-columns:1.2fr 1fr; gap:56px; align-items:center;}
+.pp-hero__visual{display:flex; justify-content:center;}
+.pp-hero__visual .demo-widget,
+.pp-hero__visual .pp-mascot{margin-top:0; width:100%; max-width:400px;}
+.pp-hero__mascot-img{width:100%; max-width:280px; height:auto; object-fit:contain;}
+@media (max-width:900px){
+  .pp-hero__grid{grid-template-columns:1fr; gap:8px;}
+  .pp-hero__visual{justify-content:flex-start; margin-top:26px;}
+  .pp-hero__mascot-img{max-width:200px;}
+}
+
+.pp-benefits{display:grid; grid-template-columns:repeat(2, 1fr); gap:18px 40px;}
+@media (max-width:760px){ .pp-benefits{grid-template-columns:1fr;} }
+
+.pp-usecases{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:18px;}
+@media (max-width:760px){ .pp-usecases{grid-template-columns:1fr;} }
+.pp-usecase{
+  background:var(--white); border:var(--border); border-radius:var(--radius-md); padding:18px 20px;
+  box-shadow:var(--shadow-card);
+}
+.pp-usecase h4{font-size:14.5px; margin-bottom:6px;}
+.pp-usecase p{font-size:13px; color:var(--ink-soft); line-height:1.5;}
+
+.pp-availability{
+  display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600;
+  background:var(--canvas); border:var(--border-light); border-radius:20px; padding:7px 14px; margin-top:18px;
+}
+.pp-availability svg{width:14px; height:14px; color:var(--success); flex-shrink:0;}
+
+.pp-related{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;}
+.pp-related a{
+  font-family:var(--font-mono); font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px;
+  border:1.5px solid var(--grid-line-strong); color:var(--ink); background:var(--white);
+  transition:border-color .15s ease, color .15s ease;
+}
+.pp-related a:hover{border-color:var(--blue); color:var(--blue);}
+
+/* Pixel grid backdrop for the "Who It's For" section, panel-white sections
+   sit on a solid white fill that hides the page-level grid, so reassert it
+   locally here to match the site's grid/wireframe aesthetic. */
+.pp-pixelgrid{
+  position:relative;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:26px 26px;
 }

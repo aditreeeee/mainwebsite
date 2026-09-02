@@ -1,4 +1,6 @@
 using eGlobeSolutions.Domain.Entities;
+using eGlobeSolutions.Domain.Entities.Calculator;
+using eGlobeSolutions.Domain.Enums;
 using eGlobeSolutions.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -82,6 +84,222 @@ public static class DbInitializer
         }
 
         await SeedContentAsync(db);
+        await SeedCalculatorAsync(db);
+    }
+
+    /// <summary>
+    /// Seeds the price calculator's DB-driven catalog (plan base rates, module
+    /// availability/pricing, default tax) on a fresh database. Idempotent: only
+    /// runs when the tables are empty, so it never overwrites admin edits.
+    /// </summary>
+    private static async Task SeedCalculatorAsync(AppDbContext db)
+    {
+        if (!await db.CalculatorPlanBaseRates.AnyAsync())
+        {
+            // Flat ₹1,200/month base subscription, the same regardless of how
+            // many properties or rooms are entered, admin-editable per plan.
+            db.CalculatorPlanBaseRates.AddRange(
+                new PricingPlanBaseRate
+                {
+                    PlanType = CalculatorPlanType.PerRoom,
+                    DisplayName = "Per Room",
+                    UnitDescription = "Flat monthly base fee, the same no matter how many rooms you run. Includes PMS, Channel Manager, Housekeeping and OTA Listing & Management.",
+                    MonthlyRatePerUnit = 1200m,
+                    OneTimeSetupFee = 7500m
+                },
+                new PricingPlanBaseRate
+                {
+                    PlanType = CalculatorPlanType.PerProperty,
+                    DisplayName = "Per Property",
+                    UnitDescription = "Flat monthly base fee, the same no matter how many properties you run. Includes every core module except B2B Stay.",
+                    MonthlyRatePerUnit = 1200m,
+                    OneTimeSetupFee = 15000m
+                },
+                new PricingPlanBaseRate
+                {
+                    PlanType = CalculatorPlanType.Enterprise,
+                    DisplayName = "Enterprise",
+                    UnitDescription = "Flat monthly base fee to start; final portfolio pricing is customised. Includes every module plus Portfolio Dashboards and a Dedicated Account Manager.",
+                    MonthlyRatePerUnit = 1200m,
+                    OneTimeSetupFee = 50000m,
+                    IsCustomQuote = true
+                });
+        }
+
+        if (!await db.CalculatorTaxConfigurations.AnyAsync())
+        {
+            db.CalculatorTaxConfigurations.AddRange(
+                new TaxConfiguration { Name = "GST (18%)", RatePercent = 18m, IsDefault = true, SortOrder = 0 },
+                new TaxConfiguration { Name = "IGST (18%)", RatePercent = 18m, SortOrder = 1 },
+                new TaxConfiguration { Name = "No Tax", RatePercent = 0m, SortOrder = 2 });
+        }
+
+        if (!await db.CalculatorCurrencyRates.AnyAsync())
+        {
+            db.CalculatorCurrencyRates.AddRange(
+                new CurrencyRate { Code = "INR", Symbol = "₹", Name = "Indian Rupee", RatePerInr = 1m, IsDefault = true, SortOrder = 0 },
+                new CurrencyRate { Code = "USD", Symbol = "$", Name = "US Dollar", RatePerInr = 0.012m, SortOrder = 1 },
+                new CurrencyRate { Code = "EUR", Symbol = "€", Name = "Euro", RatePerInr = 0.011m, SortOrder = 2 },
+                new CurrencyRate { Code = "GBP", Symbol = "£", Name = "British Pound", RatePerInr = 0.0095m, SortOrder = 3 },
+                new CurrencyRate { Code = "AED", Symbol = "AED", Name = "UAE Dirham", RatePerInr = 0.044m, SortOrder = 4 });
+        }
+
+        if (!await db.CalculatorBillingCycles.AnyAsync())
+        {
+            db.CalculatorBillingCycles.AddRange(
+                new BillingCycle { Label = "Monthly", Months = 1, DiscountPercent = 0m, IsDefault = true, SortOrder = 0 },
+                new BillingCycle { Label = "3 Months", Months = 3, DiscountPercent = 5m, SortOrder = 1 },
+                new BillingCycle { Label = "6 Months", Months = 6, DiscountPercent = 10m, SortOrder = 2 },
+                new BillingCycle { Label = "Annual", Months = 12, DiscountPercent = 15m, SortOrder = 3 });
+        }
+
+        if (!await db.CalculatorPricingModules.AnyAsync())
+        {
+            const ModuleAvailability inc = ModuleAvailability.Included;
+            const ModuleAvailability add = ModuleAvailability.AddOn;
+            const ModuleAvailability na = ModuleAvailability.NotAvailable;
+
+            var modules = new[]
+            {
+                // ---- Core comparison-table modules ----
+                new PricingModule
+                {
+                    Code = "pms", Name = "PMS", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerRoomMonthly,
+                    PerRoomAvailability = inc, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 0
+                },
+                new PricingModule
+                {
+                    Code = "channel-manager", Name = "Channel Manager", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerRoomMonthly,
+                    PerRoomAvailability = inc, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 1
+                },
+                new PricingModule
+                {
+                    Code = "housekeeping", Name = "Housekeeping", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerPropertyMonthly,
+                    PerRoomAvailability = inc, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 2
+                },
+                new PricingModule
+                {
+                    Code = "pos-kot", Name = "POS & KOT", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerRoomMonthly, MonthlyRate = 19m,
+                    PerRoomAvailability = add, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 3
+                },
+                new PricingModule
+                {
+                    Code = "finance-revenue", Name = "Finance & Revenue Management", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerRoomMonthly, MonthlyRate = 24m,
+                    PerRoomAvailability = add, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 4
+                },
+                new PricingModule
+                {
+                    Code = "reviews-manager", Name = "Reviews Manager", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerPropertyMonthly, MonthlyRate = 299m,
+                    PerRoomAvailability = add, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 5
+                },
+                new PricingModule
+                {
+                    Code = "b2b-stay", Name = "B2B Stay", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerPropertyMonthly, MonthlyRate = 2999m,
+                    PerRoomAvailability = na, PerPropertyAvailability = add, EnterpriseAvailability = inc,
+                    SortOrder = 6
+                },
+                new PricingModule
+                {
+                    Code = "ota-listing", Name = "OTA Listing & Management", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerRoomMonthly,
+                    PerRoomAvailability = inc, PerPropertyAvailability = inc, EnterpriseAvailability = inc,
+                    SortOrder = 7
+                },
+                new PricingModule
+                {
+                    Code = "portfolio-dashboards", Name = "Portfolio Dashboards", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.PerPropertyMonthly,
+                    PerRoomAvailability = na, PerPropertyAvailability = na, EnterpriseAvailability = inc,
+                    SortOrder = 8
+                },
+                new PricingModule
+                {
+                    Code = "dedicated-account-manager", Name = "Dedicated Account Manager", Category = ModuleCategory.CoreModule,
+                    ChargeType = ModuleChargeType.FlatMonthly,
+                    PerRoomAvailability = na, PerPropertyAvailability = na, EnterpriseAvailability = inc,
+                    SortOrder = 9
+                },
+
+                // ---- Additional products (available as add-ons across all plans) ----
+                new PricingModule
+                {
+                    Code = "ai-tools", Name = "eGlobe AI Tools", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.PerRoomMonthly, MonthlyRate = 15m, OneTimeSetupFee = 5000m,
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "AI Sales Agent, Smartdesk & Admin Agent, billed per room per month.",
+                    SortOrder = 10
+                },
+                new PricingModule
+                {
+                    Code = "booking-engine", Name = "Booking Engine", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.Commission, CommissionPercent = 5m, OneTimeSetupFee = 2500m,
+                    VolumeInputLabel = "Estimated monthly booking value (₹)",
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "5% commission on confirmed direct bookings made through the engine.",
+                    SortOrder = 11
+                },
+                new PricingModule
+                {
+                    Code = "google-hotel-ads", Name = "Google Hotel Ads", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.Commission, CommissionPercent = 12m,
+                    VolumeInputLabel = "Estimated monthly Google Hotel Ads booking value (₹)",
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "Management fee/commission on bookings driven through Google Hotel Ads, admin-configurable.",
+                    SortOrder = 12
+                },
+                new PricingModule
+                {
+                    Code = "meta-search", Name = "Meta Search Engines", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.Commission, CommissionPercent = 10m,
+                    VolumeInputLabel = "Estimated monthly meta-search booking value (₹)",
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "Commission on bookings driven through Trivago, TripAdvisor and other meta-search channels.",
+                    SortOrder = 13
+                },
+                new PricingModule
+                {
+                    Code = "website-builder", Name = "Website Builder", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.FlatMonthly, MonthlyRate = 999m, OneTimeSetupFee = 15000m,
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "One-time build fee plus flat monthly hosting & maintenance.",
+                    SortOrder = 14
+                },
+                new PricingModule
+                {
+                    Code = "payment-gateway", Name = "Payment Gateway", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.Commission, CommissionPercent = 2m, OneTimeSetupFee = 1000m,
+                    VolumeInputLabel = "Estimated monthly online payment volume (₹)",
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "Transaction fee on payments processed through the gateway.",
+                    SortOrder = 15
+                },
+                new PricingModule
+                {
+                    Code = "pms-apis", Name = "PMS APIs", Category = ModuleCategory.AdditionalProduct,
+                    ChargeType = ModuleChargeType.FlatMonthly, MonthlyRate = 4999m, OneTimeSetupFee = 10000m,
+                    PerRoomAvailability = add, PerPropertyAvailability = add, EnterpriseAvailability = add,
+                    Tooltip = "Direct API access for custom integrations, flat monthly fee.",
+                    SortOrder = 16
+                }
+            };
+
+            db.CalculatorPricingModules.AddRange(modules);
+        }
+
+        await db.SaveChangesAsync();
     }
 
     /// <summary>
@@ -137,9 +355,14 @@ public static class DbInitializer
             i = 0;
             var footerProduct = new[]
             {
-                ("Cloud PMS", "index.html#ecosystem"), ("Channel Manager", "index.html#ecosystem"),
-                ("Cloud POS", "index.html#ecosystem"), ("Booking Engine", "index.html#ecosystem"),
-                ("Website Builder", "index.html#ecosystem"), ("eGlobe AI Tools", "index.html#ecosystem"),
+                ("PMS", "/products/pms.html"), ("Channel Manager", "/products/channel-manager.html"),
+                ("eGlobe AI Tools", "/products/ai-tools.html"), ("Finance & Revenue", "/products/finance-revenue.html"),
+                ("POS", "/products/pos.html"), ("Housekeeping", "/products/housekeeping.html"),
+                ("KOT", "/products/kot.html"), ("Booking Engine", "/products/booking-engine.html"),
+                ("OTA Listing & Management", "/products/ota-management.html"), ("Google Hotel Ads", "/products/google-hotel-ads.html"),
+                ("Meta Search Engines", "/products/meta-search.html"), ("B2B Stay", "/products/b2b-stay.html"),
+                ("Website Builder", "/products/website-builder.html"), ("Reviews Manager", "/products/reviews-manager.html"),
+                ("Payment Gateway", "/products/payment-gateway.html"), ("PMS APIs", "/products/pms-apis.html"),
             };
             foreach (var (label, url) in footerProduct)
             {
@@ -149,7 +372,7 @@ public static class DbInitializer
             i = 0;
             var footerCompany = new[]
             {
-                ("Home", "index.html"), ("Pricing", "pricing.html"), ("Resellers", "reseller.html"),
+                ("Home", "index.html"), ("About Us", "about.html"), ("Pricing", "pricing.html"), ("Resellers", "reseller.html"),
                 ("Blog", "blog.html"), ("Contact", "contact.html"),
             };
             foreach (var (label, url) in footerCompany)
@@ -195,6 +418,15 @@ public static class DbInitializer
                     Description = "Talk to eGlobe's sales team about the hotel technology stack we source and connect for you, PMS, channel manager, POS, housekeeping and revenue management.",
                     Keywords = "hotel management software demo, hotel PMS demo, contact hotel software sales, hospitality SaaS sales",
                     CanonicalUrl = "https://www.eglobe-solutions.com/contact.html",
+                    OgImageUrl = "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png"
+                },
+                new SeoMetadata
+                {
+                    PageKey = "calculator",
+                    Title = "Price Calculator, eGlobe Solutions | Build a Hotel Software Quote",
+                    Description = "Build an instant, accurate quotation across eGlobe's Per Room, Per Property and Enterprise pricing models, modules, add-ons, tax and commissions included.",
+                    Keywords = "hotel management software price calculator, hotel PMS quote, hotel software pricing estimate",
+                    CanonicalUrl = "https://www.eglobe-solutions.com/calculator.html",
                     OgImageUrl = "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png"
                 },
                 new SeoMetadata
