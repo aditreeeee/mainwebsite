@@ -157,23 +157,30 @@
     }, {passive:true});
   }
 
-  /* ---------- Solutions in the mobile nav-dock pill ----------
+  /* ---------- Solutions in the nav-dock pill ----------
      The nav-dock pill (Home/Pricing/Resellers) is the ONLY navigation
      surface on mobile, #topbar-links is display:none below 760px entirely.
      Previously there was no way to reach the product list on a phone at
-     all. This adds a "Solutions" row that expands an in-place accordion
-     (not a second overlay stacked on top of the mobile menu) listing the
-     same 16 products, grouped the same way as the desktop mega-menu. Must
-     run before initDock() so the product links it creates are included in
-     initDock()'s "any link click closes the mobile menu" wiring below. */
+     all. A stacked accordion listing all 16 products here turned out to be
+     the wrong shape for a phone (too much to scan inside an already-small
+     popover), so on mobile "Solutions" is now a plain link straight to the
+     ecosystem section, exactly like Home/Pricing/Resellers already work.
+     Desktop keeps the small dropdown (real hover/click target, room for
+     categories) since the pill isn't the cramped surface there. This is a
+     single <a> element for both cases: on mobile its href just navigates
+     normally; on desktop the click handler intercepts it to open the
+     dropdown instead. Must run before initDock() so this link and the
+     dropdown's product links are included in initDock()'s "any link click
+     closes the mobile menu" wiring below. */
   function initNavDockSolutions(){
     var links = document.querySelector('.nav-dock__links');
     if(!links) return;
 
     var depth = /\/(products|blog-articles)\//.test(location.pathname) ? '../' : '';
+    var isMobileNav = function(){ return window.innerWidth <= 860; };
 
-    var toggle = document.createElement('button');
-    toggle.type = 'button';
+    var toggle = document.createElement('a');
+    toggle.href = depth + 'index.html#ecosystem';
     toggle.className = 'nav-dock__link nav-dock__solutions-toggle';
     toggle.setAttribute('aria-expanded', 'false');
     toggle.textContent = 'Solutions';
@@ -193,13 +200,15 @@
     }
 
     toggle.addEventListener('click', function(e){
+      if(isMobileNav()) return; // let the href navigate to the ecosystem section as-is
+      e.preventDefault();
       e.stopPropagation(); // don't let this bubble into the mobile "click outside closes menu" handler
       var open = panel.classList.toggle('open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     // Desktop pill has no burger/backdrop, so this dropdown needs its own
-    // click-outside-to-close (mobile's accordion doesn't need this, tapping
-    // outside there already closes the whole mobile menu via initDock()).
+    // click-outside-to-close (mobile doesn't reach this code path at all,
+    // its tap navigates away immediately).
     document.addEventListener('click', function(e){
       if(!panel.contains(e.target) && e.target !== toggle) closePanel();
     });

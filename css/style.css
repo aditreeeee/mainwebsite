@@ -343,21 +343,27 @@ p{margin:0;color:var(--ink-soft);}
 
 .nav-dock__solutions-panel{
   display:none;
-  position:absolute; bottom:calc(100% + 12px); left:50%; transform:translateX(-50%);
-  width:260px; max-height:min(420px, 60vh); overflow-y:auto;
-  background:var(--navy-deep); color:#fff; border-radius:14px; padding:14px;
-  box-shadow:0 20px 50px rgba(16,25,53,.3);
+  position:absolute; bottom:calc(100% + 14px); left:50%; transform:translateX(-50%);
+  /* Wide enough to lay categories out in two real columns instead of one
+     narrow, scrolling, single-file list, letting all 16 products read at a
+     glance without hunting through a scrollbar. */
+  width:min(460px, 92vw); max-height:none; overflow:visible;
+  background:var(--navy-deep); color:#fff; border-radius:16px; padding:22px 26px;
+  box-shadow:0 24px 60px rgba(16,25,53,.35);
   z-index:1100;
+  column-count:2; column-gap:26px;
 }
 .nav-dock__solutions-panel.open{display:block;}
 .nav-dock__solutions-label{
-  font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em;
-  color:rgba(255,255,255,.45); margin:14px 0 6px;
+  font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
+  color:rgba(255,255,255,.45); margin:16px 0 8px;
+  break-after:avoid; break-inside:avoid;
 }
-.nav-dock__solutions-label:first-child{margin-top:0;}
+.nav-dock__solutions-label:first-of-type{margin-top:0;}
 .nav-dock__solutions-panel a{
   display:block; font-size:13px; font-weight:600; color:rgba(255,255,255,.9);
-  padding:8px 10px; margin:0 -10px; border-radius:8px; transition:background .15s ease;
+  padding:7px 10px; margin:0 -10px; border-radius:8px; transition:background .15s ease;
+  break-inside:avoid;
 }
 .nav-dock__solutions-panel a:hover{background:rgba(255,255,255,.1); color:#fff;}
 
@@ -402,19 +408,13 @@ p{margin:0;color:var(--ink-soft);}
   .nav-dock__burger[aria-expanded="true"] .l2{opacity:0;}
   .nav-dock__burger[aria-expanded="true"] .l3{transform:translateY(-6px) rotate(-45deg);}
 
-  /* Solutions becomes an in-place accordion inside the mobile menu card,
-     not a second floating panel, so it never gets clipped by the
-     already-fixed-position mobile menu or requires a separate dead-zone
-     hover path (this is tap-only anyway, no hover concerns on mobile). */
+  /* Solutions is a plain link straight to the ecosystem section on mobile
+     (see initNavDockSolutions in main.js), the dropdown panel is desktop
+     -only and never opens here, this just matches the toggle/link's own
+     look to the other full-width rows (Home/Pricing/Resellers) in the
+     mobile menu card. */
   .nav-dock__solutions-toggle{width:100%; justify-content:space-between; padding:13px 16px; text-align:left;}
-  .nav-dock__solutions-panel{
-    position:static; transform:none; width:auto; max-height:none; overflow:visible;
-    background:rgba(17,24,39,.04); color:var(--ink); border-radius:12px;
-    padding:4px 12px 8px; margin:0 0 2px; box-shadow:none;
-  }
-  .nav-dock__solutions-label{color:var(--ink-soft);}
-  .nav-dock__solutions-panel a{color:var(--ink); padding:11px 8px;}
-  .nav-dock__solutions-panel a:hover{background:rgba(17,24,39,.06); color:var(--ink);}
+  .nav-dock__solutions-toggle::after{display:none;}
 }
 
 /* ==========================================================================
@@ -2211,7 +2211,16 @@ footer{
   color:rgba(255,255,255,.82);
   padding-top:0;
   position:sticky;
+  /* The sticky-footer-at-bottom trick pins this at the bottom of the
+     viewport via top:100vh. On mobile, 100vh is measured against the
+     LARGEST possible viewport (address bar hidden), but the page actually
+     renders shorter than that while the address bar is showing, so a
+     sliver of the body's background peeks through below the footer, the
+     "white line" at the end of the page. 100dvh tracks the real, current
+     viewport instead; browsers that don't understand dvh simply ignore
+     this second declaration and keep the vh fallback above. */
   top:100vh;
+  top:100dvh;
   z-index:0;
   overflow:hidden;
 }
