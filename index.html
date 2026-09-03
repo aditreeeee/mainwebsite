@@ -160,7 +160,7 @@
       <div class="dash">
         <div class="dash__bar">
           <span class="d"></span><span class="d"></span><span class="d"></span>
-          <span class="title">eglobe.app / dashboard</span>
+          <span class="title">eGlobe Solutions / dashboard</span>
         </div>
         <div class="dash__tabs" role="tablist">
           <button class="dash__tab active" data-dash-tab="overview" role="tab" aria-selected="true">Overview</button>
@@ -281,13 +281,13 @@
           </div>
         </div>
       </div>
-      <div class="floaty floaty--1">
+      <div class="floaty floaty--1" data-floaty-cycle="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Rate sync complete
+        <span class="floaty__text">Rate sync complete</span>
       </div>
-      <div class="floaty floaty--2">
+      <div class="floaty floaty--2" data-floaty-cycle="1">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Housekeeping updated
+        <span class="floaty__text">Housekeeping updated</span>
       </div>
     </div>
   </div>
@@ -921,7 +921,6 @@
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Monday, Saturday, 9:30 AM, 6:30 PM (IST)</span>
     </div>
   </div>
-  <span class="footer__watermark" aria-hidden="true">eGlobe Solutions</span>
   <div class="container footer__bottom-wrap">
     <div class="footer__bottom">
 
@@ -986,10 +985,30 @@
         <input type="text" required autocomplete="name" placeholder="Your name">
         <span class="field-msg"></span>
       </div>
+      <div class="field" data-field="company">
+        <label class="mono">Hotel Name <span class="field-optional">(optional)</span></label>
+        <input type="text" autocomplete="organization" placeholder="Your property">
+        <span class="field-msg"></span>
+      </div>
+      <div class="field" data-field="email">
+        <label class="mono">Work Email <span class="field-optional">(optional)</span></label>
+        <input type="email" autocomplete="email" placeholder="you@yourhotel.com">
+        <span class="field-msg"></span>
+      </div>
       <div class="field" data-field="phone">
         <label class="mono">Phone *</label>
         <input type="tel" required autocomplete="tel" placeholder="We'll call you back">
         <span class="field-msg"></span>
+      </div>
+      <div class="field" data-field="rooms">
+        <label class="mono">Number of Rooms <span class="field-optional">(optional)</span></label>
+        <div class="room-chips" role="group" aria-label="Number of rooms">
+          <button type="button" class="room-chip" data-rooms="1-10">1–10</button>
+          <button type="button" class="room-chip" data-rooms="11-50">11–50</button>
+          <button type="button" class="room-chip" data-rooms="51-150">51–150</button>
+          <button type="button" class="room-chip" data-rooms="150+">150+</button>
+        </div>
+        <input type="hidden">
       </div>
       <button type="submit" class="btn btn-primary btn-block">Send</button>
       <p class="form-status"></p>

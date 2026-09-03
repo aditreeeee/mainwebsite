@@ -3,7 +3,7 @@
    Tech Neubrutalism × Grid/Wireframe × Bento SaaS
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root{
   /* Colour system */
@@ -21,7 +21,7 @@
   --success:#16A34A;
   --warn:#D97706;
 
-  --font-display:'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-display:'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
   --font-mono:'JetBrains Mono', 'Consolas', monospace;
 
   /* Minerva-style: near-square corners, thin solid black borders, flat */
@@ -56,31 +56,42 @@ html{scroll-behavior:smooth; overflow-x:hidden; --spot-x:-9999px; --spot-y:-9999
 body{
   margin:0;
   font-family:var(--font-display);
+  /* Three layers, quietest first: a faint dot grid for the same technical
+     texture the old line grid gave (much quieter than ruled lines), a
+     barely-there 45deg hatch underneath for a subtle woven quality instead
+     of a flat wireframe, and two soft, large-scale blue radial blooms for
+     depth, so the page doesn't read as pure flat white. All three are
+     deliberately low-contrast, this replaces a literal grid, it isn't
+     meant to be as prominent as one. */
   background:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    radial-gradient(var(--grid-line) 1px, transparent 1.5px),
+    repeating-linear-gradient(45deg, rgba(17,24,39,.028) 0 1px, transparent 1px 44px),
+    radial-gradient(900px 650px at 12% 0%, rgba(59,82,232,.07), transparent 60%),
+    radial-gradient(800px 600px at 100% 100%, rgba(59,82,232,.055), transparent 65%),
     var(--canvas);
-  background-size:44px 44px, 44px 44px, auto;
+  background-size:44px 44px, auto, auto, auto, auto;
   background-attachment:fixed;
   color:var(--ink);
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
 
-/* ---------- Cursor-reactive pixel grid: lights up nearby grid cells as the
-   pointer moves over any area where the page-level grid is visible. Purely
-   decorative; --spot-x/--spot-y are updated in main.js via mousemove. ---------- */
+/* ---------- Cursor-reactive dot grid: lights up nearby dots as the
+   pointer moves over any area where the page-level pattern is visible.
+   Purely decorative; --spot-x/--spot-y are updated in main.js via
+   mousemove. ---------- */
 body::before{
   content:'';
   position:fixed;
   inset:0;
-  background-image:
-    linear-gradient(var(--blue) 1px, transparent 1px),
-    linear-gradient(90deg, var(--blue) 1px, transparent 1px);
-  background-size:44px 44px, 44px 44px;
-  opacity:.55;
-  -webkit-mask-image:radial-gradient(200px circle at var(--spot-x) var(--spot-y), #000 0%, transparent 72%);
-          mask-image:radial-gradient(200px circle at var(--spot-x) var(--spot-y), #000 0%, transparent 72%);
+  /* Dots inside the spotlight are drawn noticeably larger than the base
+     page grid (2.5px vs 1px), so the effect reads as "these specific dots
+     lit up" rather than just a faint colour wash near the cursor. */
+  background-image:radial-gradient(var(--blue) 2.5px, transparent 3px);
+  background-size:44px 44px;
+  opacity:.85;
+  -webkit-mask-image:radial-gradient(170px circle at var(--spot-x) var(--spot-y), #000 0%, #000 38%, transparent 70%);
+          mask-image:radial-gradient(170px circle at var(--spot-x) var(--spot-y), #000 0%, #000 38%, transparent 70%);
   pointer-events:none;
 }
 
@@ -208,7 +219,10 @@ p{margin:0;color:var(--ink-soft);}
   padding:15px 28px;
   font-size:15px;
   font-weight:600;
-  border-radius:var(--radius-sm);
+  /* Scoped to buttons specifically rather than bumping --radius-sm globally,
+     the site's sharp-cornered neubrutalist cards/inputs elsewhere are a
+     deliberate part of the look; buttons alone read as too boxy though. */
+  border-radius:9px;
   border:var(--border);
   /* `color` transitions alongside `background` so a light-text/dark-bg swap
      (e.g. .btn-ghost on hover) never has a mid-transition moment where the
@@ -572,11 +586,11 @@ p{margin:0;color:var(--ink-soft);}
    SECTION SCAFFOLDING
    ========================================================================== */
 section{position:relative;}
-.section{padding:80px 0;}
-.section-tight{padding:56px 0;}
+.section{padding:64px 0;}
+.section-tight{padding:48px 0;}
 @media (max-width:700px){
-  .section{padding:44px 0;}
-  .section-tight{padding:32px 0;}
+  .section{padding:38px 0;}
+  .section-tight{padding:28px 0;}
 }
 .section-border-top{border-top:var(--border-light);}
 .section-dark{background:var(--navy-deep); color:var(--white);}
@@ -604,10 +618,10 @@ section{position:relative;}
 
 .section-head{
   max-width:720px;
-  margin-bottom:64px;
+  margin-bottom:48px;
 }
 .section-head.center{margin-left:auto;margin-right:auto;text-align:center;}
-.section-head--tight{margin-bottom:32px;}
+.section-head--tight{margin-bottom:26px;}
 
 /* ---------- Chapter marker + connecting narration ---------- */
 .chapter{
@@ -656,7 +670,7 @@ section{position:relative;}
 
 /* ---------- Editorial statement — oversized single-line break ---------- */
 .statement{
-  padding:70px 0;
+  padding:52px 0;
   border-top:1px solid var(--grid-line-strong);
   border-bottom:1px solid var(--grid-line-strong);
   background:var(--white);
@@ -763,7 +777,7 @@ section{position:relative;}
    ========================================================================== */
 .hero{
   position:relative;
-  padding:90px 0 60px;
+  padding:76px 0 44px;
   overflow:hidden;
 }
 .hero__grid{
@@ -777,15 +791,15 @@ section{position:relative;}
 .hero__copy p.lead{
   font-size:19px;
   max-width:520px;
-  margin:22px 0 34px;
+  margin:16px 0 26px;
   color:var(--ink-soft);
 }
-.hero h1{margin-top:18px; color:#000;}
+.hero h1{margin-top:14px; color:#000;}
 .hero h1 .accent{color:var(--blue);}
-.hero__cta-row{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:36px;}
+.hero__cta-row{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:26px;}
 .hero__proof{
   display:flex; gap:36px; flex-wrap:wrap;
-  padding-top:28px;
+  padding-top:20px;
   border-top:var(--border-light);
 }
 .hero__proof .stat-num{
@@ -878,7 +892,9 @@ section{position:relative;}
   display:flex; align-items:center; gap:8px;
   animation:float 5s ease-in-out infinite;
 }
-.floaty svg{width:14px;height:14px;color:var(--success);}
+.floaty svg{width:14px;height:14px;color:var(--success);flex-shrink:0;}
+.floaty__text{display:inline-block; white-space:nowrap; transition:opacity .3s ease, transform .3s ease;}
+.floaty__text.swap{opacity:0; transform:translateY(4px);}
 .floaty--1{top:-22px; right:18px; animation-delay:.2s;}
 .floaty--2{bottom:20px; left:-30px; animation-delay:1.2s;}
 @keyframes float{
@@ -1026,7 +1042,7 @@ section{position:relative;}
    LOGO / SOCIAL PROOF STRIP
    ========================================================================== */
 .logo-strip{
-  padding:48px 0;
+  padding:34px 0;
   border-top:var(--border-light);
   border-bottom:var(--border-light);
   background:var(--white);
@@ -1825,7 +1841,7 @@ section{position:relative;}
   font-size:14px;
 }
 .qe-form .form-status{margin-top:10px; font-size:13px; text-align:center;}
-.qe-form .btn{border-radius:0; margin-top:2px;}
+.qe-form .btn{margin-top:2px;}
 .qe-form__full-link{
   display:block; text-align:center; margin-top:12px; font-size:12px; font-weight:600; color:var(--ink-soft);
 }
@@ -2225,42 +2241,10 @@ footer{
   overflow:hidden;
 }
 
-/* Bold brand wordmark, the footer's final full-width band (flows in normal
-   document order after everything else, so it's always fully visible and
-   never overlaps or gets clipped by the content above it). */
-.footer__watermark{
-  position:relative; z-index:1;
-  display:block;
-  width:100%;
-  text-align:center;
-  font-family:var(--font-display);
-  font-weight:800;
-  /* Scaled by vw (not a fixed rem cap) so the wordmark keeps stretching
-     toward the viewport edges on wide screens instead of plateauing. */
-  font-size:clamp(3.5rem, 15vw, 15rem);
-  letter-spacing:-.01em;
-  color:rgba(255,255,255,.94);
-  white-space:nowrap;
-  overflow:hidden;
-  pointer-events:none;
-  user-select:none;
-  line-height:1;
-  padding:.2em 6px .12em;
-  border-top:1px solid rgba(255,255,255,.1);
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-@media (max-width:760px){
-  .footer__watermark{font-size:clamp(2rem,12.5vw,4rem); padding:.2em 4px .12em;}
-}
-@media (max-width:480px){
-  /* "eGlobe Solutions" at 16 characters needs a smaller vw multiplier on
-     phone-width screens specifically, the 760px breakpoint's ratio is
-     tuned for wider tablets and clips on true phone widths otherwise. */
-  .footer__watermark{font-size:clamp(1.5rem,10vw,2.6rem);}
-}
-
-/* Status/copyright strip now lives below the wordmark, its own centered band. */
-.footer__bottom-wrap{padding-top:12px; padding-bottom:16px;}
+/* Status/copyright strip, its own centered band below the contact strip.
+   Keeps the separator line that used to sit between the wordmark and this
+   strip, now just directly under .footer__strip instead. */
+.footer__bottom-wrap{padding-top:12px; padding-bottom:16px; border-top:1px solid rgba(255,255,255,.1);}
 
 .footer__bookend{
   position:relative; z-index:1;
@@ -3169,6 +3153,19 @@ img.testi-card__avatar{
 }
 .pp-usecase h3{font-size:14.5px; margin-bottom:6px;}
 .pp-usecase p{font-size:13px; color:var(--ink-soft); line-height:1.5;}
+
+.pp-what-is{font-size:15.5px; max-width:720px; color:var(--ink-soft); margin-top:14px; line-height:1.6;}
+
+.pp-steps{display:grid; grid-template-columns:repeat(2, 1fr); gap:20px 32px; margin-top:24px;}
+@media (max-width:760px){ .pp-steps{grid-template-columns:1fr;} }
+.pp-step{display:flex; gap:14px; align-items:flex-start;}
+.pp-step__num{
+  width:32px; height:32px; border-radius:9px; background:var(--navy-deep); color:#fff;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-family:var(--font-mono); font-size:13px; font-weight:700;
+}
+.pp-step h3{font-size:14.5px; margin-bottom:4px;}
+.pp-step p{font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
 
 .pp-availability{
   display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600;

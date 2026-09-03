@@ -500,6 +500,36 @@
     });
   }
 
+  /* ---------- Ambient "live activity" badges over the hero dash mock ---------- */
+  function initFloatyCycle(){
+    var floaties = Array.prototype.slice.call(document.querySelectorAll('.floaty'));
+    if(!floaties.length) return;
+
+    var MESSAGES = [
+      'Rate sync complete',
+      'New booking, Room 204',
+      'Housekeeping updated',
+      'Payment received',
+      'Guest checked in',
+      'Availability pushed live'
+    ];
+
+    floaties.forEach(function(floaty, i){
+      var textEl = floaty.querySelector('.floaty__text');
+      if(!textEl) return;
+      var msgIndex = i % MESSAGES.length;
+
+      setInterval(function(){
+        textEl.classList.add('swap');
+        setTimeout(function(){
+          msgIndex = (msgIndex + floaties.length) % MESSAGES.length;
+          textEl.textContent = MESSAGES[msgIndex];
+          textEl.classList.remove('swap');
+        }, 300);
+      }, 3600 + i * 400);
+    });
+  }
+
   /* ---------- Cursor-reactive pixel grid ---------- */
   /* ---------- Hero interactive demo: tabs, rate cells, inventory, promotions ---------- */
 
@@ -1158,6 +1188,7 @@
     var submitLabel = submitBtn ? submitBtn.textContent : 'Send';
     var REQUIRED = ['name', 'phone'];
     var lastFocused = null;
+    var selectedRooms = '';
 
     function fieldGroup(key){ return form.querySelector('.field[data-field="' + key + '"]'); }
     function setMsg(group, msg){
@@ -1186,15 +1217,35 @@
         setMsg(group, val.length > 0 && !phoneOk ? 'Enter a valid phone number.' : '');
         return phoneOk;
       }
+      if(key === 'email'){
+        var emailOk = val.length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+        group.classList.toggle('invalid', val.length > 0 && !emailOk);
+        group.classList.toggle('valid', val.length > 0 && emailOk);
+        setMsg(group, val.length > 0 && !emailOk ? 'Enter a valid email address.' : '');
+        return emailOk;
+      }
       return true;
     }
 
-    REQUIRED.forEach(function(key){
+    ['name', 'phone', 'email'].forEach(function(key){
       var group = fieldGroup(key);
       if(!group) return;
       var input = group.querySelector('input');
       input.addEventListener('blur', function(){ validateField(key); });
     });
+
+    var qeRoomsGroup = fieldGroup('rooms');
+    if(qeRoomsGroup){
+      var qeRoomsInput = qeRoomsGroup.querySelector('input[type="hidden"]');
+      qeRoomsGroup.querySelectorAll('.room-chip').forEach(function(chip){
+        chip.addEventListener('click', function(){
+          qeRoomsGroup.querySelectorAll('.room-chip').forEach(function(c){ c.classList.remove('active'); });
+          chip.classList.add('active');
+          selectedRooms = chip.getAttribute('data-rooms');
+          if(qeRoomsInput) qeRoomsInput.value = selectedRooms;
+        });
+      });
+    }
 
     function open(){
       lastFocused = document.activeElement;
@@ -1219,7 +1270,7 @@
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
-      var allValid = REQUIRED.map(validateField).every(Boolean);
+      var allValid = REQUIRED.map(validateField).every(Boolean) && validateField('email');
       if(!allValid){
         var firstInvalid = REQUIRED.find(function(key){ return !validateField(key); });
         if(firstInvalid){
@@ -1242,6 +1293,9 @@
       var body = new URLSearchParams();
       body.set('FullName', fieldGroup('name').querySelector('input').value.trim());
       body.set('Phone', fieldGroup('phone').querySelector('input').value.trim());
+      body.set('HotelName', fieldGroup('company') ? fieldGroup('company').querySelector('input').value.trim() : '');
+      body.set('Email', fieldGroup('email') ? fieldGroup('email').querySelector('input').value.trim() : '');
+      body.set('RoomsRange', selectedRooms);
       body.set('Website', websiteEl ? websiteEl.value : '');
       body.set('FormType', 'quick');
       if(tokenEl) body.set('__RequestVerificationToken', tokenEl.value);
@@ -1431,6 +1485,7 @@
     initMagnetic();
     initGridSpotlight();
     initHeroDemo();
+    initFloatyCycle();
     initProductModal();
     initContactForm();
     initQuickEnquiryPopup();
