@@ -127,3 +127,7 @@ app.MapHealthChecks("/health");
 await DbInitializer.InitializeAsync(app.Services);
 
 app.Run();
+
+// Exposes the top-level Program for WebApplicationFactory<Program> in the
+// integration test project (standard ASP.NET Core pattern).
+public partial class Program { }

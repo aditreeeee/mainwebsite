@@ -20,7 +20,7 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "Pricing, eGlobe Solutions")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "Simple, transparent pricing for the hotel technology stack eGlobe sources for you.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/style.min.css">
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -109,7 +109,7 @@
       {
         <div class="price-teaser-card @(plan.IsFeatured ? "featured" : "")">
           <span class="badge-pill">@plan.BadgeText</span>
-          <h4>@plan.Name</h4>
+          <h3>@plan.Name</h3>
           <p class="unit">@plan.UnitDescription</p>
           <ul>
             @foreach (var f in plan.Features)
@@ -200,7 +200,7 @@
   </nav>
 </div>
 
-<script src="~/js/main.js"></script>
+<script src="~/js/main.min.js"></script>
 </body>
 </html>
 

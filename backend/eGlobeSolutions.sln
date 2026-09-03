@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eGlobeSolutions.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eGlobeSolutions.Web", "src\eGlobeSolutions.Web\eGlobeSolutions.Web.csproj", "{EF2DAFFD-8942-49B4-955E-232CCA8CE754}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{050B01A2-BF89-48D8-9164-0787B71C1818}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eGlobeSolutions.Tests", "tests\eGlobeSolutions.Tests\eGlobeSolutions.Tests.csproj", "{5AC44BF8-0CE8-4797-9812-C470D0DA4DBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +36,15 @@ Global
 		{EF2DAFFD-8942-49B4-955E-232CCA8CE754}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF2DAFFD-8942-49B4-955E-232CCA8CE754}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF2DAFFD-8942-49B4-955E-232CCA8CE754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AC44BF8-0CE8-4797-9812-C470D0DA4DBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AC44BF8-0CE8-4797-9812-C470D0DA4DBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AC44BF8-0CE8-4797-9812-C470D0DA4DBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AC44BF8-0CE8-4797-9812-C470D0DA4DBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B05D7490-1558-4490-AE45-EC0B83A5D52C} = {6FF6C033-0581-4A80-BFEE-0A6DD883937B}
 		{EBF32E52-CF1C-488A-B09F-098B1648818D} = {6FF6C033-0581-4A80-BFEE-0A6DD883937B}
 		{EF2DAFFD-8942-49B4-955E-232CCA8CE754} = {6FF6C033-0581-4A80-BFEE-0A6DD883937B}
+		{5AC44BF8-0CE8-4797-9812-C470D0DA4DBE} = {050B01A2-BF89-48D8-9164-0787B71C1818}
 	EndGlobalSection
 EndGlobal

@@ -120,20 +120,24 @@
     });
   }
 
-  /* ---------- Modules ---------- */
+  /* ---------- Modules ----------
+     Availability (Included / Add-on / Not typical) is shown as a reference
+     badge only, plans are for observation now, every module can be freely
+     ticked on or off for this specific client regardless of what its plan
+     normally includes. A module's checked state is only ever defaulted once,
+     when it's first seen (Included modules start ticked, everything else
+     starts unticked); after that it's entirely under manual control and
+     survives switching between plan cards. */
   function moduleRow(module) {
     var availability = availabilityFor(module);
     var sel = state.selections[module.id];
-    var disabled = availability === "NotAvailable";
     var included = availability === "Included";
-
-    if (included) sel.checked = true;
-    if (disabled) sel.checked = false;
+    var notTypical = availability === "NotAvailable";
 
     var badge = included
-      ? el("span", { class: "calc-badge calc-badge--included" }, [document.createTextNode("Included")])
-      : disabled
-        ? el("span", { class: "calc-badge calc-badge--disabled" }, [document.createTextNode("Not available")])
+      ? el("span", { class: "calc-badge calc-badge--included" }, [document.createTextNode("Included in plan")])
+      : notTypical
+        ? el("span", { class: "calc-badge calc-badge--optional" }, [document.createTextNode("Not typical for plan")])
         : el("span", { class: "calc-badge calc-badge--addon" }, [document.createTextNode("Add-on")]);
 
     var checkbox = el("input", {
@@ -141,7 +145,6 @@
       id: "calc-mod-" + module.id
     });
     checkbox.checked = sel.checked;
-    checkbox.disabled = disabled || included;
     checkbox.addEventListener("change", function () {
       sel.checked = checkbox.checked;
       volumeWrap.style.display = (sel.checked && module.chargeType === "Commission") ? "block" : "none";
@@ -149,7 +152,7 @@
     });
 
     var priceHint = "";
-    if (!disabled && !included) {
+    if (!included) {
       if (module.chargeType === "Commission") {
         priceHint = module.commissionPercent + "% commission";
       } else if (module.chargeType === "PerRoomMonthly") {
@@ -174,13 +177,13 @@
 
     var volumeWrap = el("div", {
       class: "calc-module-volume",
-      style: (sel.checked && module.chargeType === "Commission" && !disabled) ? "display:block" : "display:none"
+      style: (sel.checked && module.chargeType === "Commission") ? "display:block" : "display:none"
     }, [
       el("label", {}, [document.createTextNode(module.volumeInputLabel || "Estimated monthly value (₹)")]),
       volumeInput
     ]);
 
-    var row = el("div", { class: "calc-module-row" + (disabled ? " is-disabled" : "") }, [
+    var row = el("div", { class: "calc-module-row" }, [
       el("label", { class: "calc-module-row__main", for: "calc-mod-" + module.id }, [
         checkbox,
         el("span", { class: "calc-module-row__name" }, [
@@ -203,7 +206,9 @@
     addon.innerHTML = "";
 
     state.catalog.modules.forEach(function (module) {
-      if (!state.selections[module.id]) state.selections[module.id] = { checked: false, volume: 0 };
+      if (!state.selections[module.id]) {
+        state.selections[module.id] = { checked: availabilityFor(module) === "Included", volume: 0 };
+      }
       var row = moduleRow(module);
       if (module.category === "CoreModule") core.appendChild(row);
       else addon.appendChild(row);
@@ -222,7 +227,8 @@
       totalRooms: Number(els.rooms.value) || 1,
       taxId: state.taxId,
       billingCycleId: state.billingCycleId,
-      selectedModules: selectedModules
+      selectedModules: selectedModules,
+      waiveOneTimeSetupFees: !!(els.waiveSetup && els.waiveSetup.checked)
     };
   }
 
@@ -295,7 +301,6 @@
 
     var linesWrap = el("div", { class: "calc-summary__lines" });
     result.lines.forEach(function (line) {
-      if (line.lineType === "Ineligible") return;
       var amountText = line.lineType === "Included"
         ? "Included"
         : line.lineType === "Commission"
@@ -310,7 +315,11 @@
     body.appendChild(summaryLine("Subscription subtotal", fmtMoney(result.subscriptionMonthlySubtotal) + "/mo"));
     if (result.taxAmount > 0) body.appendChild(summaryLine("Tax (" + result.taxRatePercent + "%)", fmtMoney(result.taxAmount)));
     if (result.commissionMonthlyEstimate > 0) body.appendChild(summaryLine("Commission (est.)", fmtMoney(result.commissionMonthlyEstimate) + "/mo"));
-    if (result.oneTimeChargesTotal > 0) body.appendChild(summaryLine("One-time setup charges", fmtMoney(result.oneTimeChargesTotal)));
+    if (result.oneTimeFeesWaived) {
+      body.appendChild(summaryLine("One-time setup charges", "Waived"));
+    } else if (result.oneTimeChargesTotal > 0) {
+      body.appendChild(summaryLine("One-time setup charges", fmtMoney(result.oneTimeChargesTotal)));
+    }
 
     body.appendChild(el("div", { class: "calc-summary__divider" }));
 
@@ -330,6 +339,233 @@
     if (result.isCustomQuote) {
       body.appendChild(el("p", { class: "calc-empty", style: "margin-top:14px;" }, [document.createTextNode("Enterprise pricing is customised, the figures above are an estimate. Contact sales to confirm final pricing.")]));
     }
+
+    renderPrintQuote(result);
+  }
+
+  /* ---------- Printed quotation ----------
+     A formal itemised quotation (billto block, line-item tables, totals box,
+     amount in words, terms, signature) built from the same calculate result
+     the on-screen summary uses, nothing here is invented, every figure comes
+     straight from the calculator's own API response. Rendered into the
+     print-only containers added around the on-screen summary, which the
+     @media print rules in style.css hide everything else in favour of. */
+  var ONES = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  var TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+  function threeDigitsToWords(n) {
+    var out = "";
+    if (n >= 100) { out += ONES[Math.floor(n / 100)] + " Hundred"; n %= 100; if (n) out += " "; }
+    if (n >= 20) { out += TENS[Math.floor(n / 10)]; if (n % 10) out += " " + ONES[n % 10]; }
+    else if (n > 0) { out += ONES[n]; }
+    return out;
+  }
+
+  /** Indian numbering system (lakh/crore) rupee amount in words, e.g. 73264 -> "Seventy Three Thousand Two Hundred Sixty Four". */
+  function amountToWordsIndian(amount) {
+    var n = Math.round(Math.abs(Number(amount) || 0));
+    if (n === 0) return "Zero";
+    var crore = Math.floor(n / 10000000); n %= 10000000;
+    var lakh = Math.floor(n / 100000); n %= 100000;
+    var thousand = Math.floor(n / 1000); n %= 1000;
+    var rest = n;
+    var parts = [];
+    if (crore) parts.push(threeDigitsToWords(crore) + " Crore");
+    if (lakh) parts.push(threeDigitsToWords(lakh) + " Lakh");
+    if (thousand) parts.push(threeDigitsToWords(thousand) + " Thousand");
+    if (rest) parts.push(threeDigitsToWords(rest));
+    return parts.join(" ");
+  }
+
+  function printTableRow(cells) {
+    return el("tr", {}, cells.map(function (c) {
+      return el("td", { class: c.class || "" }, [document.createTextNode(c.text)]);
+    }));
+  }
+
+  /** One bordered, header-banded line-item table (mirrors the "Material /
+      Products" and "Labor" tables in the reference quotation layout).
+      Every row is fully pre-formatted text (row.cells = array of strings,
+      one per column after Sl. No.), and row.amount is the raw number used
+      only to sum the Total row, no formatting decisions happen in here. */
+  function printItemTable(title, rows, columns, waived) {
+    if (!rows.length) return null;
+    var totalAmount = rows.reduce(function (sum, r) { return sum + r.amount; }, 0);
+
+    var thead = el("thead", {}, [
+      el("tr", {}, columns.map(function (c) { return el("th", { class: c.class || "" }, [document.createTextNode(c.label)]); }))
+    ]);
+
+    var tbody = el("tbody", {}, rows.map(function (r, i) {
+      var cells = [{ text: String(i + 1), class: "calc-print-table__num" }, { text: r.description, class: "calc-print-table__desc" }];
+      r.cells.forEach(function (c) { cells.push({ text: c, class: "calc-print-table__num" }); });
+      cells.push({ text: waived ? "Waived" : fmtBase(r.amount), class: "calc-print-table__num calc-print-table__amount" });
+      return printTableRow(cells);
+    }));
+
+    var blankTds = columns.length - 3; // Sl.No + Description + Amount already accounted for
+    var tfoot = el("tfoot", {}, [
+      el("tr", {}, [
+        el("td", { colspan: "2", class: "calc-print-table__totallabel" }, [document.createTextNode("Total")])
+      ].concat(
+        Array.from({ length: blankTds }, function () { return el("td", {}, []); })
+      ).concat([
+        el("td", { class: "calc-print-table__num" }, [document.createTextNode(waived ? "Waived" : fmtBase(totalAmount))])
+      ]))
+    ]);
+
+    return el("div", { class: "calc-print-table-wrap" }, [
+      el("div", { class: "calc-print-table-title" }, [document.createTextNode(title)]),
+      el("table", { class: "calc-print-table" }, [thead, tbody, tfoot])
+    ]);
+  }
+
+  function renderPrintQuote(result) {
+    var billToWrap = document.getElementById("calc-print-billto");
+    var tablesWrap = document.getElementById("calc-print-tables");
+    var totalsWrap = document.getElementById("calc-print-totals");
+    var termsWrap = document.getElementById("calc-print-terms");
+    if (!billToWrap || !tablesWrap || !totalsWrap || !termsWrap) return;
+
+    billToWrap.innerHTML = "";
+    tablesWrap.innerHTML = "";
+    totalsWrap.innerHTML = "";
+    termsWrap.innerHTML = "";
+
+    if (!result.success) return;
+
+    var customerName = (els.customer && els.customer.value.trim()) || "Prospective Customer";
+    var rooms = els.rooms.value || "-";
+    var props = els.properties.value || "-";
+
+    /* ---- Bill To / quote meta ---- */
+    billToWrap.appendChild(el("div", { class: "calc-print-billto" }, [
+      el("div", { class: "calc-print-billto__col" }, [
+        el("div", { class: "calc-print-billto__label" }, [document.createTextNode("Bill To")]),
+        el("div", { class: "calc-print-billto__name" }, [document.createTextNode(customerName)]),
+        el("div", {}, [document.createTextNode(props + " propert" + (props === "1" ? "y" : "ies") + " · " + rooms + " room" + (rooms === "1" ? "" : "s"))])
+      ]),
+      el("div", { class: "calc-print-billto__col calc-print-billto__col--right" }, [
+        metaKeyVal("Quote No.", document.getElementById("calc-print-quoteno") ? document.getElementById("calc-print-quoteno").textContent : ""),
+        metaKeyVal("Date", todayLabel()),
+        metaKeyVal("Plan", planDisplayName()),
+        metaKeyVal("Billing Cycle", result.billingCycleLabel)
+      ])
+    ]));
+
+    /* ---- Line-item tables ---- */
+    var subscriptionRows = [];
+    var oneTimeRows = [];
+    var commissionRows = [];
+
+    result.lines.forEach(function (line) {
+      if (line.oneTimeAmount > 0) {
+        oneTimeRows.push({
+          description: line.name + " (setup)",
+          cells: ["1", fmtBase(line.oneTimeAmount), "-"],
+          amount: line.oneTimeAmount
+        });
+      }
+
+      if (line.lineType === "Commission") {
+        commissionRows.push({
+          description: line.name,
+          cells: [fmtBase(line.volumeAmount), line.commissionPercent + "%", "-"],
+          amount: line.monthlyAmount
+        });
+        return;
+      }
+
+      if (line.lineType === "Included") {
+        subscriptionRows.push({
+          description: line.name,
+          cells: ["1", fmtBase(0), "-"],
+          amount: 0
+        });
+        return;
+      }
+
+      // Base or AddOn: a real recurring monthly charge.
+      subscriptionRows.push({
+        description: line.name,
+        cells: [String(line.quantity), fmtBase(line.unitPrice), result.taxRatePercent > 0 ? (result.taxRatePercent + "%") : "-"],
+        amount: line.monthlyAmount
+      });
+    });
+
+    var subscriptionTable = printItemTable("Subscription & Modules (Monthly)", subscriptionRows, [
+      { label: "Sl. No.", class: "calc-print-table__num" },
+      { label: "Description" },
+      { label: "Qty", class: "calc-print-table__num" },
+      { label: "Price / Unit (₹/mo)", class: "calc-print-table__num" },
+      { label: "GST (%)", class: "calc-print-table__num" },
+      { label: "Amount (₹/mo)", class: "calc-print-table__num" }
+    ]);
+    if (subscriptionTable) tablesWrap.appendChild(subscriptionTable);
+
+    var commissionTable = printItemTable("Commission-Based Products (Estimated)", commissionRows, [
+      { label: "Sl. No.", class: "calc-print-table__num" },
+      { label: "Description" },
+      { label: "Est. Volume (₹)", class: "calc-print-table__num" },
+      { label: "Commission %", class: "calc-print-table__num" },
+      { label: "GST (%)", class: "calc-print-table__num" },
+      { label: "Amount (₹/mo, est.)", class: "calc-print-table__num" }
+    ]);
+    if (commissionTable) tablesWrap.appendChild(commissionTable);
+
+    var oneTimeTable = printItemTable(
+      "One-Time Setup Charges" + (result.oneTimeFeesWaived ? " (Waived)" : ""),
+      oneTimeRows, [
+        { label: "Sl. No.", class: "calc-print-table__num" },
+        { label: "Description" },
+        { label: "Qty", class: "calc-print-table__num" },
+        { label: "Price / Unit (₹)", class: "calc-print-table__num" },
+        { label: "GST (%)", class: "calc-print-table__num" },
+        { label: result.oneTimeFeesWaived ? "Amount (₹, waived)" : "Amount (₹)", class: "calc-print-table__num" }
+      ],
+      result.oneTimeFeesWaived
+    );
+    if (oneTimeTable) tablesWrap.appendChild(oneTimeTable);
+
+    /* ---- Amount in words + totals box, side by side like the reference layout ---- */
+    var discountAmount = Math.max(0, (result.totalMonthlyCost * result.billingCycleMonths) - result.billingCycleRecurringTotal);
+    var wordsBox = el("div", { class: "calc-print-words" }, [
+      el("strong", {}, [document.createTextNode("Amount in Words: ")]),
+      document.createTextNode("Rupees " + amountToWordsIndian(result.billingCycleTotalDue) + " Only")
+    ]);
+    var totalsBox = el("div", { class: "calc-print-totals" }, [
+      totalsRow("Sub Total (" + result.billingCycleLabel + ")", fmtBase(result.totalMonthlyCost * result.billingCycleMonths)),
+      discountAmount > 0 ? totalsRow("Billing Cycle Discount", "-" + fmtBase(discountAmount)) : null,
+      oneTimeRows.length ? totalsRow("One-Time Setup Charges", result.oneTimeFeesWaived ? "Waived" : fmtBase(result.oneTimeChargesTotal)) : null,
+      totalsRow("Final Amount Due", fmtBase(result.billingCycleTotalDue), true)
+    ].filter(Boolean));
+    totalsWrap.appendChild(el("div", { class: "calc-print-totals-row" }, [wordsBox, totalsBox]));
+
+    /* ---- Terms ---- */
+    var terms = [
+      "This is an estimate generated by the eGlobe price calculator, final pricing is confirmed by our sales team before signup.",
+      "Recurring charges shown are billed " + result.billingCycleLabel.toLowerCase() + (result.billingCycleDiscountPercent > 0 ? ", inclusive of the " + result.billingCycleDiscountPercent + "% billing-cycle discount" : "") + "."
+    ];
+    if (result.isCustomQuote) terms.push("Enterprise pricing is customised, the figures shown are indicative only.");
+    termsWrap.appendChild(el("div", { class: "calc-print-terms" }, [
+      el("div", { class: "calc-print-terms__label" }, [document.createTextNode("Terms & Conditions")]),
+      el("ol", {}, terms.map(function (t) { return el("li", {}, [document.createTextNode(t)]); }))
+    ]));
+  }
+
+  function metaKeyVal(label, value) {
+    return el("div", { class: "calc-print-billto__row" }, [
+      el("span", {}, [document.createTextNode(label)]),
+      el("span", {}, [document.createTextNode(value)])
+    ]);
+  }
+
+  function totalsRow(label, value, strong) {
+    return el("div", { class: "calc-print-totals__row" + (strong ? " strong" : "") }, [
+      el("span", {}, [document.createTextNode(label)]),
+      el("span", {}, [document.createTextNode(value)])
+    ]);
   }
 
   function init() {
@@ -341,6 +577,7 @@
     els.customer = document.getElementById("calc-customer");
     els.tax = document.getElementById("calc-tax");
     els.billingCycle = document.getElementById("calc-billing-cycle");
+    els.waiveSetup = document.getElementById("calc-waive-setup");
     els.summaryBody = document.getElementById("calc-summary-body");
     var printBtn = document.getElementById("calc-print-btn");
 
@@ -349,6 +586,7 @@
     [els.properties, els.rooms, els.customer].forEach(function (input) {
       input.addEventListener("input", recalculate);
     });
+    if (els.waiveSetup) els.waiveSetup.addEventListener("change", recalculate);
 
     if (printBtn) printBtn.addEventListener("click", function () { window.print(); });
 
@@ -368,6 +606,9 @@
         renderBillingCycleSelect();
         var defaultPlan = catalog.plans[0] ? catalog.plans[0].planType : "PerRoom";
         selectPlan(defaultPlan);
+      })
+      .catch(function () {
+        els.summaryBody.innerHTML = '<p class="calc-empty">Unable to load pricing right now, please refresh or try again shortly.</p>';
       });
   }
 

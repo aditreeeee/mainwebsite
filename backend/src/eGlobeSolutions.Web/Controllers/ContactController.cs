@@ -94,7 +94,7 @@ public class ContactController : Controller
         return Ok(new
         {
             success = true,
-            message = "Thanks, this is a real submission, our team will reach out within one business day."
+            message = "Thanks, we've received your details, our team will reach out within one business day."
         });
     }
 }

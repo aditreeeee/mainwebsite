@@ -1,0 +1,21 @@
+{
+  "name": "eglobe-solutions-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Build tooling for the eGlobe Solutions static frontend: minifies CSS/JS and optimizes images, then syncs the output into the .NET backend's wwwroot.",
+  "scripts": {
+    "build:css": "cleancss -o css/style.min.css css/style.css",
+    "build:js": "terser js/main.js -c -m -o js/main.min.js && terser js/calculator.js -c -m -o js/calculator.min.js",
+    "build:images": "node scripts/optimize-images.js",
+    "build:sync-wwwroot": "node scripts/sync-wwwroot.js",
+    "build": "npm run build:css && npm run build:js && npm run build:images && npm run build:sync-wwwroot",
+    "check:headings": "node scripts/check-headings.js",
+    "check:wwwroot-sync": "node scripts/check-wwwroot-sync.js",
+    "test": "npm run check:headings && npm run check:wwwroot-sync"
+  },
+  "devDependencies": {
+    "clean-css-cli": "^5.6.3",
+    "terser": "^5.51.2",
+    "sharp": "^0.33.0"
+  }
+}

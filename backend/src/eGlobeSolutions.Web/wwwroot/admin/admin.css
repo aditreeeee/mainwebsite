@@ -156,7 +156,22 @@ a{color:inherit; text-decoration:none;}
 .admin-preview-card__result div .k{font-size:11px; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.04em;}
 
 /* Standalone login page */
-.admin-login{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy);}
+.admin-login{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:20px;}
 .admin-login__box{background:#fff; border-radius:10px; padding:36px; width:100%; max-width:360px;}
 .admin-login__box h1{font-size:19px; margin:0 0 4px;}
 .admin-login__box p{font-size:13px; color:var(--ink-soft); margin:0 0 24px;}
+
+@media (max-width:768px){
+  /* Internal admin tool, not the public site, so this stays a light-touch
+     fix (usable on a phone in a pinch) rather than a full responsive
+     redesign of every data table: sidebar becomes a horizontally
+     scrollable strip instead of a fixed 220px column stealing most of a
+     phone's width from the actual content. */
+  .admin-shell{flex-direction:column;}
+  .admin-sidebar{width:100%; padding:10px 0;}
+  .admin-sidebar__nav{flex-direction:row; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .admin-sidebar__nav a,.admin-sidebar__soon{white-space:nowrap; padding:10px 14px;}
+  .admin-topbar{padding:12px 16px; flex-wrap:wrap; gap:8px;}
+  .admin-content{padding:16px;}
+  input,select,textarea{font-size:16px;} /* avoid iOS auto-zoom-on-focus here too */
+}

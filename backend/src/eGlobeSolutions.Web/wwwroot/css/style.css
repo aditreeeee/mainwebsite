@@ -89,6 +89,17 @@ a{color:inherit;text-decoration:none;}
 ul{list-style:none;margin:0;padding:0;}
 button{font-family:inherit;cursor:pointer;}
 input,textarea,select{font-family:inherit;}
+@media (max-width:760px){
+  /* Several forms across the site (Quick Enquiry popup, calculator inputs)
+     set a smaller font-size for tighter desktop layouts, but any form
+     control under 16px makes iOS Safari auto-zoom the whole page on focus,
+     a real, disruptive mobile bug, not a cosmetic one. This unconditionally
+     floors every text input/select/textarea at 16px on small screens,
+     regardless of which component-scoped rule set it smaller; !important is
+     deliberate here since it has to win over many different, more specific
+     selectors by design intent, not by accident. */
+  input,select,textarea{font-size:16px !important;}
+}
 
 .container{
   max-width:var(--container);
@@ -261,6 +272,7 @@ p{margin:0;color:var(--ink-soft);}
   opacity:0;
 }
 .nav-dock{
+  position:relative;
   pointer-events:auto;
   display:flex;
   align-items:center;
@@ -311,6 +323,44 @@ p{margin:0;color:var(--ink-soft);}
 .nav-dock__cta:hover{background:var(--blue-dim); transform:translateY(-1px);}
 .nav-dock__burger{display:none;}
 
+/* Solutions row inside the nav-dock pill, injected by main.js. Desktop
+   (pill visible inline, no burger): a floating dropdown that opens upward
+   from the pill, since the pill sits near the bottom of the viewport.
+   Mobile: overridden below to an inline accordion instead. */
+.nav-dock__solutions-toggle{
+  padding:10px 16px; font-size:13.5px; font-weight:600; color:var(--ink-soft);
+  border-radius:999px; background:none; border:none; font-family:inherit; cursor:pointer;
+  display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+  transition:background .2s ease, color .2s ease;
+}
+.nav-dock__solutions-toggle:hover,
+.nav-dock__solutions-toggle[aria-expanded="true"]{color:var(--ink); background:rgba(17,24,39,.06);}
+.nav-dock__solutions-toggle::after{
+  content:''; width:5px; height:5px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
+  transform:rotate(-135deg); transition:transform .2s ease; margin-top:2px;
+}
+.nav-dock__solutions-toggle[aria-expanded="true"]::after{transform:rotate(45deg); margin-top:-2px;}
+
+.nav-dock__solutions-panel{
+  display:none;
+  position:absolute; bottom:calc(100% + 12px); left:50%; transform:translateX(-50%);
+  width:260px; max-height:min(420px, 60vh); overflow-y:auto;
+  background:var(--navy-deep); color:#fff; border-radius:14px; padding:14px;
+  box-shadow:0 20px 50px rgba(16,25,53,.3);
+  z-index:1100;
+}
+.nav-dock__solutions-panel.open{display:block;}
+.nav-dock__solutions-label{
+  font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+  color:rgba(255,255,255,.45); margin:14px 0 6px;
+}
+.nav-dock__solutions-label:first-child{margin-top:0;}
+.nav-dock__solutions-panel a{
+  display:block; font-size:13px; font-weight:600; color:rgba(255,255,255,.9);
+  padding:8px 10px; margin:0 -10px; border-radius:8px; transition:background .15s ease;
+}
+.nav-dock__solutions-panel a:hover{background:rgba(255,255,255,.1); color:#fff;}
+
 @media (max-width:860px){
   .nav-dock{gap:0; padding:7px;}
   .nav-dock__links{
@@ -351,6 +401,20 @@ p{margin:0;color:var(--ink-soft);}
   .nav-dock__burger[aria-expanded="true"] .l1{transform:translateY(6px) rotate(45deg);}
   .nav-dock__burger[aria-expanded="true"] .l2{opacity:0;}
   .nav-dock__burger[aria-expanded="true"] .l3{transform:translateY(-6px) rotate(-45deg);}
+
+  /* Solutions becomes an in-place accordion inside the mobile menu card,
+     not a second floating panel, so it never gets clipped by the
+     already-fixed-position mobile menu or requires a separate dead-zone
+     hover path (this is tap-only anyway, no hover concerns on mobile). */
+  .nav-dock__solutions-toggle{width:100%; justify-content:space-between; padding:13px 16px; text-align:left;}
+  .nav-dock__solutions-panel{
+    position:static; transform:none; width:auto; max-height:none; overflow:visible;
+    background:rgba(17,24,39,.04); color:var(--ink); border-radius:12px;
+    padding:4px 12px 8px; margin:0 0 2px; box-shadow:none;
+  }
+  .nav-dock__solutions-label{color:var(--ink-soft);}
+  .nav-dock__solutions-panel a{color:var(--ink); padding:11px 8px;}
+  .nav-dock__solutions-panel a:hover{background:rgba(17,24,39,.06); color:var(--ink);}
 }
 
 /* ==========================================================================
@@ -402,6 +466,70 @@ p{margin:0;color:var(--ink-soft);}
 .topbar__links a.active::after{transform:scaleX(1); background:var(--navy-deep);}
 .topbar__links-login{display:none;}
 .topbar__actions{display:flex;align-items:center;gap:14px;}
+
+/* Solutions mega-menu, injected by main.js in place of the plain "Products" link */
+.topbar__solutions{position:relative;}
+.topbar__solutions-trigger{display:inline-flex; align-items:center; gap:4px;}
+.topbar__solutions-trigger::before{
+  content:''; width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
+  transform:rotate(45deg) translateY(-2px); transition:transform .2s ease; flex-shrink:0;
+}
+.topbar__solutions-trigger[aria-expanded="true"]::before{transform:rotate(-135deg) translateY(1px);}
+.topbar__mega{
+  /* top:100% with zero real gap to the trigger is deliberate: any actual
+     space between the trigger and this absolutely-positioned panel (out of
+     flow, so it isn't part of the trigger's own hoverable box) is a dead
+     zone the mouse has to cross, and mouseleave fires the instant the
+     cursor enters it, closing the menu before it can ever be reached.
+     Visual breathing room comes from the panel's own top padding instead
+     of an outer margin/gap. */
+  position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  width:min(880px, 88vw);
+  background:var(--navy-deep); color:#fff;
+  border-radius:16px; box-shadow:0 24px 60px rgba(16,25,53,.35);
+  padding:26px 32px 32px;
+  display:grid; grid-template-columns:repeat(3, 1fr) 220px; gap:8px 32px;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .15s ease, visibility .15s;
+  z-index:1200;
+}
+.topbar__mega.open{opacity:1; visibility:visible; pointer-events:auto;}
+.topbar__mega-col{display:flex; flex-direction:column; gap:2px;}
+.topbar__mega-label{
+  font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
+  color:rgba(255,255,255,.45); margin-bottom:10px;
+}
+.topbar__mega-col a{
+  font-size:14px; font-weight:600; color:rgba(255,255,255,.9);
+  padding:9px 10px; margin:0 -10px; border-radius:8px;
+  transition:background .15s ease, color .15s ease;
+}
+.topbar__mega-col a:hover{background:rgba(255,255,255,.1); color:#fff;}
+.topbar__mega-cta{
+  background:rgba(255,255,255,.06); border-radius:12px; padding:18px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.topbar__mega-cta-label{font-size:13.5px; font-weight:700; color:#fff;}
+.topbar__mega-cta p{font-size:12.5px; line-height:1.5; color:rgba(255,255,255,.65); margin:0;}
+.topbar__mega-cta .btn{width:100%; text-align:center; justify-content:center;}
+/* Explicit override: the default .btn-ghost (white bg, dark text) is meant
+   for light sections; on this dark panel it needs to be the inverse of
+   .btn-primary, an outlined button, not the accidental near-invisible
+   white-on-white-ish blend a plain background swap would give here. */
+.topbar__mega-cta .btn-ghost{
+  background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.35);
+}
+.topbar__mega-cta .btn-ghost:hover{background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.6);}
+/* Explicit, redundant-but-safe override for the primary button too: same
+   guarantee as the ghost button above, visible regardless of any cascade
+   quirk from context this panel is rendered in. */
+.topbar__mega-cta .btn-primary{background:var(--blue); color:#fff; border-color:var(--blue);}
+.topbar__mega-cta .btn-primary:hover{background:var(--blue-dim); color:#fff; border-color:var(--blue-dim);}
+@media (max-width:1100px){
+  .topbar__mega{grid-template-columns:repeat(3, 1fr); width:min(680px, 92vw);}
+  .topbar__mega-cta{grid-column:1 / -1; flex-direction:row; align-items:center; flex-wrap:wrap;}
+  .topbar__mega-cta p{flex:1; min-width:180px;}
+}
 
 .topbar__burger{
   display:none;
@@ -456,7 +584,7 @@ section{position:relative;}
 .section-dark h1,.section-dark h2,.section-dark h3{color:var(--white);}
 .section-dark .chapter__line{background:rgba(255,255,255,.25);}
 .section-dark .product-card{background:#fff; border-color:#fff;}
-.section-dark .product-card h4{color:var(--ink);}
+.section-dark .product-card h3{color:var(--ink);}
 .section-dark .product-card p{color:var(--ink-soft);}
 .section-dark .product-card:hover{border-color:var(--blue);}
 .section-dark .product-card__icon{background:var(--blue);}
@@ -469,7 +597,7 @@ section{position:relative;}
 .section-blue .chapter__num{border-color:#fff; color:#fff;}
 .section-blue .chapter__line{background:rgba(255,255,255,.3);}
 .section-blue .product-card{background:#fff; border-color:#fff;}
-.section-blue .product-card h4{color:var(--ink);}
+.section-blue .product-card h3{color:var(--ink);}
 .section-blue .product-card p{color:var(--ink-soft);}
 .section-blue .product-card:hover{border-color:var(--navy-deep);}
 .section-blue .product-card__icon{background:var(--blue);}
@@ -1557,7 +1685,7 @@ section{position:relative;}
   position:relative;
 }
 .product-card__icon svg{width:18px;height:18px;color:#fff;}
-.product-card h4{
+.product-card h3{
   font-size:15.5px; line-height:1.3;
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
   min-height:2.6em;
@@ -1582,6 +1710,19 @@ section{position:relative;}
 .product-card__more svg{width:13px;height:13px; transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
 .product-card:hover .product-card__more svg{transform:translateX(4px);}
 
+/* Compact override for #ecosystem specifically: 16 cards in a 4x4 grid is a
+   lot of vertical real estate at the base .section/.product-card sizing, so
+   this section gets its own tighter rhythm to fit closer to one screen,
+   other .product-grid usages elsewhere are unaffected. */
+#ecosystem{padding:44px 0 48px;}
+#ecosystem .section-head--tight{margin-bottom:22px;}
+#ecosystem .product-grid{gap:10px;}
+#ecosystem .product-card{padding:14px; gap:6px;}
+#ecosystem .product-card__icon{width:30px; height:30px; border-radius:8px;}
+#ecosystem .product-card__icon svg{width:15px; height:15px;}
+#ecosystem .product-card h3{font-size:13.5px; line-height:1.25; min-height:0; -webkit-line-clamp:2;}
+#ecosystem .product-card__more{font-size:11.5px; padding-top:0;}
+
 @media (max-width:980px){
   .product-grid{grid-template-columns:repeat(3,1fr);}
 }
@@ -1590,7 +1731,7 @@ section{position:relative;}
   .product-card{padding:14px; gap:8px;}
   .product-card__icon{width:30px; height:30px; border-radius:8px;}
   .product-card__icon svg{width:15px;height:15px;}
-  .product-card h4{font-size:13.5px; min-height:0; -webkit-line-clamp:2;}
+  .product-card h3{font-size:13.5px; min-height:0; -webkit-line-clamp:2;}
   .product-card__more{font-size:11.5px; padding-top:0;}
 }
 
@@ -1878,7 +2019,7 @@ section{position:relative;}
   display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow-card);
 }
 .why-item__icon svg{width:18px;height:18px; color:var(--blue);}
-.why-item h4{font-size:16px; margin-bottom:4px;}
+.why-item h3{font-size:16px; margin-bottom:4px;}
 .why-item p{font-size:14px;}
 
 .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
@@ -1906,7 +2047,7 @@ section{position:relative;}
   border-top:var(--border-light);
   display:flex; flex-direction:column; gap:12px;
 }
-.get-in-touch h4{font-size:13px; text-transform:uppercase; letter-spacing:.08em; font-family:var(--font-mono); margin-bottom:2px;}
+.get-in-touch h3{font-size:13px; text-transform:uppercase; letter-spacing:.08em; font-family:var(--font-mono); margin-bottom:2px;}
 .get-in-touch a,.get-in-touch span{
   display:flex; align-items:center; gap:10px;
   font-size:13.5px; font-weight:600; color:var(--ink);
@@ -1946,7 +2087,7 @@ section{position:relative;}
   display:inline-block; font-family:var(--font-mono); font-size:11px; font-weight:700;
   background:var(--blue); color:#fff; padding:4px 10px; border-radius:6px; margin-bottom:16px;
 }
-.price-teaser-card h4{font-size:20px; margin-bottom:10px;}
+.price-teaser-card h3{font-size:20px; margin-bottom:10px;}
 .price-teaser-card .unit{font-size:13.5px; margin-bottom:20px;}
 .price-teaser-card ul{display:flex; flex-direction:column; gap:10px; margin-bottom:24px;}
 .price-teaser-card li{display:flex; gap:9px; align-items:flex-start; font-size:13.5px;}
@@ -2075,28 +2216,42 @@ footer{
   overflow:hidden;
 }
 
-/* giant faded background wordmark */
+/* Bold brand wordmark, the footer's final full-width band (flows in normal
+   document order after everything else, so it's always fully visible and
+   never overlaps or gets clipped by the content above it). */
 .footer__watermark{
-  position:absolute;
-  left:50%; bottom:-4%;
-  transform:translateX(-50%);
+  position:relative; z-index:1;
+  display:block;
   width:100%;
   text-align:center;
   font-family:var(--font-display);
   font-weight:800;
-  font-size:clamp(4.5rem, 14vw, 15rem);
-  letter-spacing:-.035em;
-  color:rgba(255,255,255,.16);
-  -webkit-text-stroke:1px rgba(255,255,255,.12);
+  /* Scaled by vw (not a fixed rem cap) so the wordmark keeps stretching
+     toward the viewport edges on wide screens instead of plateauing. */
+  font-size:clamp(3.5rem, 15vw, 15rem);
+  letter-spacing:-.01em;
+  color:rgba(255,255,255,.94);
   white-space:nowrap;
+  overflow:hidden;
   pointer-events:none;
   user-select:none;
-  z-index:0;
   line-height:1;
+  padding:.2em 6px .12em;
+  border-top:1px solid rgba(255,255,255,.1);
+  border-bottom:1px solid rgba(255,255,255,.1);
 }
 @media (max-width:760px){
-  .footer__watermark{font-size:clamp(3rem,18vw,6rem); bottom:2%;}
+  .footer__watermark{font-size:clamp(2rem,12.5vw,4rem); padding:.2em 4px .12em;}
 }
+@media (max-width:480px){
+  /* "eGlobe Solutions" at 16 characters needs a smaller vw multiplier on
+     phone-width screens specifically, the 760px breakpoint's ratio is
+     tuned for wider tablets and clips on true phone widths otherwise. */
+  .footer__watermark{font-size:clamp(1.5rem,10vw,2.6rem);}
+}
+
+/* Status/copyright strip now lives below the wordmark, its own centered band. */
+.footer__bottom-wrap{padding-top:12px; padding-bottom:16px;}
 
 .footer__bookend{
   position:relative; z-index:1;
@@ -2118,8 +2273,8 @@ footer{
   position:relative; z-index:1;
   display:grid;
   grid-template-columns:1.15fr 1fr;
-  gap:60px;
-  padding:52px 0 28px;
+  gap:44px;
+  padding:36px 0 20px;
 }
 .footer__cta h3{
   color:#fff; font-size:clamp(1.8rem,3vw,2.4rem); font-weight:700; letter-spacing:-.015em;
@@ -2140,7 +2295,7 @@ footer{
   grid-template-columns:1fr 1fr;
   gap:40px;
 }
-.footer h5{color:#fff; font-size:12px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px; font-family:var(--font-mono); font-weight:700;}
+.footer h4{color:#fff; font-size:12px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px; font-family:var(--font-mono); font-weight:700;}
 .footer__links{display:flex; flex-direction:column; gap:10px;}
 .footer__links a{font-size:14.5px; transition:color .2s;}
 .footer__links a:hover{color:#fff;}
@@ -2150,12 +2305,12 @@ footer{
    towering in one narrow column and leaving the rest of the footer empty. */
 .footer__products-row{
   position:relative; z-index:1;
-  padding:18px 0 20px;
+  padding:14px 0;
   border-top:1px solid rgba(255,255,255,.1);
 }
-.footer__products-row h5{margin-bottom:14px;}
-.footer__products-row h5 a{color:inherit; transition:color .2s ease;}
-.footer__products-row h5 a:hover{color:var(--blue-dim);}
+.footer__products-row h4{margin-bottom:14px;}
+.footer__products-row h4 a{color:inherit; transition:color .2s ease;}
+.footer__products-row h4 a:hover{color:var(--blue-dim);}
 /* All 16 product links stay on desktop; on mobile they'd add a long block
    to an already-tall footer, so the single "Products" link already listed
    under Company (linking to the same #ecosystem section) covers it there. */
@@ -2168,8 +2323,9 @@ footer{
   position:relative; z-index:1;
   display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
   gap:8px 28px;
-  padding:14px 0;
+  padding:12px 0;
   border-top:1px solid rgba(255,255,255,.1);
+  border-bottom:1px solid rgba(255,255,255,.1);
   font-size:12.5px;
 }
 .footer__legal-strip a{color:rgba(255,255,255,.7); font-weight:600; transition:color .2s ease;}
@@ -2217,8 +2373,7 @@ footer{
   position:relative; z-index:1;
   display:flex; justify-content:center; align-items:center; flex-wrap:wrap;
   gap:10px 32px;
-  padding:14px 0;
-  border-bottom:1px solid rgba(255,255,255,.1);
+  padding:12px 0;
   font-size:13px;
   color:rgba(255,255,255,.85);
 }
@@ -2229,7 +2384,7 @@ footer{
 
 .footer__bottom{
   position:relative; z-index:1;
-  display:flex; justify-content:space-between; align-items:center; padding:14px 0; font-size:12.5px; flex-wrap:wrap; gap:10px;
+  display:flex; justify-content:space-between; align-items:center; padding:0; font-size:12.5px; flex-wrap:wrap; gap:10px;
 }
 .footer__bottom .status{display:flex; align-items:center; gap:18px;}
 .footer__bottom .status-dot{
@@ -2255,7 +2410,13 @@ footer{
      from a phone and were adding two extra stacked lines). */
   .footer__cta p{display:none;}
   .footer__strip{justify-content:flex-start; gap:8px 20px;}
-  .footer__strip > *:nth-child(n+3){display:none;}
+  /* Phone + email only, regardless of how many other items this footer
+     variant has (the Razor-rendered footer additionally has a multi-number
+     "Call Us: x / y / z" span the static HTML doesn't, position-based
+     nth-child hiding kept the wrong item depending on which markup was
+     live). Website URL, business hours and the Call Us block are all
+     tap-unfriendly on a phone anyway. */
+  .footer__strip > *:not(.footer__strip-priority){display:none;}
 }
 
 /* ==========================================================================
@@ -2403,6 +2564,10 @@ img.testi-card__avatar{
 .sales-form__title{margin-bottom:6px;}
 .sales-form__hint{font-size:14px; margin-bottom:26px;}
 .sales-form__grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media (max-width:560px){
+  .sales-form{padding:24px;}
+  .sales-form__grid{grid-template-columns:1fr;}
+}
 .sales-form .field{margin-top:0;}
 .sales-form .field.full{grid-column:1 / -1;}
 .sales-form .field label{
@@ -2643,6 +2808,34 @@ img.testi-card__avatar{
 .announce-bar__close svg{width:14px; height:14px;}
 .announce-bar.hide{display:none;}
 
+/* Cookie consent notice, injected by main.js on every public page */
+.cookie-notice{
+  position:fixed; left:20px; right:20px; bottom:20px; z-index:2000;
+  max-width:640px; margin:0 auto;
+  background:var(--navy-deep); color:#fff;
+  border-radius:var(--radius-lg); box-shadow:var(--shadow-hard-lg-solid);
+  padding:16px 20px;
+  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  animation:cookieNoticeIn .35s ease both;
+}
+.cookie-notice p{
+  flex:1; min-width:220px; margin:0; font-size:13px; line-height:1.55; color:rgba(255,255,255,.85);
+}
+.cookie-notice a{color:#fff; text-decoration:underline; text-underline-offset:2px; font-weight:600;}
+.cookie-notice__close{
+  flex-shrink:0; background:var(--blue); color:#fff; border:none; border-radius:8px;
+  padding:10px 18px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer;
+  transition:background .2s ease;
+}
+.cookie-notice__close:hover{background:var(--blue-dim);}
+.cookie-notice--hide{animation:cookieNoticeOut .3s ease both;}
+@keyframes cookieNoticeIn{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
+@keyframes cookieNoticeOut{from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(16px);}}
+@media (max-width:560px){
+  .cookie-notice{left:12px; right:12px; bottom:12px; padding:14px 16px;}
+  .cookie-notice__close{width:100%;}
+}
+
 /* ==========================================================================
    ARTICLE PAGE
    ========================================================================== */
@@ -2747,6 +2940,11 @@ img.testi-card__avatar{
   width:100%; padding:13px 14px; border:var(--border-light); border-radius:8px; background:var(--canvas);
   font-family:inherit; font-size:14px; color:var(--ink);
 }
+.calc-checkbox-row{
+  display:flex; align-items:center; gap:10px; margin-top:16px; padding-top:16px;
+  border-top:1px solid var(--grid-line); cursor:pointer; font-size:13.5px; font-weight:600;
+}
+.calc-checkbox-row input[type="checkbox"]{width:17px; height:17px; accent-color:var(--blue); flex-shrink:0;}
 
 /* Plan picker reuses .price-teaser / .price-teaser-card (same look as
    pricing.html) but each card is a real <button>, so reset button chrome
@@ -2775,7 +2973,7 @@ img.testi-card__avatar{
 }
 .calc-badge--included{background:rgba(22,163,74,.12); color:var(--success);}
 .calc-badge--addon{background:var(--blue-glow); color:var(--blue);}
-.calc-badge--disabled{background:#F1F2F4; color:var(--ink-soft);}
+.calc-badge--optional{background:#F1F2F4; color:var(--ink-soft);}
 .calc-module-volume{margin:10px 0 0 27px;}
 .calc-module-volume label{display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:6px;}
 .calc-module-volume input{
@@ -2805,51 +3003,112 @@ img.testi-card__avatar{
 .calc-summary__note{font-size:11.5px; color:rgba(255,255,255,.5); text-align:center; margin:12px 0 0;}
 .calc-empty{font-size:13.5px; color:rgba(255,255,255,.6);}
 
-/* Print-only letterhead + footer, hidden on screen */
-.calc-print-header,.calc-print-footer{display:none;}
+/* Print-only quotation document (letterhead, bill-to, item tables, totals,
+   amount-in-words, terms, signature), all hidden on screen. */
+.calc-print-header,.calc-print-footer,
+.calc-print-billto,.calc-print-table-wrap,.calc-print-totals-row,.calc-print-terms{display:none;}
 
 @media print{
-  /* Print only the live quotation summary, nothing else on the page. Hide
+  /* Print only the quotation document, nothing else on the page. Hide
      everything, then re-show just the summary's own ancestor chain (section
      > container > layout) plus the summary card and its contents. */
   body *{display:none !important;}
   .calc-section,.calc-section > .container,.calc-summary,.calc-summary *{display:revert !important;}
   .calc-layout{display:block !important;}
   .calc-summary__cta,.calc-summary__note{display:none !important;}
+  /* The on-screen live summary (meta box + line list + running totals) is
+     superseded by the print-only tables/totals/words blocks below. */
+  #calc-summary-body,.calc-summary__card > h3{display:none !important;}
   body{background:#fff;}
   .calc-section{padding:0 !important;}
-  .calc-summary{position:static; width:100%; max-width:680px; margin:0 auto; padding:0;}
-  .calc-summary__card{background:#fff; color:#000; box-shadow:none; border:none; padding:0;}
-  .calc-summary__card h3{display:none;}
-  .calc-summary__line.strong{color:#000;}
-  .calc-summary__line{color:#333;}
-  .calc-summary__divider{background:#ccc;}
+  .calc-summary{position:static; width:100%; max-width:760px; margin:0 auto; padding:0;}
+  .calc-summary__card{background:#fff; color:#000; box-shadow:none; border:none; padding:0; font-size:12px;}
 
-  /* Letterhead: logo + company block + document title */
+  /* ---- Letterhead: logo + company block + document title ---- */
   .calc-print-header{
     display:flex !important; align-items:center; justify-content:space-between;
-    border-bottom:2px solid #000; padding-bottom:14px; margin-bottom:18px;
+    background:var(--navy-deep); color:#fff; padding:16px 20px; margin-bottom:0;
   }
   .calc-print-header__brand{display:flex; align-items:center; gap:12px;}
-  .calc-print-header__brand img{height:48px; width:auto;}
-  .calc-print-header__co strong{display:block; font-size:16px;}
-  .calc-print-header__co span{display:block; font-size:11px; color:#444;}
+  .calc-print-header__brand img{height:40px; width:auto;}
+  .calc-print-header__co strong{display:block; font-size:15px; color:#fff;}
+  .calc-print-header__co span{display:block; font-size:10.5px; color:rgba(255,255,255,.75);}
   .calc-print-header__title{text-align:right;}
-  .calc-print-header__title strong{display:block; font-size:20px; letter-spacing:.02em;}
-  .calc-print-header__title span{display:block; font-size:11px; color:#444;}
+  .calc-print-header__title strong{display:block; font-size:18px; letter-spacing:.02em; color:#fff;}
+  .calc-print-header__title span{display:block; font-size:10.5px; color:rgba(255,255,255,.75); font-family:var(--font-mono);}
 
-  .calc-summary__meta{
-    background:none; border:1px solid #ccc; border-radius:0; padding:12px 14px; margin-bottom:18px;
+  /* ---- Bill To / quote meta strip ---- */
+  .calc-print-billto{
+    display:flex !important; justify-content:space-between; gap:20px;
+    border:1px solid #ccc; border-top:none; padding:14px 20px; margin-bottom:0;
   }
-  .calc-summary__meta-row{color:#444;}
-  .calc-summary__meta-row span:last-child{color:#000;}
+  .calc-print-billto__col{flex:1;}
+  .calc-print-billto__col--right{max-width:220px;}
+  .calc-print-billto__label{
+    font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+    color:#888; margin-bottom:4px;
+  }
+  .calc-print-billto__name{font-size:14px; font-weight:700; color:#000; margin-bottom:2px;}
+  .calc-print-billto__row{display:flex; justify-content:space-between; gap:10px; font-size:11px; color:#444; padding:2px 0;}
+  .calc-print-billto__row span:last-child{color:#000; font-weight:600; text-align:right;}
 
-  /* Footer: contact details, page bottom */
+  /* ---- Item tables ---- */
+  .calc-print-table-wrap{display:block !important; margin:0;}
+  .calc-print-table-title{
+    background:var(--blue); color:#fff; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    padding:7px 20px;
+  }
+  .calc-print-table{width:100%; border-collapse:collapse; font-size:11px;}
+  .calc-print-table th{
+    background:#EEF1FA; color:#222; font-size:10px; text-transform:uppercase; letter-spacing:.03em;
+    text-align:left; padding:6px 10px; border-bottom:1px solid #ccc;
+  }
+  .calc-print-table td{padding:6px 10px; border-bottom:1px solid #e5e5e5; color:#222;}
+  .calc-print-table__num,.calc-print-table th.calc-print-table__num{text-align:right;}
+  .calc-print-table__desc{max-width:260px;}
+  .calc-print-table tfoot td{
+    border-top:1.5px solid #999; border-bottom:none; font-weight:700; background:#F7F8FA;
+  }
+  .calc-print-table__totallabel{text-align:right;}
+
+  /* ---- Amount in words + totals box, side by side ---- */
+  .calc-print-totals-row{
+    display:flex !important; justify-content:space-between; align-items:flex-start; gap:16px;
+    border:1px solid #ccc; border-top:none; padding:14px 20px;
+  }
+  .calc-print-words{font-size:11.5px; color:#333; max-width:340px;}
+  .calc-print-words strong{color:#000;}
+  .calc-print-totals{min-width:240px;}
+  .calc-print-totals__row{display:flex; justify-content:space-between; gap:16px; font-size:11.5px; color:#444; padding:3px 0;}
+  .calc-print-totals__row span:last-child{color:#000; font-weight:600;}
+  .calc-print-totals__row.strong{
+    font-size:14px; font-weight:700; border-top:1.5px solid #999; margin-top:4px; padding-top:6px;
+  }
+  .calc-print-totals__row.strong span{color:#000;}
+
+  /* ---- Terms & Conditions ---- */
+  .calc-print-terms{
+    display:block !important; border:1px solid #ccc; border-top:none; padding:14px 20px;
+  }
+  .calc-print-terms__label{
+    font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+    color:#888; margin-bottom:6px;
+  }
+  .calc-print-terms ol{margin:0; padding-left:16px; font-size:10.5px; color:#333; line-height:1.6;}
+
+  /* ---- Footer: contact details left, seal/sign box right ---- */
   .calc-print-footer{
-    display:block !important; margin-top:24px; padding-top:14px; border-top:1px solid #ccc;
-    font-size:11px; color:#555; text-align:center;
+    display:flex !important; justify-content:space-between; align-items:flex-end; gap:20px;
+    border:1px solid #ccc; border-top:none; padding:14px 20px;
   }
-  .calc-print-footer strong{color:#000;}
+  .calc-print-footer__contact{font-size:10px; color:#555; flex:1;}
+  .calc-print-footer__contact strong{color:#000;}
+  .calc-print-footer__seal{
+    width:180px; height:60px; border:1px dashed #999; border-radius:4px;
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px;
+    font-size:10px; color:#888; text-transform:uppercase; letter-spacing:.04em; font-family:var(--font-mono);
+    flex-shrink:0;
+  }
 }
 
 /* ==========================================================================
@@ -2899,7 +3158,7 @@ img.testi-card__avatar{
   background:var(--white); border:var(--border); border-radius:var(--radius-md); padding:18px 20px;
   box-shadow:var(--shadow-card);
 }
-.pp-usecase h4{font-size:14.5px; margin-bottom:6px;}
+.pp-usecase h3{font-size:14.5px; margin-bottom:6px;}
 .pp-usecase p{font-size:13px; color:var(--ink-soft); line-height:1.5;}
 
 .pp-availability{

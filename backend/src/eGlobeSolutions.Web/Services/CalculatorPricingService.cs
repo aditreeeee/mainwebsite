@@ -121,7 +121,9 @@ public class CalculatorPricingService : ICalculatorPricingService
             Name = $"{plan.DisplayName} base subscription",
             LineType = "Base",
             MonthlyAmount = baseMonthly,
-            OneTimeAmount = plan.OneTimeSetupFee
+            OneTimeAmount = plan.OneTimeSetupFee,
+            Quantity = 1,
+            UnitPrice = baseMonthly
         });
 
         // ---- Modules ----
@@ -137,18 +139,13 @@ public class CalculatorPricingService : ICalculatorPricingService
             var module = modules.FirstOrDefault(m => m.Id == sel.ModuleId);
             if (module is null) continue;
 
+            // Plan availability (Included/AddOn/NotAvailable) is shown to Sales as a
+            // reference only, it no longer restricts what can actually be quoted: a
+            // module a plan doesn't normally include can still be selected and priced
+            // like any other add-on, and an "Included" module is only free because the
+            // caller chose to select it (the frontend lets it be removed from the
+            // quote too, in which case it simply isn't in SelectedModules at all).
             var availability = GetAvailability(module, request.PlanType);
-            if (availability == ModuleAvailability.NotAvailable)
-            {
-                result.Lines.Add(new QuoteLineDto
-                {
-                    Name = module.Name,
-                    LineType = "Ineligible",
-                    MonthlyAmount = 0,
-                    OneTimeAmount = 0
-                });
-                continue;
-            }
 
             if (availability == ModuleAvailability.Included)
             {
@@ -157,12 +154,13 @@ public class CalculatorPricingService : ICalculatorPricingService
                     Name = module.Name,
                     LineType = "Included",
                     MonthlyAmount = 0,
-                    OneTimeAmount = 0
+                    OneTimeAmount = 0,
+                    Quantity = 1,
+                    UnitPrice = 0
                 });
                 continue;
             }
 
-            // AddOn
             switch (module.ChargeType)
             {
                 case ModuleChargeType.Commission:
@@ -177,11 +175,19 @@ public class CalculatorPricingService : ICalculatorPricingService
                         MonthlyAmount = commissionAmount,
                         OneTimeAmount = module.OneTimeSetupFee,
                         CommissionPercent = module.CommissionPercent,
-                        VolumeAmount = volume
+                        VolumeAmount = volume,
+                        Quantity = 1,
+                        UnitPrice = commissionAmount
                     });
                     break;
 
                 default:
+                    var qty = module.ChargeType switch
+                    {
+                        ModuleChargeType.PerRoomMonthly => Math.Max(rooms, 1),
+                        ModuleChargeType.PerPropertyMonthly => Math.Max(properties, 1),
+                        _ => 1
+                    };
                     var monthly = module.ChargeType switch
                     {
                         ModuleChargeType.PerRoomMonthly => module.MonthlyRate * rooms,
@@ -197,7 +203,9 @@ public class CalculatorPricingService : ICalculatorPricingService
                         Name = module.Name,
                         LineType = "AddOn",
                         MonthlyAmount = monthly,
-                        OneTimeAmount = module.OneTimeSetupFee
+                        OneTimeAmount = module.OneTimeSetupFee,
+                        Quantity = qty,
+                        UnitPrice = module.MonthlyRate
                     });
                     break;
             }
@@ -231,6 +239,17 @@ public class CalculatorPricingService : ICalculatorPricingService
         result.BillingCycleMonths = cycleMonths;
         result.BillingCycleDiscountPercent = cycleDiscount;
         result.BillingCycleRecurringTotal = Round(recurringForCycle);
+
+        // One-time setup/onboarding fees are optional: Sales can waive them for a
+        // given client. Line items still show what each fee would normally be
+        // (OneTimeAmount is untouched above), only the totals actually charged
+        // drop them, so the printed quotation can honestly show "Waived".
+        if (request.WaiveOneTimeSetupFees)
+        {
+            result.OneTimeFeesWaived = true;
+            result.OneTimeChargesTotal = 0m;
+        }
+
         result.BillingCycleTotalDue = Round(recurringForCycle + result.OneTimeChargesTotal);
 
         result.CurrencyCode = "INR";

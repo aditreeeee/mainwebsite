@@ -1,0 +1,38 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.html"
+      - "css/**"
+      - "js/**"
+      - "scripts/**"
+      - "package.json"
+      - ".github/workflows/frontend-ci.yml"
+  pull_request:
+    paths:
+      - "**/*.html"
+      - "css/**"
+      - "js/**"
+      - "scripts/**"
+      - "package.json"
+      - ".github/workflows/frontend-ci.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Heading hierarchy check
+        run: node scripts/check-headings.js
+
+      - name: wwwroot sync check
+        run: node scripts/check-wwwroot-sync.js

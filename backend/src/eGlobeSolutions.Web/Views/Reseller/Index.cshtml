@@ -36,7 +36,7 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "Resellers, eGlobe Solutions")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "Become a reseller or partner for eGlobe's sourced hotel technology stack.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/style.min.css">
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -112,7 +112,7 @@
     <div class="price-teaser" data-reveal-group>
       <div class="price-teaser-card">
         <span class="badge-pill">@(planReferral?.Kicker ?? "Referral Program")</span>
-        <h4>@Html.Raw(planReferral?.Title ?? "Refer &amp; Earn")</h4>
+        <h3>@Html.Raw(planReferral?.Title ?? "Refer &amp; Earn")</h3>
         <p class="unit">@(planReferral?.Subtitle ?? "Refer hotels to us, we handle the rest")</p>
         <ul>
           @foreach (var bullet in Bullets(planReferral).DefaultIfEmpty("").Where(b => b != ""))
@@ -130,7 +130,7 @@
       </div>
       <div class="price-teaser-card featured">
         <span class="badge-pill">@(planReseller?.Kicker ?? "Most Popular")</span>
-        <h4>@(planReseller?.Title ?? "Reseller Commission")</h4>
+        <h3>@(planReseller?.Title ?? "Reseller Commission")</h3>
         <p class="unit">@(planReseller?.Subtitle ?? "Sell directly and earn recurring commission")</p>
         <ul>
           @foreach (var bullet in Bullets(planReseller).DefaultIfEmpty("").Where(b => b != ""))
@@ -148,7 +148,7 @@
       </div>
       <div class="price-teaser-card">
         <span class="badge-pill">@(planWhitelabel?.Kicker ?? "White Label")</span>
-        <h4>@(planWhitelabel?.Title ?? "Your Own Brand")</h4>
+        <h3>@(planWhitelabel?.Title ?? "Your Own Brand")</h3>
         <p class="unit">@(planWhitelabel?.Subtitle ?? "Offer eGlobe's platform under your identity")</p>
         <ul>
           @foreach (var bullet in Bullets(planWhitelabel).DefaultIfEmpty("").Where(b => b != ""))
@@ -189,15 +189,15 @@
       <div class="why-list" data-reveal-group>
         <div class="why-item">
           <div class="why-item__icon" style="background:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 014 10 15 15 0 01-4 10 15 15 0 01-4-10 15 15 0 014-10z"/></svg></div>
-          <div><h4>@Html.Raw(benefit1?.Title ?? "Recurring Revenue &amp; High Commissions")</h4><p>@(benefit1?.Body ?? "A generous commission structure that rewards performance, plus special partner pricing.")</p></div>
+          <div><h3>@Html.Raw(benefit1?.Title ?? "Recurring Revenue &amp; High Commissions")</h3><p>@(benefit1?.Body ?? "A generous commission structure that rewards performance, plus special partner pricing.")</p></div>
         </div>
         <div class="why-item">
           <div class="why-item__icon" style="background:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a6 6 0 0112 0v2"/></svg></div>
-          <div><h4>@Html.Raw(benefit2?.Title ?? "Dedicated Account Manager &amp; Live Support")</h4><p>@(benefit2?.Body ?? "A personal success manager plus 24/7 expert support for you and your customers.")</p></div>
+          <div><h3>@Html.Raw(benefit2?.Title ?? "Dedicated Account Manager &amp; Live Support")</h3><p>@(benefit2?.Body ?? "A personal success manager plus 24/7 expert support for you and your customers.")</p></div>
         </div>
         <div class="why-item">
           <div class="why-item__icon" style="background:var(--navy-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg></div>
-          <div><h4>@Html.Raw(benefit3?.Title ?? "Sales, Marketing &amp; Onboarding Support")</h4><p>@(benefit3?.Body ?? "Ready-to-use marketing materials and a quick, guided onboarding to get you selling fast.")</p></div>
+          <div><h3>@Html.Raw(benefit3?.Title ?? "Sales, Marketing &amp; Onboarding Support")</h3><p>@(benefit3?.Body ?? "Ready-to-use marketing materials and a quick, guided onboarding to get you selling fast.")</p></div>
         </div>
       </div>
     </div>
@@ -233,6 +233,6 @@
   </nav>
 </div>
 
-<script src="~/js/main.js"></script>
+<script src="~/js/main.min.js"></script>
 </body>
 </html>

@@ -71,17 +71,32 @@ public class CalculateRequest
     public int? TaxId { get; set; }
     public int? BillingCycleId { get; set; }
     public List<CalculateModuleSelection> SelectedModules { get; set; } = new();
+
+    /// <summary>When true, Sales has waived every one-time setup/onboarding fee
+    /// (plan + module) for this client, they're still shown on the quote as
+    /// waived line items rather than silently disappearing, but excluded from
+    /// every total.</summary>
+    public bool WaiveOneTimeSetupFees { get; set; }
 }
 
 public class QuoteLineDto
 {
     public string Name { get; set; } = string.Empty;
-    /// <summary>Included, Base, AddOn, Commission, Ineligible</summary>
+    /// <summary>Included, Base, AddOn, Commission</summary>
     public string LineType { get; set; } = string.Empty;
     public decimal MonthlyAmount { get; set; }
     public decimal OneTimeAmount { get; set; }
     public decimal? CommissionPercent { get; set; }
     public decimal? VolumeAmount { get; set; }
+
+    /// <summary>Units billed: room count for PerRoomMonthly, property count for
+    /// PerPropertyMonthly, otherwise 1. Printed quotation line-item quantity.</summary>
+    public int Quantity { get; set; } = 1;
+
+    /// <summary>MonthlyAmount / Quantity, the module's own rate per unit
+    /// (or the flat/commission amount when Quantity is 1). Printed quotation
+    /// "Price / Unit" column.</summary>
+    public decimal UnitPrice { get; set; }
 }
 
 public class CalculateResultDto
@@ -106,6 +121,11 @@ public class CalculateResultDto
     public decimal? EffectiveCostPerProperty { get; set; }
 
     public bool IsCustomQuote { get; set; }
+
+    /// <summary>True when Sales explicitly waived one-time setup fees for this
+    /// client. OneTimeChargesTotal is 0 in that case, but individual line items
+    /// still carry their normal (waived) OneTimeAmount for display.</summary>
+    public bool OneTimeFeesWaived { get; set; }
 
     /// <summary>All monetary fields above are already converted into this currency.</summary>
     public string CurrencyCode { get; set; } = "INR";

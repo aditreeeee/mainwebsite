@@ -15,6 +15,112 @@
     });
   }
 
+  /* ---------- Solutions mega-menu (replaces the plain "Products" link) ----------
+     Injected into every page's topbar (and mobile burger list, which reuses the
+     same #topbar-links markup) so this lives in one place instead of 40 files.
+     "Solutions" opens a full-width dropdown listing all 16 products grouped
+     into the same categories used on the homepage ecosystem section. */
+  var SOLUTIONS_CATEGORIES = [
+    {
+      label: 'Core Operations',
+      items: [
+        { name: 'Property Management System', href: 'products/pms.html' },
+        { name: 'Channel Manager', href: 'products/channel-manager.html' },
+        { name: 'Housekeeping', href: 'products/housekeeping.html' },
+        { name: 'Point of Sale (POS)', href: 'products/pos.html' },
+        { name: 'Kitchen Order Ticket (KOT)', href: 'products/kot.html' },
+        { name: 'PMS APIs', href: 'products/pms-apis.html' }
+      ]
+    },
+    {
+      label: 'Revenue & Distribution',
+      items: [
+        { name: 'Finance & Revenue Management', href: 'products/finance-revenue.html' },
+        { name: 'OTA Listing & Management', href: 'products/ota-management.html' },
+        { name: 'Google Hotel Ads', href: 'products/google-hotel-ads.html' },
+        { name: 'Meta Search Engines', href: 'products/meta-search.html' },
+        { name: 'B2B Stay', href: 'products/b2b-stay.html' }
+      ]
+    },
+    {
+      label: 'Guest Experience & Growth',
+      items: [
+        { name: 'Booking Engine', href: 'products/booking-engine.html' },
+        { name: 'Website Builder', href: 'products/website-builder.html' },
+        { name: 'Reviews Manager', href: 'products/reviews-manager.html' },
+        { name: 'eGlobe AI Tools', href: 'products/ai-tools.html' },
+        { name: 'Payment Gateway', href: 'products/payment-gateway.html' }
+      ]
+    }
+  ];
+
+  function initSolutionsMenu(){
+    var links = document.getElementById('topbar-links');
+    if(!links) return;
+
+    var trigger = null;
+    links.querySelectorAll('a').forEach(function(a){
+      if(a.textContent.trim() === 'Products') trigger = a;
+    });
+    if(!trigger) return;
+
+    var depth = /\/(products|blog-articles)\//.test(location.pathname) ? '../' : '';
+    trigger.textContent = 'Solutions';
+    trigger.setAttribute('aria-haspopup', 'true');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.classList.add('topbar__solutions-trigger');
+
+    var wrap = document.createElement('div');
+    wrap.className = 'topbar__solutions';
+    trigger.parentNode.insertBefore(wrap, trigger);
+    wrap.appendChild(trigger);
+
+    var panel = document.createElement('div');
+    panel.className = 'topbar__mega';
+    panel.id = 'topbar-mega';
+
+    var columnsHtml = SOLUTIONS_CATEGORIES.map(function(cat){
+      var itemsHtml = cat.items.map(function(it){
+        return '<a href="' + depth + it.href + '">' + it.name + '</a>';
+      }).join('');
+      return '<div class="topbar__mega-col"><div class="topbar__mega-label">' + cat.label + '</div>' + itemsHtml + '</div>';
+    }).join('');
+
+    panel.innerHTML =
+      columnsHtml +
+      '<div class="topbar__mega-cta">' +
+        '<div class="topbar__mega-cta-label">Not sure where to start?</div>' +
+        '<p>See how every module connects into one platform, sourced and managed for you.</p>' +
+        '<a href="' + depth + 'index.html#ecosystem" class="btn btn-ghost btn-sm">View Full Ecosystem</a>' +
+        '<a href="' + depth + 'contact.html" class="btn btn-primary btn-sm">Book a Demo</a>' +
+      '</div>';
+
+    wrap.appendChild(panel);
+
+    function openMenu(){
+      panel.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+    function closeMenu(){
+      panel.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    // #topbar-links (and this trigger with it) is hidden entirely below 760px
+    // in favour of the separate nav-dock mobile pill, so this only ever needs
+    // to handle desktop: hover to open, click as a keyboard/accessibility
+    // toggle (the trigger keeps its original href as a no-JS fallback).
+    wrap.addEventListener('mouseenter', openMenu);
+    wrap.addEventListener('mouseleave', closeMenu);
+    trigger.addEventListener('click', function(e){
+      e.preventDefault();
+      panel.classList.contains('open') ? closeMenu() : openMenu();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') closeMenu();
+    });
+  }
+
   /* ---------- Top header mobile menu ---------- */
   function initTopbarBurger(){
     var burger = document.getElementById('topbar-burger');
@@ -51,6 +157,66 @@
     }, {passive:true});
   }
 
+  /* ---------- Solutions in the mobile nav-dock pill ----------
+     The nav-dock pill (Home/Pricing/Resellers) is the ONLY navigation
+     surface on mobile, #topbar-links is display:none below 760px entirely.
+     Previously there was no way to reach the product list on a phone at
+     all. This adds a "Solutions" row that expands an in-place accordion
+     (not a second overlay stacked on top of the mobile menu) listing the
+     same 16 products, grouped the same way as the desktop mega-menu. Must
+     run before initDock() so the product links it creates are included in
+     initDock()'s "any link click closes the mobile menu" wiring below. */
+  function initNavDockSolutions(){
+    var links = document.querySelector('.nav-dock__links');
+    if(!links) return;
+
+    var depth = /\/(products|blog-articles)\//.test(location.pathname) ? '../' : '';
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'nav-dock__link nav-dock__solutions-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = 'Solutions';
+
+    var panel = document.createElement('div');
+    panel.className = 'nav-dock__solutions-panel';
+    panel.innerHTML = SOLUTIONS_CATEGORIES.map(function(cat){
+      var itemsHtml = cat.items.map(function(it){
+        return '<a href="' + depth + it.href + '">' + it.name + '</a>';
+      }).join('');
+      return '<div class="nav-dock__solutions-label">' + cat.label + '</div>' + itemsHtml;
+    }).join('');
+
+    function closePanel(){
+      panel.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', function(e){
+      e.stopPropagation(); // don't let this bubble into the mobile "click outside closes menu" handler
+      var open = panel.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    // Desktop pill has no burger/backdrop, so this dropdown needs its own
+    // click-outside-to-close (mobile's accordion doesn't need this, tapping
+    // outside there already closes the whole mobile menu via initDock()).
+    document.addEventListener('click', function(e){
+      if(!panel.contains(e.target) && e.target !== toggle) closePanel();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') closePanel();
+    });
+
+    var homeLink = links.querySelector('a');
+    if(homeLink){
+      links.insertBefore(toggle, homeLink.nextSibling);
+      links.insertBefore(panel, toggle.nextSibling);
+    } else {
+      links.appendChild(toggle);
+      links.appendChild(panel);
+    }
+  }
+
   /* ---------- Floating dock: hidden only in the hero and footer zones ---------- */
   function initDock(){
     var dockWrap = document.querySelector('.nav-dock-wrap');
@@ -63,11 +229,14 @@
     function applyVisibility(){
       var vh = window.innerHeight;
       var isMobile = window.innerWidth <= 760;
-      /* On mobile the topbar has no page links, so the dock is the only
-         way to navigate, never hide it for the hero OR the footer on
-         small screens, it needs to stay reachable everywhere. */
+      /* On mobile the topbar has no page links, so the dock is the only way
+         to navigate through the main page content, it stays visible through
+         the hero there. The footer is different: it has its own full link
+         list (Home/Products/Pricing/etc.), so the dock would just be
+         floating on top of, and hiding, footer content with nothing gained,
+         hide it there on mobile same as desktop. */
       var inHero = (!isMobile && heroEl) ? heroEl.getBoundingClientRect().bottom > vh * 0.35 : false;
-      var inFooter = (!isMobile && footerEl) ? footerEl.getBoundingClientRect().top < vh * 0.65 : false;
+      var inFooter = footerEl ? footerEl.getBoundingClientRect().top < vh * 0.65 : false;
       dockWrap.classList.toggle('hide', inHero || inFooter);
     }
 
@@ -1210,10 +1379,39 @@
     }
   }
 
+  /* ---------- Cookie consent notice (site-wide, remembered once dismissed) ---------- */
+  function initCookieNotice(){
+    if(localStorage.getItem('cookieNoticeDismissed') === '1') return;
+    if(document.querySelector('.cookie-notice')) return;
+
+    // main.js is shared by every page at every folder depth (root, products/,
+    // blog-articles/), so the link to the privacy policy has to be relative
+    // to wherever this particular page actually lives, not hardcoded.
+    var depth = /\/(products|blog-articles)\//.test(location.pathname) ? '../' : '';
+
+    var bar = document.createElement('div');
+    bar.className = 'cookie-notice';
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', 'Cookie notice');
+    bar.innerHTML =
+      '<p>We use cookies to improve your user experience. Cookies are small text files that are saved on your computer or mobile device when you visit the site. ' +
+      '<a href="' + depth + 'privacy-policy.html">Read more</a></p>' +
+      '<button type="button" class="cookie-notice__close" aria-label="Dismiss">Got it</button>';
+    document.body.appendChild(bar);
+
+    bar.querySelector('.cookie-notice__close').addEventListener('click', function(){
+      bar.classList.add('cookie-notice--hide');
+      localStorage.setItem('cookieNoticeDismissed', '1');
+      setTimeout(function(){ bar.remove(); }, 300);
+    });
+  }
+
   /* ---------- init ---------- */
   document.addEventListener('DOMContentLoaded', function(){
     markActiveNav();
+    initNavDockSolutions();
     initDock();
+    initSolutionsMenu();
     initTopbarBurger();
     initProgress();
     initReveal();
@@ -1233,5 +1431,6 @@
     initOccRings();
     initBlogFilters();
     initAnnounceBar();
+    initCookieNotice();
   });
 })();

@@ -2,7 +2,11 @@
 backend/**/bin/
 backend/**/obj/
 backend/**/.vs/
+backend/**/TestResults/
 backend/src/eGlobeSolutions.Web/wwwroot/uploads/
+
+# Frontend build tooling
+node_modules/
 
 # Editor/OS cruft
 .vs/

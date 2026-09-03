@@ -42,7 +42,12 @@ public class CalculatorController : Controller
         return Json(await _pricing.GetCatalogAsync(ct));
     }
 
-    /// <summary>Authoritative live calculation, formulas + rates all applied server-side.</summary>
+    /// <summary>
+    /// Authoritative live calculation, formulas + rates all applied server-side.
+    /// No [ValidateAntiForgeryToken]: this is a stateless read-only computation (no DB
+    /// writes, no session/auth effects), so a forged cross-site POST here has nothing to
+    /// exploit. Rate-limited instead to bound abuse.
+    /// </summary>
     [HttpPost("/calculator/calculate")]
     [EnableRateLimiting("CalculatorCalculate")]
     public async Task<IActionResult> Calculate([FromBody] CalculateRequest request, CancellationToken ct)
