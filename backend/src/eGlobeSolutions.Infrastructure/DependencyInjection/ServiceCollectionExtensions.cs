@@ -1,6 +1,7 @@
 using eGlobeSolutions.Infrastructure.Identity;
 using eGlobeSolutions.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +49,12 @@ public static class ServiceCollectionExtensions
             options.AccessDeniedPath = "/admin/account/denied";
             options.Cookie.Name = "eglobe.admin.auth";
             options.Cookie.HttpOnly = true;
+            // Explicit rather than relying on ASP.NET Core's SameAsRequest/Lax
+            // defaults: the app already forces HTTPS everywhere (UseHttpsRedirection
+            // + HSTS in Program.cs), so the admin session cookie should never be
+            // sent over plain HTTP or as part of a cross-site navigation.
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.Strict;
             options.ExpireTimeSpan = TimeSpan.FromHours(8);
             options.SlidingExpiration = true;
         });

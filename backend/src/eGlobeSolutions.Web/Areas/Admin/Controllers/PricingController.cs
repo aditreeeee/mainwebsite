@@ -9,7 +9,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 /// <summary>Manages the pricing.html plans, their feature bullets, the comparison table and CTA.</summary>
 [Area("Admin")]
 [Route("admin/pricing")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class PricingController : Controller
 {
     private readonly AppDbContext _db;

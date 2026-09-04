@@ -17,15 +17,12 @@ const pairs = [
   ["js/calculator.js", "js/calculator.js"],
   ["js/calculator.min.js", "js/calculator.min.js"],
   ["404.html", "404.html"],
-  ["about.html", "about.html"],
-  ["privacy-policy.html", "privacy-policy.html"],
-  ["terms-of-use.html", "terms-of-use.html"],
-  ["refund-and-cancellation.html", "refund-and-cancellation.html"],
 ];
 
-for (const f of fs.readdirSync(path.join(root, "products")).filter((f) => f.endsWith(".html"))) {
-  pairs.push([`products/${f}`, `products/${f}`]);
-}
+// products/*.html and about.html/privacy-policy.html/terms-of-use.html/
+// refund-and-cancellation.html at the repo root are archival: their content
+// now lives in CmsPages (seeded via DbInitializer) and is served dynamically,
+// not mirrored into wwwroot, so they're deliberately not tracked here.
 
 let outOfSync = [];
 

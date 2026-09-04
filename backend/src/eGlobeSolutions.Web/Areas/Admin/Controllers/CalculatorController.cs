@@ -15,7 +15,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 /// </summary>
 [Area("Admin")]
 [Route("admin/calculator")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class CalculatorController : Controller
 {
     private readonly AppDbContext _db;

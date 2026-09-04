@@ -33,7 +33,8 @@
 <meta name="twitter:title" content="@metaTitle">
 <meta name="twitter:description" content="@metaDesc">
 <meta name="twitter:image" content="@coverImage">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -102,6 +103,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <div class="topbar">
@@ -118,6 +120,7 @@
   </div>
 </div>
 
+<main id="main-content">
 <!-- ===================== ARTICLE HEADER ===================== -->
 <section class="section-tight panel-white">
   <div class="container" style="max-width:900px;">
@@ -192,7 +195,7 @@
     <div class="final-cta" data-reveal="scale">
       <div class="grid-bg" style="opacity:.15"></div>
       <div style="position:relative;z-index:1;">
-        <h2>The future of hotel operations starts with eGlobe.</h2>
+        <h2>The <span class="accent-alt">future</span> of hotel operations starts with eGlobe.</h2>
         <p>See the PMS, channel manager and AI tools your hotel could be running on, in a live 20-minute walkthrough.</p>
         <div class="final-cta__row">
           <a href="contact.html" class="btn btn-dark">Book a Demo</a>
@@ -202,6 +205,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 @await Component.InvokeAsync("SiteFooter")
 
@@ -216,6 +221,6 @@
   </nav>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>

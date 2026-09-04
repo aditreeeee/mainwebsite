@@ -20,7 +20,11 @@ public class ContactEnquirySubmissionTests
 
     public ContactEnquirySubmissionTests(CustomWebApplicationFactory factory) => _factory = factory;
 
-    private HttpClient NewClient() => _factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+    private HttpClient NewClient() => _factory.CreateClient(new WebApplicationFactoryClientOptions
+    {
+        BaseAddress = new Uri("https://localhost"),
+        HandleCookies = true,
+    });
 
     private async Task<(HttpClient client, string token)> NewClientWithTokenAsync()
     {

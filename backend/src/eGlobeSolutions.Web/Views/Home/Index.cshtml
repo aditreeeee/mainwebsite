@@ -31,7 +31,8 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "eGlobe Solutions, Every Hotel System, Sourced by One Partner")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "eGlobe sources and connects the PMS, channel manager, POS and revenue tools your hotel needs.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -104,6 +105,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <!-- ===================== ANNOUNCEMENT BAR ===================== -->
@@ -130,7 +132,7 @@
   </div>
 </div>
 
-<main>
+<main id="main-content">
 <!-- ===================== HERO ===================== -->
 <header class="hero">
   <div class="grid-bg"></div>
@@ -336,6 +338,7 @@
 <!-- ===================== DEPARTMENT WORKSPACES ===================== -->
 <section class="section section-border-top panel-white">
   <div class="container">
+    <div class="dept-sticky-head">
     <div class="section-head section-head--tight">
       <span class="section-kicker">@(workspaces?.Kicker ?? "One shift, every role")</span>
       <h2 data-reveal>@Html.Raw(workspaces?.Title ?? "Built around how your<br>hotel actually runs.")</h2>
@@ -363,6 +366,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M6 21v-2a6 6 0 0112 0v2"/></svg>
         Management
       </button>
+    </div>
     </div>
 
     <div class="dept-panel active" data-dept-panel="frontdesk">
@@ -551,7 +555,7 @@
 </section>
 
 <!-- ===================== PRODUCT ECOSYSTEM (GROUPED) ===================== -->
-<section class="section section-border-top section-dark" id="ecosystem">
+<section class="section section-border-top section-dark parallax-bg" id="ecosystem">
   <div class="container">
     <div class="section-head section-head--tight">
       <span class="section-kicker">@(ecoIntro?.Kicker ?? "The full technology stack")</span>
@@ -688,12 +692,15 @@
         <span class="section-kicker">@(mobileApp?.Kicker ?? "Manage from anywhere")</span>
         <h2 data-reveal>@Html.Raw(mobileApp?.Title ?? "The eGlobe<br>Mobile App.")</h2>
         <p class="lead" style="margin-top:16px;">@(mobileApp?.Subtitle ?? "Stay in control from anywhere, update inventory, view live bookings, and track performance without being at the front desk.")</p>
-        <div class="app-feature__list" data-reveal-group>
+        <div class="app-feature__list" data-reveal-group id="app-feature-list">
           <div class="app-feature__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Update room inventory and rates in real time</div>
           <div class="app-feature__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>View live bookings and arrivals on the go</div>
           <div class="app-feature__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Track performance across every property</div>
           <div class="app-feature__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Message guests directly from the app</div>
         </div>
+        <button type="button" class="app-feature__readmore" id="app-feature-readmore" aria-expanded="false" aria-controls="app-feature-list">
+          <span>Read more</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -789,7 +796,7 @@
   <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;">
     <div>
       <span class="statement__tag" data-reveal>@(priceTeaser?.Kicker ?? "Pricing")</span>
-      <p class="statement__text" data-reveal style="max-width:640px;">@Html.Raw(priceTeaser?.Body ?? "Priced <span class=\"accent\">per room</span>, <span class=\"accent\">per property</span>, or <span class=\"dim\">custom for larger portfolios</span>, one line item, not a stack of subscriptions.")</p>
+      <p class="statement__text" data-reveal data-kinetic style="max-width:640px;">@Html.Raw(priceTeaser?.Body ?? "Priced <span class=\"accent\">per room</span>, <span class=\"accent\">per property</span>, or <span class=\"dim\">custom for larger portfolios</span>, one line item, not a stack of subscriptions.")</p>
     </div>
     <span class="magnetic" data-reveal><a href="@(priceTeaser?.CtaUrl ?? "pricing.html")" class="btn btn-primary">@(priceTeaser?.CtaLabel ?? "View Pricing")</a></span>
   </div>
@@ -859,29 +866,33 @@
       @Html.AntiForgeryToken()
       <input type="hidden" name="FormType" value="quick">
       <input type="text" name="website" id="qe-website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true">
-      <div class="field" data-field="name">
-        <label class="mono">Full Name *</label>
-        <input type="text" required autocomplete="name" placeholder="Your name">
-        <span class="field-msg"></span>
+      <div class="qe-form__row">
+        <div class="field" data-field="name">
+          <label class="mono" for="qe-name">Full Name *</label>
+          <input id="qe-name" type="text" required autocomplete="name" placeholder="Your name">
+          <span class="field-msg"></span>
+        </div>
+        <div class="field" data-field="company">
+          <label class="mono" for="qe-company">Hotel Name <span class="field-optional">(optional)</span></label>
+          <input id="qe-company" type="text" autocomplete="organization" placeholder="Your property">
+          <span class="field-msg"></span>
+        </div>
       </div>
-      <div class="field" data-field="company">
-        <label class="mono">Hotel Name <span class="field-optional">(optional)</span></label>
-        <input type="text" autocomplete="organization" placeholder="Your property">
-        <span class="field-msg"></span>
-      </div>
-      <div class="field" data-field="email">
-        <label class="mono">Work Email <span class="field-optional">(optional)</span></label>
-        <input type="email" autocomplete="email" placeholder="you@yourhotel.com">
-        <span class="field-msg"></span>
-      </div>
-      <div class="field" data-field="phone">
-        <label class="mono">Phone *</label>
-        <input type="tel" required autocomplete="tel" placeholder="We'll call you back">
-        <span class="field-msg"></span>
+      <div class="qe-form__row">
+        <div class="field" data-field="email">
+          <label class="mono" for="qe-email">Work Email <span class="field-optional">(optional)</span></label>
+          <input id="qe-email" type="email" autocomplete="email" placeholder="you@yourhotel.com">
+          <span class="field-msg"></span>
+        </div>
+        <div class="field" data-field="phone">
+          <label class="mono" for="qe-phone">Phone *</label>
+          <input id="qe-phone" type="tel" required autocomplete="tel" placeholder="We'll call you back">
+          <span class="field-msg"></span>
+        </div>
       </div>
       <div class="field" data-field="rooms">
-        <label class="mono">Number of Rooms <span class="field-optional">(optional)</span></label>
-        <div class="room-chips" role="group" aria-label="Number of rooms">
+        <label class="mono" id="qe-rooms-label">Number of Rooms <span class="field-optional">(optional)</span></label>
+        <div class="room-chips" role="group" aria-labelledby="qe-rooms-label">
           <button type="button" class="room-chip" data-rooms="1-10">1–10</button>
           <button type="button" class="room-chip" data-rooms="11-50">11–50</button>
           <button type="button" class="room-chip" data-rooms="51-150">51–150</button>
@@ -896,6 +907,6 @@
   </div>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>

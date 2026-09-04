@@ -1,6 +1,7 @@
 using eGlobeSolutions.Infrastructure.Persistence;
 using eGlobeSolutions.Web.Models.Public;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace eGlobeSolutions.Web.Controllers;
@@ -23,6 +24,7 @@ public class BlogController : Controller
     public BlogController(AppDbContext db) => _db = db;
 
     [HttpGet("/blog.html")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var featured = await _db.BlogPosts
@@ -46,6 +48,7 @@ public class BlogController : Controller
     }
 
     [HttpGet("/{slug}.html")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> Article(string slug, CancellationToken ct)
     {
         var post = await _db.BlogPosts
@@ -68,11 +71,28 @@ public class BlogController : Controller
     /// "products/pms"), so this route and Article's never collide, they're different
     /// path shapes entirely.</summary>
     [HttpGet("/products/{slug}.html")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> ProductPage(string slug, CancellationToken ct)
     {
         var page = await _db.CmsPages
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Slug == "products/" + slug && p.IsPublished, ct);
+
+        if (page is null) return NotFound();
+
+        return View("Page", new CmsPageViewModel { Page = page });
+    }
+
+    /// <summary>The 6 Solutions pages (property-type/audience segments, e.g.
+    /// "Hotels & Resorts", "Boutique Properties") are CmsPages whose Slug carries
+    /// a "solutions/" prefix, same shape as ProductPage above.</summary>
+    [HttpGet("/solutions/{slug}.html")]
+    [OutputCache(PolicyName = "PublicContent")]
+    public async Task<IActionResult> SolutionPage(string slug, CancellationToken ct)
+    {
+        var page = await _db.CmsPages
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Slug == "solutions/" + slug && p.IsPublished, ct);
 
         if (page is null) return NotFound();
 

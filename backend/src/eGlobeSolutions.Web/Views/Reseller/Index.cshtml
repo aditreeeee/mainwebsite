@@ -36,7 +36,8 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "Resellers, eGlobe Solutions")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "Become a reseller or partner for eGlobe's sourced hotel technology stack.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -74,6 +75,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <div class="topbar">
@@ -90,6 +92,7 @@
   </div>
 </div>
 
+<main id="main-content">
 <header class="page-hero page-hero--compact">
   <div class="container page-hero__split">
     <h1 data-reveal>@Html.Raw(hero?.Title ?? "Become an eGlobe <span class=\"accent\">Reseller</span> <span class=\"accent-alt\">Partner.</span>")</h1>
@@ -128,7 +131,7 @@
         </ul>
         <a href="@(planReferral?.CtaUrl ?? "contact.html")" class="btn btn-ghost btn-block">@(planReferral?.CtaLabel ?? "Refer a Hotel")</a>
       </div>
-      <div class="price-teaser-card featured">
+      <div class="price-teaser-card featured parallax-bg-static">
         <span class="badge-pill">@(planReseller?.Kicker ?? "Most Popular")</span>
         <h3>@(planReseller?.Title ?? "Reseller Commission")</h3>
         <p class="unit">@(planReseller?.Subtitle ?? "Sell directly and earn recurring commission")</p>
@@ -172,19 +175,19 @@
 <section class="statement">
   <div class="container">
     <span class="statement__tag" data-reveal>@(statement?.Kicker ?? "No exclusivity requirements")</span>
-    <p class="statement__text" data-reveal>@Html.Raw(statement?.Body ?? "You don't have to drop your other vendors or lock into one brand. <span class=\"accent\">Sell what makes sense</span> for the hotel in front of you.")</p>
+    <p class="statement__text" data-reveal data-kinetic>@Html.Raw(statement?.Body ?? "You don't have to drop your other vendors or lock into one brand. <span class=\"accent\">Sell what makes sense</span> for the hotel in front of you.")</p>
   </div>
 </section>
 
 <!-- ===================== WHO SHOULD APPLY + BENEFITS ===================== -->
-<section class="section section-border-top section-dark">
+<section class="section section-border-top section-dark parallax-bg">
   <div class="container">
     <div class="why-grid">
       <div>
         <span class="section-kicker" style="color:var(--blue)">@(whoShould?.Kicker ?? "Who Should Apply")</span>
         <h2 data-reveal>@Html.Raw(whoShould?.Title ?? "If you already work with hotels,<br>you already have a head start.")</h2>
-        <p class="lead" style="margin-top:18px;color:rgba(255,255,255,.6);">@(whoShould?.Subtitle ?? "Revenue management companies, hotel consultants & GMs, IT solutions providers, web designers & marketers, PMS and booking engine providers, reputation management companies, photographers, hardware suppliers, and tour operators.")</p>
-        <p style="margin-top:22px;font-size:13px;color:rgba(255,255,255,.5);">@(whoShould?.Body ?? "Industries served: Hotels & Resorts, Boutique Properties, Vacation Rentals, Hostels, Guest Houses, Travel Agencies.")</p>
+        <p class="lead" style="margin-top:18px;">@(whoShould?.Subtitle ?? "Revenue management companies, hotel consultants & GMs, IT solutions providers, web designers & marketers, PMS and booking engine providers, reputation management companies, photographers, hardware suppliers, and tour operators.")</p>
+        <p style="margin-top:22px;font-size:13px;">@(whoShould?.Body ?? "Industries served: Hotels & Resorts, Boutique Properties, Vacation Rentals, Hostels, Guest Houses, Travel Agencies.")</p>
       </div>
       <div class="why-list" data-reveal-group>
         <div class="why-item">
@@ -210,7 +213,7 @@
     <div class="final-cta" data-reveal="scale">
       <div class="grid-bg" style="opacity:.15"></div>
       <div style="position:relative;z-index:1;">
-        <h2>@(finalCta?.Title ?? "Ready to Grow Together?")</h2>
+        <h2>@Html.Raw(finalCta?.Title ?? "Ready to Grow Together?")</h2>
         <p>@(finalCta?.Body ?? "Talk to our partnerships team about the referral, reseller commission or white label model that fits your business.")</p>
         <div class="final-cta__row">
           <a href="@(finalCta?.CtaUrl ?? "contact.html")" class="btn btn-dark">@(finalCta?.CtaLabel ?? "Talk to Partnerships")</a>
@@ -219,6 +222,7 @@
     </div>
   </div>
 </section>
+</main>
 
 @await Component.InvokeAsync("SiteFooter")
 
@@ -233,6 +237,6 @@
   </nav>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>

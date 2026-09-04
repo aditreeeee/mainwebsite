@@ -20,7 +20,8 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "Pricing, eGlobe Solutions")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "Simple, transparent pricing for the hotel technology stack eGlobe sources for you.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -72,6 +73,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <div class="topbar">
@@ -88,6 +90,7 @@
   </div>
 </div>
 
+<main id="main-content">
 <header class="page-hero page-hero--compact">
   <div class="container page-hero__split">
     <h1 data-reveal><span class="accent">Simple</span> or <span class="accent-alt">sourced</span> for scale?</h1>
@@ -100,14 +103,14 @@
   <div class="container">
     <div class="section-head center" style="margin-left:auto;margin-right:auto;">
       <span class="section-kicker">Choose Your Model</span>
-      <h2 data-reveal>Three ways to license eGlobe.</h2>
+      <h2 data-reveal><span class="accent">Three ways</span> to license eGlobe.</h2>
       <p class="lead" style="margin:16px auto 0;">Every plan is quoted by our sales team, no published figures, no guesswork. Pick the unit that matches how your property is structured.</p>
     </div>
 
     <div class="price-teaser" data-reveal-group>
       @foreach (var plan in Model.Plans)
       {
-        <div class="price-teaser-card @(plan.IsFeatured ? "featured" : "")">
+        <div class="price-teaser-card @(plan.IsFeatured ? "featured parallax-bg-static" : "")">
           <span class="badge-pill">@plan.BadgeText</span>
           <h3>@plan.Name</h3>
           <p class="unit">@plan.UnitDescription</p>
@@ -153,7 +156,7 @@
   <div class="container" style="max-width:820px;">
     <div class="section-head center" style="margin-left:auto;margin-right:auto;">
       <span class="section-kicker">FAQ</span>
-      <h2 data-reveal>Pricing questions, answered.</h2>
+      <h2 data-reveal>Pricing questions, <span class="accent">answered</span>.</h2>
     </div>
     <div class="faq-list" data-reveal-group>
       @foreach (var faq in Model.Faqs)
@@ -176,7 +179,7 @@
     <div class="final-cta" data-reveal="scale">
       <div class="grid-bg" style="opacity:.15"></div>
       <div style="position:relative;z-index:1;">
-        <h2>Ready for a Quote Built Around Your Property?</h2>
+        <h2>Ready for a <span class="accent-alt">Quote</span> Built Around Your Property?</h2>
         <p>Talk to our sales team for pricing tailored to your room count, module needs and portfolio size.</p>
         <div class="final-cta__row">
           <a href="contact.html" class="btn btn-dark">Contact Sales</a>
@@ -186,6 +189,7 @@
     </div>
   </div>
 </section>
+</main>
 
 @await Component.InvokeAsync("SiteFooter")
 
@@ -200,7 +204,7 @@
   </nav>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>
 

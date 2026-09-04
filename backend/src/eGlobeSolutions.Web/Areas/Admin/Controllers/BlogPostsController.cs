@@ -8,7 +8,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/blog")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class BlogPostsController : Controller
 {
     private readonly AppDbContext _db;

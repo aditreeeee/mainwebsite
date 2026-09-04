@@ -42,6 +42,13 @@ public class SiteSettingsFormModel
     [StringLength(200)]
     public string? FooterCopyright { get; set; }
 
+    // ---- Display colors ---- (blank = use the built-in default from css/style.css)
+    [RegularExpression("^(#[0-9A-Fa-f]{6})?$", ErrorMessage = "Enter a hex color like #3B52E8.")]
+    public string? ThemePrimaryColor { get; set; }
+
+    [RegularExpression("^(#[0-9A-Fa-f]{6})?$", ErrorMessage = "Enter a hex color like #1B2A5F.")]
+    public string? ThemeSecondaryColor { get; set; }
+
     // ---- SMTP ----
     [StringLength(200)]
     public string? SmtpHost { get; set; }

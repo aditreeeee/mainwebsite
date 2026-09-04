@@ -33,6 +33,23 @@ public class SiteFooterViewComponent : ViewComponent
             };
         }
 
+        var solutionLinks = await _db.MenuItems
+            .AsNoTracking()
+            .Where(m => m.Location == "footer-solutions" && m.IsPublished)
+            .OrderBy(m => m.SortOrder).ToListAsync();
+        if (solutionLinks.Count == 0)
+        {
+            solutionLinks = new List<MenuItem>
+            {
+                new() { Label = "Hotels & Resorts", Url = "solutions/hotels-resorts.html" },
+                new() { Label = "Boutique Properties", Url = "solutions/boutique-properties.html" },
+                new() { Label = "Vacation Rentals", Url = "solutions/vacation-rentals.html" },
+                new() { Label = "Hostels", Url = "solutions/hostels.html" },
+                new() { Label = "Guest Houses", Url = "solutions/guest-houses.html" },
+                new() { Label = "Travel Agencies", Url = "solutions/travel-agencies.html" },
+            };
+        }
+
         var companyLinks = await _db.MenuItems
             .AsNoTracking()
             .Where(m => m.Location == "footer-company" && m.IsPublished)
@@ -53,6 +70,7 @@ public class SiteFooterViewComponent : ViewComponent
         {
             Settings = settings,
             ProductLinks = productLinks,
+            SolutionLinks = solutionLinks,
             CompanyLinks = companyLinks
         });
     }

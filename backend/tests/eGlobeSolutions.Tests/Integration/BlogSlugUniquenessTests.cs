@@ -27,8 +27,13 @@ public class BlogSlugUniquenessTests
         // see the raw 302 (success) vs 200 (validation error, form re-rendered)
         // response instead of a followed redirect masking that distinction.
         // TestAuthHelper's login works correctly either way.
+        // BaseAddress must be https: the admin auth cookie is Secure-only
+        // (CookieSecurePolicy.Always), HttpClient silently drops it on the next
+        // request if the client thinks it's talking http, breaking every
+        // "still logged in" call after login without this.
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
+            BaseAddress = new Uri("https://localhost"),
             HandleCookies = true,
             AllowAutoRedirect = false,
         });

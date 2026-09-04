@@ -10,7 +10,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/settings")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "SuperAdminOnly")]
 public class SettingsController : Controller
 {
     private readonly AppDbContext _db;
@@ -41,6 +41,9 @@ public class SettingsController : Controller
             AppStoreUrl = Get(SiteSettingKeys.AppStoreUrl),
             GooglePlayUrl = Get(SiteSettingKeys.GooglePlayUrl),
             FooterCopyright = Get(SiteSettingKeys.FooterCopyright),
+
+            ThemePrimaryColor = Get(SiteSettingKeys.ThemePrimaryColor),
+            ThemeSecondaryColor = Get(SiteSettingKeys.ThemeSecondaryColor),
 
             SmtpHost = Get(SiteSettingKeys.SmtpHost),
             SmtpPort = int.TryParse(Get(SiteSettingKeys.SmtpPort), out var port) ? port : 587,
@@ -80,6 +83,9 @@ public class SettingsController : Controller
             [SiteSettingKeys.AppStoreUrl] = model.AppStoreUrl,
             [SiteSettingKeys.GooglePlayUrl] = model.GooglePlayUrl,
             [SiteSettingKeys.FooterCopyright] = model.FooterCopyright,
+
+            [SiteSettingKeys.ThemePrimaryColor] = model.ThemePrimaryColor,
+            [SiteSettingKeys.ThemeSecondaryColor] = model.ThemeSecondaryColor,
 
             [SiteSettingKeys.SmtpHost] = model.SmtpHost,
             [SiteSettingKeys.SmtpPort] = model.SmtpPort?.ToString() ?? "587",

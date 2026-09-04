@@ -38,7 +38,8 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "Contact Sales, eGlobe Solutions")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "Talk to our sales team about the hotel technology stack eGlobe sources for you.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -76,6 +77,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <div class="topbar">
@@ -92,6 +94,7 @@
   </div>
 </div>
 
+<main id="main-content">
 <header class="page-hero page-hero--compact">
   <div class="container page-hero__split">
     <h1 data-reveal>@Html.Raw(hero?.Title ?? "<span class=\"accent\">Let's Source</span> the <span class=\"accent-alt\">Right Stack</span> for Your Hotel.")</h1>
@@ -108,7 +111,7 @@
       <form id="sales-form" class="sales-form" data-reveal="left" novalidate method="post" action="/contact/submit">
         @Html.AntiForgeryToken()
         <div class="sales-form__head">
-          <h2 class="sales-form__title">Tell Us About Your Property</h2>
+          <h2 class="sales-form__title">Tell Us About Your <span class="accent">Property</span></h2>
           <span class="sales-form__progress" id="sales-form-progress">0 of 5</span>
         </div>
         <div class="sales-form__bar"><span id="sales-form-bar-fill"></span></div>
@@ -117,30 +120,30 @@
 
         <div class="sales-form__grid">
           <div class="field" data-field="name">
-            <label class="mono">Full Name *</label>
-            <input type="text" required autocomplete="name">
+            <label class="mono" for="sf-name">Full Name *</label>
+            <input id="sf-name" type="text" required autocomplete="name">
             <span class="field-msg"></span>
           </div>
           <div class="field" data-field="company">
-            <label class="mono">Hotel Name *</label>
-            <input type="text" required autocomplete="organization">
+            <label class="mono" for="sf-company">Hotel Name *</label>
+            <input id="sf-company" type="text" required autocomplete="organization">
             <span class="field-msg"></span>
           </div>
           <div class="field" data-field="email">
-            <label class="mono">Work Email *</label>
-            <input type="email" required autocomplete="email">
+            <label class="mono" for="sf-email">Work Email *</label>
+            <input id="sf-email" type="email" required autocomplete="email">
             <span class="field-msg"></span>
           </div>
           <div class="field" data-field="phone">
-            <label class="mono">Phone *</label>
-            <input type="tel" required autocomplete="tel">
+            <label class="mono" for="sf-phone">Phone *</label>
+            <input id="sf-phone" type="tel" required autocomplete="tel">
             <span class="field-msg"></span>
           </div>
         </div>
 
         <div class="field" data-field="rooms">
-          <label class="mono">Number of Rooms *</label>
-          <div class="room-chips" role="group" aria-label="Number of rooms">
+          <label class="mono" id="sf-rooms-label">Number of Rooms *</label>
+          <div class="room-chips" role="group" aria-labelledby="sf-rooms-label">
             <button type="button" class="room-chip" data-rooms="1-10">1–10</button>
             <button type="button" class="room-chip" data-rooms="11-50">11–50</button>
             <button type="button" class="room-chip" data-rooms="51-150">51–150</button>
@@ -151,8 +154,8 @@
         </div>
 
         <div class="field">
-          <label class="mono">Interested In <span class="field-optional">(pick any)</span></label>
-          <div class="product-chips">
+          <label class="mono" id="sf-interested-label">Interested In <span class="field-optional">(pick any)</span></label>
+          <div class="product-chips" role="group" aria-labelledby="sf-interested-label">
             <button type="button" class="product-chip" data-product="Demo Call">Demo Call</button>
             <button type="button" class="product-chip" data-product="Free Trial">Free Trial</button>
             <button type="button" class="product-chip" data-product="Cloud PMS">Cloud PMS</button>
@@ -168,7 +171,7 @@
         </div>
 
         <div class="field sales-form__message">
-          <label class="mono">Message <span class="field-optional">(optional)</span></label>
+          <label class="mono" for="sales-form-message">Message <span class="field-optional">(optional)</span></label>
           <textarea id="sales-form-message" rows="3" placeholder="Anything specific we should know?"></textarea>
         </div>
 
@@ -178,7 +181,7 @@
 
       <!-- PRODUCT INFO SIDEBAR -->
       <div class="sales-sidebar" data-reveal="right">
-        <h2 class="sales-sidebar__title">What happens next</h2>
+        <h2 class="sales-sidebar__title">What happens <span class="accent">next</span></h2>
         <div class="why-list">
           @{ var icons = new[]
              {
@@ -228,6 +231,7 @@
     </div>
   </div>
 </section>
+</main>
 
 @await Component.InvokeAsync("SiteFooter")
 
@@ -242,6 +246,6 @@
   </nav>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>

@@ -45,4 +45,19 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Development");
     }
+
+    // The admin auth cookie is Secure-only (CookieSecurePolicy.Always, see
+    // ServiceCollectionExtensions.ConfigureApplicationCookie), correctly so,
+    // the app is HTTPS-only everywhere real traffic reaches it. TestServer's
+    // default client base address is http://localhost though, under which a
+    // Secure cookie set by login is silently dropped by HttpClient before
+    // the next request, every "should still be logged in" assertion sees a
+    // 302-to-login instead. Pointing the default client at https://localhost
+    // makes TestServer mark the request pipeline HTTPS end to end, so the
+    // cookie round-trips exactly like it does in production, this is a test
+    // fixture fix, not a relaxation of the real cookie policy.
+    protected override void ConfigureClient(HttpClient client)
+    {
+        client.BaseAddress = new Uri("https://localhost");
+    }
 }

@@ -20,8 +20,12 @@ public class AdminAuthorizationTests
 
     public AdminAuthorizationTests(CustomWebApplicationFactory factory) => _factory = factory;
 
+    // BaseAddress must be https: the admin auth cookie is Secure-only
+    // (CookieSecurePolicy.Always), HttpClient silently drops it on the next
+    // request if the client thinks it's talking http.
     private HttpClient NewClient() => _factory.CreateClient(new WebApplicationFactoryClientOptions
     {
+        BaseAddress = new Uri("https://localhost"),
         HandleCookies = true,
         AllowAutoRedirect = true,
     });
@@ -31,6 +35,7 @@ public class AdminAuthorizationTests
     {
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
+            BaseAddress = new Uri("https://localhost"),
             HandleCookies = true,
             AllowAutoRedirect = false, // inspect the redirect itself, don't follow it
         });
@@ -112,16 +117,71 @@ public class AdminAuthorizationTests
         var loggedIn = await TestAuthHelper.TryLoginAsync(client, email, password);
         Assert.True(loggedIn);
 
-        // AdminOnly page: SalesAgent is explicitly allowed.
+        // AdminOnly page (role-agnostic overview): SalesAgent is explicitly allowed.
+        var dashboardResponse = await client.GetAsync("/admin");
+        dashboardResponse.EnsureSuccessStatusCode();
+
+        // EnquiriesManage page: SalesAgent's actual job, explicitly allowed.
+        var enquiriesResponse = await client.GetAsync("/admin/enquiries");
+        enquiriesResponse.EnsureSuccessStatusCode();
+
+        // ContentManage page: SalesAgent has no content-editing role, must be
+        // denied, not silently let through, this is the actual regression this
+        // whole test class exists to catch (see Program.cs's AddAuthorization
+        // comment: every admin controller used to share one "AdminOnly" policy,
+        // letting SalesAgent edit Pages/Settings/etc. it had no business touching).
         var blogResponse = await client.GetAsync("/admin/blog");
-        blogResponse.EnsureSuccessStatusCode();
+        AssertDenied(blogResponse, "/admin/blog");
 
         // SuperAdminOnly page: SalesAgent must be denied, not silently let through.
         var usersResponse = await client.GetAsync("/admin/users");
-        var finalPath = usersResponse.RequestMessage?.RequestUri?.AbsolutePath ?? "";
+        AssertDenied(usersResponse, "/admin/users");
+    }
+
+    private static void AssertDenied(HttpResponseMessage response, string path)
+    {
+        var finalPath = response.RequestMessage?.RequestUri?.AbsolutePath ?? "";
         Assert.True(
-            usersResponse.StatusCode == System.Net.HttpStatusCode.Forbidden ||
+            response.StatusCode == System.Net.HttpStatusCode.Forbidden ||
             finalPath.Contains("/account/denied", StringComparison.OrdinalIgnoreCase),
-            $"Expected SalesAgent to be denied /admin/users, got {usersResponse.StatusCode} at {finalPath}.");
+            $"Expected role to be denied {path}, got {response.StatusCode} at {finalPath}.");
+    }
+
+    [Fact]
+    public async Task ContentEditor_role_can_manage_content_but_not_enquiries_or_settings()
+    {
+        // The other half of the SalesAgent test above: ContentEditor should
+        // reach content-editing screens but has no legitimate reason to see
+        // the enquiries/leads queue or Settings (SMTP credentials, theme).
+        const string email = "integration-tests-contenteditor@eglobe-solutions.com";
+        const string password = "Test-ContentEditor-Pass!2026";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            if (await userManager.FindByEmailAsync(email) is null)
+            {
+                var user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true, FullName = "Test Content Editor", IsActive = true };
+                var createResult = await userManager.CreateAsync(user, password);
+                Assert.True(createResult.Succeeded, string.Join("; ", createResult.Errors.Select(e => e.Description)));
+                await userManager.AddToRoleAsync(user, ApplicationRole.Names.ContentEditor);
+            }
+        }
+
+        var client = NewClient();
+        var loggedIn = await TestAuthHelper.TryLoginAsync(client, email, password);
+        Assert.True(loggedIn);
+
+        // ContentManage page: this is ContentEditor's actual job, explicitly allowed.
+        var blogResponse = await client.GetAsync("/admin/blog");
+        blogResponse.EnsureSuccessStatusCode();
+
+        // EnquiriesManage page: ContentEditor has no business seeing lead data.
+        var enquiriesResponse = await client.GetAsync("/admin/enquiries");
+        AssertDenied(enquiriesResponse, "/admin/enquiries");
+
+        // SuperAdminOnly page: Settings holds SMTP credentials, ContentEditor must be denied.
+        var settingsResponse = await client.GetAsync("/admin/settings");
+        AssertDenied(settingsResponse, "/admin/settings");
     }
 }

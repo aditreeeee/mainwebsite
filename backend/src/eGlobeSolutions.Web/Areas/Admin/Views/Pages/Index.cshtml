@@ -1,5 +1,27 @@
 @model List<CmsPage>
-@{ ViewData["Title"] = "Pages"; }
+@{
+    ViewData["Title"] = "Pages";
+
+    // Grouped by Slug prefix so the list reads as three real categories
+    // instead of one flat table of 22+ rows in no obvious order. "products/"
+    // pages are branded "Platform" everywhere else in the site (nav, footer),
+    // so the group label matches that, not the DB/URL naming.
+    var platformPages = Model.Where(p => p.Slug.StartsWith("products/")).OrderBy(p => p.SortOrder).ThenBy(p => p.Title).ToList();
+    var solutionPages = Model.Where(p => p.Slug.StartsWith("solutions/")).OrderBy(p => p.SortOrder).ThenBy(p => p.Title).ToList();
+    var otherPages = Model.Where(p => !p.Slug.StartsWith("products/") && !p.Slug.StartsWith("solutions/")).OrderBy(p => p.SortOrder).ThenBy(p => p.Title).ToList();
+
+    // Legal and a few marketing pages aren't CmsPages at all, they're static
+    // files under wwwroot (edited in the repo, not here), listed read-only
+    // so it's clear they exist and where to find them, rather than silently
+    // missing from a page titled "Pages".
+    var legalPages = new (string Label, string Url)[]
+    {
+        ("Privacy Policy", "/privacy-policy.html"),
+        ("Terms of Use", "/terms-of-use.html"),
+        ("Refund & Cancellation Policy", "/refund-and-cancellation.html"),
+        ("About Us", "/about.html"),
+    };
+}
 
 <div class="admin-toolbar">
     <h1>Pages</h1>
@@ -7,11 +29,12 @@
 </div>
 <p class="admin-hint">Create a page here and it's live at /{slug}.html immediately, no code change or redeploy needed. Add it to the site's navigation from <a href="/admin/menus">Menus</a> if it should show up in the header, footer or mobile nav.</p>
 
-<div class="admin-card">
+<div class="admin-card" style="margin-bottom:24px;">
+    <h2 style="margin:0 0 14px; font-size:16px;">Platform <span style="font-weight:400; color:#6b7280;">(@platformPages.Count)</span></h2>
     <table class="admin-table">
         <thead><tr><th>Title</th><th>URL</th><th>Published</th><th>Updated</th><th></th></tr></thead>
         <tbody>
-        @foreach (var p in Model)
+        @foreach (var p in platformPages)
         {
             <tr>
                 <td><a href="/admin/pages/@p.Id/edit" style="font-weight:600;">@p.Title</a></td>
@@ -28,9 +51,86 @@
                 </td>
             </tr>
         }
-        @if (!Model.Any())
+        @if (!platformPages.Any())
         {
-            <tr><td colspan="5">No pages yet, create one above.</td></tr>
+            <tr><td colspan="5">No platform pages yet.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="admin-card" style="margin-bottom:24px;">
+    <h2 style="margin:0 0 14px; font-size:16px;">Solutions <span style="font-weight:400; color:#6b7280;">(@solutionPages.Count)</span></h2>
+    <table class="admin-table">
+        <thead><tr><th>Title</th><th>URL</th><th>Published</th><th>Updated</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var p in solutionPages)
+        {
+            <tr>
+                <td><a href="/admin/pages/@p.Id/edit" style="font-weight:600;">@p.Title</a></td>
+                <td>/@(p.Slug).html</td>
+                <td><span class="admin-badge @(p.IsPublished ? "admin-badge--won" : "")">@(p.IsPublished ? "Published" : "Draft")</span></td>
+                <td>@((p.UpdatedAtUtc ?? p.CreatedAtUtc).ToString("yyyy-MM-dd"))</td>
+                <td class="admin-row-actions">
+                    <a class="admin-btn" href="/admin/pages/@p.Id/edit">Edit</a>
+                    <a class="admin-btn" href="/@(p.Slug).html" target="_blank">View</a>
+                    <form method="post" action="/admin/pages/@p.Id/delete" onsubmit="return confirm('Delete this page?');">
+                        @Html.AntiForgeryToken()
+                        <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!solutionPages.Any())
+        {
+            <tr><td colspan="5">No solution pages yet.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (otherPages.Any())
+{
+    <div class="admin-card" style="margin-bottom:24px;">
+        <h2 style="margin:0 0 14px; font-size:16px;">Other Pages <span style="font-weight:400; color:#6b7280;">(@otherPages.Count)</span></h2>
+        <table class="admin-table">
+            <thead><tr><th>Title</th><th>URL</th><th>Published</th><th>Updated</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var p in otherPages)
+            {
+                <tr>
+                    <td><a href="/admin/pages/@p.Id/edit" style="font-weight:600;">@p.Title</a></td>
+                    <td>/@(p.Slug).html</td>
+                    <td><span class="admin-badge @(p.IsPublished ? "admin-badge--won" : "")">@(p.IsPublished ? "Published" : "Draft")</span></td>
+                    <td>@((p.UpdatedAtUtc ?? p.CreatedAtUtc).ToString("yyyy-MM-dd"))</td>
+                    <td class="admin-row-actions">
+                        <a class="admin-btn" href="/admin/pages/@p.Id/edit">Edit</a>
+                        <a class="admin-btn" href="/@(p.Slug).html" target="_blank">View</a>
+                        <form method="post" action="/admin/pages/@p.Id/delete" onsubmit="return confirm('Delete this page?');">
+                            @Html.AntiForgeryToken()
+                            <button class="admin-btn admin-btn--danger" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="admin-card">
+    <h2 style="margin:0 0 6px; font-size:16px;">Legal &amp; Static Pages</h2>
+    <p class="admin-hint" style="margin-top:0;">Not stored in the database, edited directly in the repo (under <code>wwwroot/</code>) and redeployed, listed here for reference only.</p>
+    <table class="admin-table">
+        <thead><tr><th>Title</th><th>URL</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var lp in legalPages)
+        {
+            <tr>
+                <td style="font-weight:600;">@lp.Label</td>
+                <td>@lp.Url</td>
+                <td class="admin-row-actions"><a class="admin-btn" href="@lp.Url" target="_blank">View</a></td>
+            </tr>
         }
         </tbody>
     </table>

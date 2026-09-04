@@ -5,6 +5,19 @@
     var metaTitle = cmsPage.MetaTitle ?? $"{cmsPage.Title}, eGlobe Solutions";
     var metaDesc = cmsPage.MetaDescription ?? cmsPage.Subtitle ?? cmsPage.Title;
     var pageUrl = $"https://www.eglobe-solutions.com/{cmsPage.Slug}.html";
+
+    // Product/Solution pages (UseCustomHero) carry a "<!--FAQ_PLACEHOLDER-->"
+    // marker in Body where their FAQ section used to be hardcoded HTML,
+    // split around it and fill the gap with the PageFaqs ViewComponent
+    // (FaqItems where PageKey == Slug), so those FAQs are admin-editable at
+    // /admin/faqs?page=<slug> instead of baked into the page permanently.
+    // Any Body without the marker (a plain admin-created Page) renders
+    // unchanged, this only ever finds anything on the migrated pages.
+    const string faqMarker = "<!--FAQ_PLACEHOLDER-->";
+    var faqMarkerIndex = cmsPage.Body.IndexOf(faqMarker, StringComparison.Ordinal);
+    var hasFaqPlaceholder = faqMarkerIndex >= 0;
+    var bodyBeforeFaq = hasFaqPlaceholder ? cmsPage.Body[..faqMarkerIndex] : cmsPage.Body;
+    var bodyAfterFaq = hasFaqPlaceholder ? cmsPage.Body[(faqMarkerIndex + faqMarker.Length)..] : string.Empty;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +40,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="@metaTitle">
 <meta name="twitter:description" content="@metaDesc">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -75,15 +89,16 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <div class="topbar">
   <div class="topbar__inner">
-    <a href="index.html" class="brand"><img class="mark" src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe Solutions"></a>
+    <a href="/index.html" class="brand"><img class="mark" src="https://www.eglobe-solutions.com/img/logo-dark.webp" alt="eGlobe Solutions"></a>
     @await Component.InvokeAsync("TopNav")
     <div class="topbar__actions">
       <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Log In</a>
-      <a href="contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
+      <a href="/contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
     </div>
     <button class="topbar__burger" id="topbar-burger" aria-label="Toggle menu" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -91,6 +106,7 @@
   </div>
 </div>
 
+<main id="main-content">
 @if (!cmsPage.UseCustomHero)
 {
   <header class="page-hero page-hero--compact">
@@ -115,7 +131,12 @@ else
 {
   @* Body supplies its own full hero + sections + final CTA, e.g. migrated
      product pages, since a per-product CTA reads better than a generic one. *@
-  @Html.Raw(cmsPage.Body)
+  @Html.Raw(bodyBeforeFaq)
+  @if (hasFaqPlaceholder)
+  {
+    @await Component.InvokeAsync("PageFaqs", new { pageKey = cmsPage.Slug })
+  }
+  @Html.Raw(bodyAfterFaq)
 }
 
 @if (!cmsPage.UseCustomHero)
@@ -125,17 +146,18 @@ else
       <div class="final-cta" data-reveal="scale">
         <div class="grid-bg" style="opacity:.15"></div>
         <div style="position:relative;z-index:1;">
-          <h2>See eGlobe sourcing your hotel's stack.</h2>
+          <h2>See eGlobe <span class="accent-alt">sourcing</span> your hotel's stack.</h2>
           <p>Talk to our team for a live walkthrough tailored to your rooms, modules and portfolio size.</p>
           <div class="final-cta__row">
-            <a href="contact.html" class="btn btn-dark">Talk to Sales</a>
-            <a href="pricing.html" class="btn btn-ghost">View Pricing</a>
+            <a href="/contact.html" class="btn btn-dark">Talk to Sales</a>
+            <a href="/pricing.html" class="btn btn-ghost">View Pricing</a>
           </div>
         </div>
       </div>
     </div>
   </section>
 }
+</main>
 
 @await Component.InvokeAsync("SiteFooter")
 
@@ -146,10 +168,10 @@ else
     </button>
     <span class="nav-dock__brand"><img src="/assets/logo.png" alt="eGlobe"></span>
     @await Component.InvokeAsync("NavDock")
-    <a href="contact.html" class="nav-dock__cta">Book a Demo</a>
+    <a href="/contact.html" class="nav-dock__cta">Book a Demo</a>
   </nav>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>

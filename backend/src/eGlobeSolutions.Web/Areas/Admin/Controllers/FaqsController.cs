@@ -8,7 +8,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/faqs")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class FaqsController : Controller
 {
     private readonly AppDbContext _db;
@@ -19,6 +19,15 @@ public class FaqsController : Controller
     {
         var faqs = await _db.FaqItems.Where(f => f.PageKey == page).OrderBy(f => f.SortOrder).ToListAsync(ct);
         ViewBag.Page = page;
+        // Drives the page-picker dropdown: every PageKey that actually has at
+        // least one FAQ row, queried live rather than hardcoded, so this
+        // scales automatically as new page keys (the 16 products, 6
+        // solutions) get their first FAQ without a code change here.
+        ViewBag.AllPageKeys = await _db.FaqItems
+            .Select(f => f.PageKey)
+            .Distinct()
+            .OrderBy(k => k)
+            .ToListAsync(ct);
         return View(faqs);
     }
 

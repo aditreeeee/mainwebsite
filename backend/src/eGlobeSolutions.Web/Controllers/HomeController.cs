@@ -38,6 +38,15 @@ public class HomeController : Controller
         return View(vm);
     }
 
-    [Route("error")]
-    public IActionResult Error() => View("Error");
+    // Handles both UseExceptionHandler("/error") (an unhandled 500, code is
+    // null) and UseStatusCodePagesWithReExecute("/error/{0}") (a routing/auth
+    // status like 404 or 403, code is set) so each gets its own branded page
+    // instead of a blank status-only response.
+    [Route("error/{code:int?}")]
+    public IActionResult Error(int? code) => View(code switch
+    {
+        404 => "NotFound",
+        403 => "Forbidden",
+        _ => "Error"
+    });
 }

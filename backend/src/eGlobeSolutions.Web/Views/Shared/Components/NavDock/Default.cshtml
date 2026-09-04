@@ -1,14 +1,30 @@
 @model List<MenuItem>
+@{
+    // See Views/Shared/Components/TopNav/Default.cshtml for why this must be
+    // root-absolute: this component also renders on nested /products/ and
+    // /solutions/ routes, where a bare relative Url resolves against the
+    // wrong directory.
+    string Abs(string url) => url.StartsWith("http") || url.StartsWith("/") ? url : "/" + url;
+
+    var currentPath = Context.Request.Path.Value?.TrimEnd('/').ToLowerInvariant() ?? "";
+    if (currentPath is "" or "/index.html") currentPath = "";
+    bool IsCurrent(string url)
+    {
+        var linkPath = Abs(url).TrimEnd('/').ToLowerInvariant();
+        if (linkPath is "/index.html" or "") linkPath = "";
+        return !linkPath.StartsWith("http") && linkPath == currentPath;
+    }
+}
 <div class="nav-dock__links">
   @foreach (var item in Model)
   {
     @if (item.OpenInNewTab)
     {
-      <a href="@item.Url" target="_blank" rel="noopener">@item.Label</a>
+      <a href="@Abs(item.Url)" target="_blank" rel="noopener">@item.Label</a>
     }
     else
     {
-      <a href="@item.Url">@item.Label</a>
+      <a href="@Abs(item.Url)" aria-current="@(IsCurrent(item.Url) ? "page" : null)">@item.Label</a>
     }
   }
 </div>

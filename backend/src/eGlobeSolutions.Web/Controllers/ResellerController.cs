@@ -4,6 +4,7 @@ using eGlobeSolutions.Infrastructure.Persistence;
 using eGlobeSolutions.Web.Models.Public;
 using eGlobeSolutions.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,7 @@ public class ResellerController : Controller
     }
 
     [HttpGet("/reseller.html")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var blocks = await _db.ContentBlocks

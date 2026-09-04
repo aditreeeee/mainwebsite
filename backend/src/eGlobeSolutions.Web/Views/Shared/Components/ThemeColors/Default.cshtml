@@ -1,0 +1,10 @@
+@model (string? Primary, string? Secondary)
+@if (Model.Primary is not null || Model.Secondary is not null)
+{
+    <style>
+    :root{
+      @if (Model.Primary is not null) { @Html.Raw($"--blue:{Model.Primary};") }
+      @if (Model.Secondary is not null) { @Html.Raw($"--navy:{Model.Secondary};") }
+    }
+    </style>
+}

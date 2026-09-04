@@ -3,7 +3,17 @@
    Tech Neubrutalism × Grid/Wireframe × Bento SaaS
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Keyboard-only "skip to main content" link: offscreen until it receives
+   focus (first Tab stop on every page), so a keyboard/screen-reader user
+   doesn't have to tab through the full topbar nav on every page load. */
+.skip-link{
+  position:absolute; top:-999px; left:8px; z-index:10000;
+  background:var(--ink,#101935); color:#fff; padding:12px 20px;
+  border-radius:6px; font-weight:700; font-size:14px; text-decoration:none;
+}
+.skip-link:focus{ top:8px; }
 
 :root{
   /* Colour system */
@@ -21,7 +31,12 @@
   --success:#16A34A;
   --warn:#D97706;
 
-  --font-display:'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+  /* Neue Haas Grotesk / Helvetica Now are commercial (Monotype) fonts, not
+     available on Google Fonts and not something we can legally self-host
+     without a purchased license, so they're named here for when a license
+     is in place, backed by system Helvetica/Arial (the closest free match)
+     for everyone else in the meantime. */
+  --font-display:'Neue Haas Grotesk Display', 'Neue Haas Grotesk Text', 'Helvetica Now Display', 'Helvetica Now Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono:'JetBrains Mono', 'Consolas', monospace;
 
   /* Minerva-style: near-square corners, thin solid black borders, flat */
@@ -321,7 +336,8 @@ p{margin:0;color:var(--ink-soft);}
   white-space:nowrap;
 }
 .nav-dock__links a:hover{color:var(--ink); background:rgba(17,24,39,.06);}
-.nav-dock__links a.active{color:var(--white); background:var(--navy-deep);}
+.nav-dock__links a.active,
+.nav-dock__links a[aria-current="page"]{color:var(--white); background:var(--navy-deep);}
 .nav-dock__cta{
   margin-left:6px;
   padding:10px 20px;
@@ -341,21 +357,21 @@ p{margin:0;color:var(--ink-soft);}
    (pill visible inline, no burger): a floating dropdown that opens upward
    from the pill, since the pill sits near the bottom of the viewport.
    Mobile: overridden below to an inline accordion instead. */
-.nav-dock__solutions-toggle{
+.nav-dock__mega-toggle{
   padding:10px 16px; font-size:13.5px; font-weight:600; color:var(--ink-soft);
   border-radius:999px; background:none; border:none; font-family:inherit; cursor:pointer;
   display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
   transition:background .2s ease, color .2s ease;
 }
-.nav-dock__solutions-toggle:hover,
-.nav-dock__solutions-toggle[aria-expanded="true"]{color:var(--ink); background:rgba(17,24,39,.06);}
-.nav-dock__solutions-toggle::after{
+.nav-dock__mega-toggle:hover,
+.nav-dock__mega-toggle[aria-expanded="true"]{color:var(--ink); background:rgba(17,24,39,.06);}
+.nav-dock__mega-toggle::after{
   content:''; width:5px; height:5px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
   transform:rotate(-135deg); transition:transform .2s ease; margin-top:2px;
 }
-.nav-dock__solutions-toggle[aria-expanded="true"]::after{transform:rotate(45deg); margin-top:-2px;}
+.nav-dock__mega-toggle[aria-expanded="true"]::after{transform:rotate(45deg); margin-top:-2px;}
 
-.nav-dock__solutions-panel{
+.nav-dock__mega-panel{
   display:none;
   position:absolute; bottom:calc(100% + 14px); left:50%; transform:translateX(-50%);
   /* Wide enough to lay categories out in two real columns instead of one
@@ -367,19 +383,19 @@ p{margin:0;color:var(--ink-soft);}
   z-index:1100;
   column-count:2; column-gap:26px;
 }
-.nav-dock__solutions-panel.open{display:block;}
-.nav-dock__solutions-label{
+.nav-dock__mega-panel.open{display:block;}
+.nav-dock__mega-label{
   font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
   color:rgba(255,255,255,.45); margin:16px 0 8px;
   break-after:avoid; break-inside:avoid;
 }
-.nav-dock__solutions-label:first-of-type{margin-top:0;}
-.nav-dock__solutions-panel a{
+.nav-dock__mega-label:first-of-type{margin-top:0;}
+.nav-dock__mega-panel a{
   display:block; font-size:13px; font-weight:600; color:rgba(255,255,255,.9);
   padding:7px 10px; margin:0 -10px; border-radius:8px; transition:background .15s ease;
   break-inside:avoid;
 }
-.nav-dock__solutions-panel a:hover{background:rgba(255,255,255,.1); color:#fff;}
+.nav-dock__mega-panel a:hover{background:rgba(255,255,255,.1); color:#fff;}
 
 @media (max-width:860px){
   .nav-dock{gap:0; padding:7px;}
@@ -427,8 +443,8 @@ p{margin:0;color:var(--ink-soft);}
      -only and never opens here, this just matches the toggle/link's own
      look to the other full-width rows (Home/Pricing/Resellers) in the
      mobile menu card. */
-  .nav-dock__solutions-toggle{width:100%; justify-content:space-between; padding:13px 16px; text-align:left;}
-  .nav-dock__solutions-toggle::after{display:none;}
+  .nav-dock__mega-toggle{width:100%; justify-content:space-between; padding:13px 16px; text-align:left;}
+  .nav-dock__mega-toggle::after{display:none;}
 }
 
 /* ==========================================================================
@@ -476,19 +492,21 @@ p{margin:0;color:var(--ink-soft);}
   transition:transform .25s cubic-bezier(.16,1,.3,1);
 }
 .topbar__links a:hover::after{transform:scaleX(1);}
-.topbar__links a.active{color:var(--ink);}
-.topbar__links a.active::after{transform:scaleX(1); background:var(--navy-deep);}
+.topbar__links a.active,
+.topbar__links a[aria-current="page"]{color:var(--ink);}
+.topbar__links a.active::after,
+.topbar__links a[aria-current="page"]::after{transform:scaleX(1); background:var(--navy-deep);}
 .topbar__links-login{display:none;}
 .topbar__actions{display:flex;align-items:center;gap:14px;}
 
 /* Solutions mega-menu, injected by main.js in place of the plain "Products" link */
-.topbar__solutions{position:relative;}
-.topbar__solutions-trigger{display:inline-flex; align-items:center; gap:4px;}
-.topbar__solutions-trigger::before{
+.topbar__mega-wrap{position:relative;}
+.topbar__mega-trigger{display:inline-flex; align-items:center; gap:4px;}
+.topbar__mega-trigger::before{
   content:''; width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
   transform:rotate(45deg) translateY(-2px); transition:transform .2s ease; flex-shrink:0;
 }
-.topbar__solutions-trigger[aria-expanded="true"]::before{transform:rotate(-135deg) translateY(1px);}
+.topbar__mega-trigger[aria-expanded="true"]::before{transform:rotate(-135deg) translateY(1px);}
 .topbar__mega{
   /* top:100% with zero real gap to the trigger is deliberate: any actual
      space between the trigger and this absolutely-positioned panel (out of
@@ -508,6 +526,18 @@ p{margin:0;color:var(--ink-soft);}
   z-index:1200;
 }
 .topbar__mega.open{opacity:1; visibility:visible; pointer-events:auto;}
+/* Solutions has one category (6 items), not three, the default 3-column +
+   CTA grid built for the 16-product Platform menu leaves two columns of
+   dead space next to it (see screenshot report). Split its single category
+   into two real columns of content-sized width instead of stretching it
+   across a layout built for a different menu. */
+.topbar__mega--compact{
+  width:min(540px, 90vw);
+  grid-template-columns:1fr 1fr 190px;
+}
+.topbar__mega--compact .topbar__mega-col{column-count:2; column-gap:20px; grid-column:1 / span 2;}
+.topbar__mega--compact .topbar__mega-label{break-after:avoid; break-inside:avoid;}
+.topbar__mega--compact .topbar__mega-col a{break-inside:avoid;}
 .topbar__mega-col{display:flex; flex-direction:column; gap:2px;}
 .topbar__mega-label{
   font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
@@ -541,6 +571,7 @@ p{margin:0;color:var(--ink-soft);}
 .topbar__mega-cta .btn-primary:hover{background:var(--blue-dim); color:#fff; border-color:var(--blue-dim);}
 @media (max-width:1100px){
   .topbar__mega{grid-template-columns:repeat(3, 1fr); width:min(680px, 92vw);}
+  .topbar__mega--compact{grid-template-columns:1fr 1fr 190px; width:min(540px, 92vw);}
   .topbar__mega-cta{grid-column:1 / -1; flex-direction:row; align-items:center; flex-wrap:wrap;}
   .topbar__mega-cta p{flex:1; min-width:180px;}
 }
@@ -593,6 +624,59 @@ section{position:relative;}
   .section-tight{padding:28px 0;}
 }
 .section-border-top{border-top:var(--border-light);}
+
+/* Parallax texture for the site's dark-navy sections, applied explicitly
+   per-section (never blanket via .section-dark) so it never leaks onto the
+   Platform/Solutions/Legal pages' own dark sections or the footer. A dark
+   overlay sits between the image and the content so text contrast is
+   unchanged from the flat navy it replaces, the image just reads as a
+   subtle texture, not competing with the content. background-attachment
+   isn't reliable on iOS/mobile Safari, so real scroll-parallax is
+   desktop-only; mobile gets the same image as a normal cover background.
+   background-color is set (not the "background" shorthand, which would
+   reset background-image) so the same navy paints instantly while the
+   image is still downloading on a slow connection, rather than a flash of
+   white/unstyled background, and it's the visible color if the image ever
+   fails to load. Compound selectors (.section-dark.parallax-bg, not just
+   .parallax-bg alone) so this reliably wins over .section-dark/.featured's
+   own "background:" shorthand regardless of source order. */
+.section-dark.parallax-bg,
+.price-teaser-card.featured.parallax-bg-static{
+  position:relative;
+  background-color:var(--navy-deep);
+  background-image:linear-gradient(rgba(16,25,53,.42), rgba(16,25,53,.42)), url('/assets/img/bg.webp');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+/* Every text element in these sections stays pure white (not the
+   var(--white)/rgba(255,255,255,.65) mix .section-dark otherwise uses),
+   the busier, brighter image behind it needs the strongest possible
+   contrast to stay readable, a dimmer off-white reads muddy against it. */
+.section-dark.parallax-bg,
+.section-dark.parallax-bg p,
+.section-dark.parallax-bg h1,
+.section-dark.parallax-bg h2,
+.section-dark.parallax-bg h3,
+.section-dark.parallax-bg li,
+.section-dark.parallax-bg span:not(.section-kicker),
+.price-teaser-card.featured.parallax-bg-static,
+.price-teaser-card.featured.parallax-bg-static p,
+.price-teaser-card.featured.parallax-bg-static h3,
+.price-teaser-card.featured.parallax-bg-static li{
+  color:#fff;
+}
+/* The benefit-icon circles were styled to match the flat navy background;
+   against the image they'd otherwise blend in and lose their "icon in a
+   badge" shape entirely. */
+.section-dark.parallax-bg .why-item__icon{
+  background:rgba(255,255,255,.12) !important;
+  border:1px solid rgba(255,255,255,.2);
+}
+@media (min-width:861px){
+  .section-dark.parallax-bg{background-attachment:fixed;}
+}
+
 .section-dark{background:var(--navy-deep); color:var(--white);}
 .section-dark p{color:rgba(255,255,255,.65);}
 .section-dark h1,.section-dark h2,.section-dark h3{color:var(--white);}
@@ -687,6 +771,26 @@ section{position:relative;}
 }
 .statement__text .dim{color:var(--grid-line-strong);}
 .statement__text .accent{color:var(--blue);}
+/* Kinetic typography: [data-kinetic] phrases keep their real palette color
+   (accent blue / dim navy) at rest, this used to fade them in from near
+   -grey as the block scrolled into view, but that muted starting state read
+   as broken/uncolored text rather than a deliberate effect, so the colors
+   now show immediately and scroll only adds a subtle finishing polish. */
+[data-kinetic] .kinetic-phrase{
+  --kinetic-progress:0;
+  opacity:calc(.85 + .15 * var(--kinetic-progress));
+  filter:saturate(calc(.8 + .2 * var(--kinetic-progress)));
+  transition:opacity .18s linear, filter .18s linear;
+}
+[data-kinetic] .kinetic-phrase:nth-of-type(2){transition-delay:.05s;}
+[data-kinetic] .kinetic-phrase:nth-of-type(3){transition-delay:.1s;}
+[data-kinetic].kinetic-static .kinetic-phrase{opacity:1; filter:none; transition:none;}
+/* Brand navy instead of grey (var(--ink-soft) read as a washed-out neutral,
+   not a deliberate color choice) or near-black (var(--grid-line-strong),
+   nearly indistinguishable from the surrounding ink) — navy is already the
+   site's secondary brand color, distinct from the bright accent blue used
+   on the other phrases, and it's a real palette token, not grey. */
+.statement__text .dim{color:var(--navy);}
 .statement__tag{
   font-family:var(--font-mono);
   font-size:11.5px;
@@ -903,8 +1007,11 @@ section{position:relative;}
 }
 
 @media (max-width:980px){
+  /* Text (kicker, headline, lead, CTAs, stat strip) stays first in source
+     order and reads first on mobile; the interactive dashboard mockup
+     follows below it, rather than the visual leading (previous order:-1),
+     matching the same fix already made on the solutions pages' heroes. */
   .hero__grid{grid-template-columns:1fr;}
-  .hero__visual{order:-1;}
   .floaty{display:none;}
 }
 
@@ -1465,6 +1572,14 @@ section{position:relative;}
    DEPARTMENT WORKSPACES (tabs)
    ========================================================================== */
 .dept-folder{position:relative; padding-top:16px;}
+/* Scroll-locked section intro: the kicker/heading/lead and department tab
+   row pin in place while the (often tall, especially with the dept-visual
+   feature panel) content below scrolls underneath it, the same
+   position:sticky pattern already used for .engine__stage elsewhere on
+   this page. Tab click-switching itself is unchanged. */
+/* Reverted: sticky-pinning this particular header didn't read well against
+   the tab-folder + panel layout below it, kept as a plain wrapper. */
+.dept-sticky-head{padding-bottom:4px;}
 .dept-tabs{
   display:flex; flex-wrap:wrap;
   margin:0;
@@ -1541,6 +1656,15 @@ section{position:relative;}
 }
 @media (prefers-reduced-motion: reduce){
   .dept-stage.ready{transition:none;}
+}
+
+/* Mobile: the department workspace demo starts hidden, showing only the
+   tab buttons, so the animation only appears once someone actually picks a
+   department, instead of front desk's panel taking up the screen before
+   they've interacted with anything. Desktop keeps showing it immediately. */
+@media (max-width:700px){
+  .dept-stage{display:none;}
+  .dept-stage.mobile-revealed{display:block; margin-top:16px;}
 }
 
 .dept-panel.active .dept-task{animation:task-in .45s cubic-bezier(.16,1,.3,1) backwards;}
@@ -1821,9 +1945,12 @@ section{position:relative;}
   background:var(--white);
   border-radius:0;
   border:var(--border);
-  max-width:380px; width:100%;
+  /* Wider, squarer footprint: two fields per row (see .qe-form__row) instead
+     of six stacked full-width fields, so the popup reads as a compact card
+     rather than a long scrolling strip. */
+  max-width:540px; width:100%;
   max-height:90vh; overflow-y:auto;
-  padding:28px;
+  padding:28px 32px;
   position:relative;
   box-shadow:0 30px 70px rgba(16,25,53,.35);
   transform:translateY(16px) scale(.97);
@@ -1834,6 +1961,7 @@ section{position:relative;}
 .qe-modal .product-modal__close{border-radius:0;}
 .qe-modal h3{font-size:19px; margin:10px 0 6px; padding-right:20px;}
 .qe-modal__lead{font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px;}
+.qe-form__row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 .qe-form .field{margin-top:0; margin-bottom:10px;}
 .qe-form .field label{font-size:11px; font-weight:600; display:block; margin-bottom:5px;}
 .qe-form .field input{
@@ -1846,6 +1974,9 @@ section{position:relative;}
   display:block; text-align:center; margin-top:12px; font-size:12px; font-weight:600; color:var(--ink-soft);
 }
 .qe-form__full-link:hover{color:var(--blue);}
+@media (max-width:560px){
+  .qe-form__row{grid-template-columns:1fr;}
+}
 @media (max-width:480px){
   .qe-modal{padding:24px 20px;}
 }
@@ -2261,19 +2392,21 @@ footer{
   .footer__bookend nav{display:none;}
 }
 
-/* main content: CTA block (left) + link columns (right) */
+/* main content: CTA banner, full width, sits above the nav-column row */
 .footer__main{
   position:relative; z-index:1;
-  display:grid;
-  grid-template-columns:1.15fr 1fr;
-  gap:44px;
-  padding:36px 0 20px;
+  padding:36px 0 8px;
 }
+.footer__cta{display:flex; align-items:center; justify-content:space-between; gap:32px; flex-wrap:wrap;}
+.footer__cta-text{flex:1; min-width:260px;}
 .footer__cta h3{
   color:#fff; font-size:clamp(1.8rem,3vw,2.4rem); font-weight:700; letter-spacing:-.015em;
   margin-bottom:12px; max-width:380px;
 }
-.footer__cta p{font-size:14.5px; margin-bottom:24px; max-width:340px; color:rgba(255,255,255,.7);}
+.footer__cta p{font-size:14.5px; margin-bottom:0; max-width:340px; color:rgba(255,255,255,.7);}
+/* Pushed to the far right edge of the CTA row instead of stacking under the
+   copy, flex-shrink:0 keeps it full-size even as the text column wraps. */
+.footer__cta-btn{flex-shrink:0; margin-left:auto;}
 .footer__cta .contact-lines{display:flex; flex-direction:column; gap:11px; font-size:13.5px; margin-top:28px; padding-top:24px; border-top:1px solid rgba(255,255,255,.08);}
 .footer__cta .contact-lines span,
 .footer__cta .contact-lines a{color:rgba(255,255,255,.85); display:flex; align-items:center; gap:9px; transition:color .2s ease;}
@@ -2283,33 +2416,54 @@ footer{
 .footer__cta .contact-lines__closed{color:#F87171 !important; font-weight:600;}
 .footer__cta .contact-lines__closed svg{color:#F87171;}
 
-.footer__link-cols{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
+.footer h4{
+  display:block; color:#ffffff !important; opacity:1 !important; visibility:visible !important;
+  font-size:14px !important; line-height:1.5 !important; height:auto !important; max-height:none !important;
+  text-transform:uppercase; letter-spacing:.06em; margin:0 0 16px; font-family:var(--font-display); font-weight:700;
 }
-.footer h4{color:#fff; font-size:12px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px; font-family:var(--font-mono); font-weight:700;}
-.footer__links{display:flex; flex-direction:column; gap:10px;}
-.footer__links a{font-size:14.5px; transition:color .2s;}
+.footer h4 a{color:#ffffff !important; text-decoration:none; transition:color .2s ease;}
+.footer h4 a:hover{color:var(--blue-dim);}
+/* Desktop footer nav-cols column labels: a plain <span>, not <h4>, so this
+   is a fresh selector unrelated to whatever was interfering with the
+   earlier <h4> version. */
+.footer__col-label{
+  display:block; color:#ffffff; font-size:14px; line-height:1.5;
+  text-transform:uppercase; letter-spacing:.06em; margin:0 0 16px;
+  font-family:var(--font-display); font-weight:700;
+}
+.footer__nav-col--continued .footer__col-label{visibility:hidden;}
+.footer__links{display:flex; flex-direction:column; gap:11px;}
+.footer__links a{font-size:14px; line-height:1.4; color:rgba(255,255,255,.82); transition:color .2s;}
 .footer__links a:hover{color:#fff;}
 
-/* Full-width product directory row, its own band below the CTA/Company/Follow
-   Us row so 16 links spread across the whole footer width instead of
-   towering in one narrow column and leaving the rest of the footer empty. */
-.footer__products-row{
+/* Mews-style nav-column row: Follow Us (brand/social) + Platform + Solutions
+   + Company as four even columns, each its own vertical list under a
+   header, replacing the old CTA-plus-two-column layout with full-width
+   product/solution bands stacked below it. Platform naturally runs taller
+   than the others (16 links vs 6-8), same as real multi-column footers. */
+.footer__nav-cols{
   position:relative; z-index:1;
-  padding:14px 0;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr 1fr;
+  gap:28px;
+  padding:20px 0 28px;
   border-top:1px solid rgba(255,255,255,.1);
 }
-.footer__products-row h4{margin-bottom:14px;}
-.footer__products-row h4 a{color:inherit; transition:color .2s ease;}
-.footer__products-row h4 a:hover{color:var(--blue-dim);}
-/* All 16 product links stay on desktop; on mobile they'd add a long block
-   to an already-tall footer, so the single "Products" link already listed
-   under Company (linking to the same #ecosystem section) covers it there. */
-@media (max-width:860px){
-  .footer__products-row{display:none;}
+.footer__nav-col--brand .footer__social{margin-bottom:18px;}
+/* Vertical rule between Follow Us / Platform / Solutions / Company, giving
+   the row a grid look. Only on the plain (non-brand, non-continued) column
+   in each group, so Platform's own two sub-columns stay flush against each
+   other (no rule between them, they're one group) while a rule still opens
+   Platform, Solutions and Company each as their own column. */
+.footer__nav-col:not(.footer__nav-col--brand):not(.footer__nav-col--continued){
+  border-left:1px solid rgba(255,255,255,.14);
+  padding-left:28px;
 }
+/* Platform's second column continues the same list, so its header repeats
+   the "Platform" label for a screen reader / no-JS fallback but stays
+   invisible (not display:none, so its links still line up under the first
+   column's real header). */
+.footer__nav-col--continued-label{visibility:hidden;}
 
 /* One-line legal strip: Terms of Use / Refund & Cancellation / Privacy Policy */
 .footer__legal-strip{
@@ -2389,12 +2543,45 @@ footer{
 }
 .footer__bottom a{color:var(--blue); font-weight:600;}
 
+/* Mobile footer: a 3-group accordion (Platforms / Follow Us / Support)
+   instead of the desktop 5-column grid, small-screen UX for a footer this
+   link-heavy is tap-to-expand, not a long scroll of 30+ stacked links. */
+.footer__mobile-accordion{display:none;}
+.footer__mobile-social{padding:16px 2px; border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1);}
+.footer__mobile-social .footer__social{gap:12px;}
+.footer__accordion-item{border-top:1px solid rgba(255,255,255,.1);}
+.footer__accordion-item:last-child{border-bottom:1px solid rgba(255,255,255,.1);}
+.footer__accordion-item summary{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 2px; color:#fff; font-size:14px; font-weight:700;
+  cursor:pointer; list-style:none;
+}
+.footer__accordion-item summary::-webkit-details-marker{display:none;}
+.footer__accordion-item summary::after{
+  content:''; width:9px; height:9px; border-right:2px solid rgba(255,255,255,.6); border-bottom:2px solid rgba(255,255,255,.6);
+  transform:rotate(45deg); transition:transform .2s ease; flex-shrink:0;
+}
+.footer__accordion-item[open] summary::after{transform:rotate(-135deg);}
+.footer__accordion-item .footer__links{
+  display:grid; grid-template-columns:1fr 1fr; gap:6px 20px;
+  padding:4px 2px 20px;
+}
+.footer__accordion-item .footer__social{padding:4px 2px 16px; gap:10px;}
+.footer__accordion-item .footer__apps{padding:0 2px 20px; flex-direction:row; flex-wrap:wrap; display:flex; gap:10px;}
+
+@media (max-width:1100px){
+  .footer__nav-cols{grid-template-columns:1fr 1fr 1fr;}
+}
 @media (max-width:860px){
-  .footer__main{grid-template-columns:1fr; gap:28px; padding-top:32px;}
+  .footer__main{padding-top:32px;}
+  .footer__nav-cols{grid-template-columns:1fr 1fr; gap:28px 32px;}
+}
+@media (max-width:760px){
+  .footer__nav-cols--desktop{display:none;}
+  .footer__mobile-accordion{display:block;}
 }
 @media (max-width:560px){
-  .footer__link-cols{grid-template-columns:1fr 1fr; gap:28px;}
-  .footer__links--grid{grid-template-columns:1fr;}
+  .footer__cta-btn{width:100%; margin-left:0; justify-content:center;}
   .footer__bottom{flex-direction:column; text-align:center;}
   .footer__bottom .status{flex-direction:column; gap:6px;}
   /* Trim the footer down on small screens: drop the descriptive line under
@@ -2421,6 +2608,10 @@ footer{
   width:max-content;
   animation:testi-scroll 46s linear infinite;
 }
+/* Pausing on hover, not just a per-card effect, since these cards are
+   already mid-flight in an auto-scrolling marquee, letting the animation
+   keep running under a hovered card would fight the elevation below. */
+.testi-track:hover{animation-play-state:paused;}
 .testi-strip{overflow:hidden; padding:4px 0 10px;}
 .testi-card{
   width:360px;
@@ -2434,6 +2625,12 @@ footer{
   flex-direction:column;
   gap:16px;
   box-sizing:border-box;
+  transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease, border-color .2s ease;
+}
+.testi-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 14px 30px rgba(16,25,53,.1);
+  border-color:var(--blue);
 }
 .testi-card__quote{
   font-size:14.5px; line-height:1.6; color:var(--ink);
@@ -2522,12 +2719,26 @@ img.testi-card__avatar{
   transform:translateX(-16%) translateY(-8px);
   box-shadow:-14px 28px 50px rgba(16,25,53,.26), var(--shadow-card-lg);
 }
+.app-feature__readmore{display:none;}
 @media (max-width:840px){
   .app-feature{grid-template-columns:1fr; gap:40px;}
   .app-feature__visual{margin-top:20px; min-height:380px;}
   .app-feature__phone{width:186px;}
   .app-feature__phone--back{transform:translateX(-82%);}
   .app-feature__phone--front{top:40px; transform:translateX(-18%);}
+
+  /* Only the first two feature lines show by default on mobile, the rest
+     stay behind "Read more" so the section doesn't push the rest of the
+     page down before someone's chosen to see the full list. */
+  .app-feature__list .app-feature__item:nth-child(n+3){display:none;}
+  .app-feature__list.expanded .app-feature__item{display:flex;}
+  .app-feature__readmore{
+    display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+    font-weight:700; font-size:14px; color:var(--blue);
+    background:none; border:none; padding:0; cursor:pointer;
+  }
+  .app-feature__readmore svg{width:14px; height:14px; transition:transform .25s ease;}
+  .app-feature__readmore[aria-expanded="true"] svg{transform:rotate(180deg);}
 }
 @media (max-width:480px){
   .app-feature__phone{width:148px;}
@@ -2598,8 +2809,15 @@ img.testi-card__avatar{
 .page-hero .eyebrow{margin-bottom:22px;}
 .page-hero p.lead{font-size:18px; margin-top:18px; max-width:600px;}
 .page-hero h1{color:#000;}
-.page-hero h1 .accent{color:var(--blue);}
-.page-hero h1 .accent-alt{color:var(--warn);}
+
+/* Accent-word coloring for any big heading, not just hero h1s, so a
+   section h2 can pick out its one or two key words in the same palette
+   (blue/amber/navy) instead of every heading sitewide reading as flat
+   black. Deliberately excludes legal-document headings (Privacy Policy,
+   Terms of Use, etc.), which stay neutral by not using these spans. */
+h1 .accent, h2 .accent{color:var(--blue);}
+h1 .accent-alt, h2 .accent-alt{color:var(--warn);}
+h1 .dim, h2 .dim{color:var(--navy);}
 
 .page-hero__chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px;}
 .hero-chip{
@@ -3190,4 +3408,260 @@ img.testi-card__avatar{
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size:26px 26px;
+}
+
+/* ==========================================================================
+   SOLUTIONS PAGES (property-type/audience segments, /solutions/*.html)
+   Distinct from the .pp-* product-page system: solution pages lead with an
+   interactive hero widget unique to each audience rather than a static
+   screenshot, so the visual language is intentionally its own component set.
+   ========================================================================== */
+/* Solutions hero: leans into the site's own "tech neubrutalism / blueprint
+   grid" identity (hard offset shadows, mono index labels) rather than a
+   generic soft-card SaaS hero, an underused part of the brand elsewhere
+   (see --shadow-hard-solid/--shadow-hard-lg-solid, barely referenced
+   outside this block). The "instrument panel" widget frame, corner
+   brackets, mono readout strip and numbered index badge are the one
+   signature device repeated identically across all 6 solution pages, so
+   the set reads as one family distinct from the plainer product-page
+   hero (.pp-hero). */
+.sol-hero{padding:88px 0 40px; overflow:hidden;}
+.sol-hero__grid{display:grid; grid-template-columns:1.05fr 1fr; gap:64px; align-items:center;}
+.sol-hero__index{
+  display:flex; align-items:baseline; gap:10px; margin-bottom:22px; flex-wrap:wrap;
+  font-family:var(--font-mono); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+}
+.sol-hero__index-num{
+  font-size:13px; color:var(--white); background:var(--ink); padding:3px 9px; border-radius:2px;
+}
+.sol-hero__index-label{color:var(--blue);}
+.sol-hero__index-total{color:var(--ink-soft); font-weight:500;}
+.sol-hero h1{
+  font-size:clamp(34px,4.2vw,52px); line-height:1.04; letter-spacing:-.015em; font-weight:800;
+}
+.sol-hero .lead{max-width:580px; margin-top:18px; font-size:16.5px;}
+.sol-hero__actions{display:flex; gap:14px; flex-wrap:wrap; margin-top:30px;}
+.sol-hero__actions .btn-primary{box-shadow:var(--shadow-hard-solid); transition:transform .15s ease, box-shadow .15s ease;}
+.sol-hero__actions .btn-primary:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink);}
+.sol-hero__actions .btn-ghost{border:var(--border-hard);}
+
+/* ---- instrument panel: the widget frame shared by all 6 heroes ---- */
+.sol-panel{
+  position:relative; min-height:360px; display:flex; flex-direction:column;
+  background:var(--white); border:var(--border-hard); box-shadow:var(--shadow-hard-lg-solid);
+  border-radius:2px; overflow:hidden;
+}
+.sol-panel__readout{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:11px 18px; border-bottom:var(--border-hard); background:var(--ink); color:rgba(255,255,255,.7);
+  font-family:var(--font-mono); font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+}
+.sol-panel__readout-dot{width:6px; height:6px; border-radius:50%; background:var(--blue); flex-shrink:0;}
+.sol-panel__body{
+  flex:1; display:flex; align-items:center; justify-content:center; padding:32px; background:#F5F6F8;
+}
+.sol-panel__caption{
+  padding:10px 18px; border-top:var(--border-hard); background:var(--white);
+  font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft);
+}
+/* corner tick brackets, a blueprint/instrument motif reused nowhere else on
+   the product pages, drawn as four small L-marks just outside the panel */
+.sol-panel::before, .sol-panel::after,
+.sol-panel__body::before, .sol-panel__body::after{ content:none; }
+.sol-hero__visual{position:relative; padding:10px;}
+.sol-hero__visual::before, .sol-hero__visual::after{
+  content:''; position:absolute; width:16px; height:16px; border:2px solid var(--ink); pointer-events:none;
+}
+.sol-hero__visual::before{top:0; left:0; border-right:none; border-bottom:none;}
+.sol-hero__visual::after{bottom:0; right:0; border-left:none; border-top:none;}
+.sol-hero__visual > .sol-panel{margin:6px;}
+
+@media (max-width:900px){
+  /* Text content (index badge, headline, lead, CTAs) stays first in source
+     order and reads first on mobile; the interactive instrument panel
+     follows below it, rather than the widget leading (previous order:-1). */
+  .sol-hero__grid{grid-template-columns:1fr;}
+  .sol-panel{min-height:300px;}
+}
+@media (max-width:640px){
+  .sol-hero{padding:72px 0 32px;}
+  .sol-panel__body{padding:22px;}
+  .sol-hero h1{font-size:clamp(28px,7vw,38px);}
+}
+@media (max-width:480px){
+  .sol-panel__body{padding:16px;}
+  .sol-panel__readout{padding:9px 14px; font-size:10px;}
+  .sol-panel__caption{padding:9px 14px; font-size:10px;}
+  .sol-hero__actions .btn{width:100%; justify-content:center;}
+}
+
+/* ---- shared page furniture (stats / features / chips / faq) ---- */
+.sol-section{padding:56px 0;}
+.sol-section-head{max-width:640px; margin-bottom:32px;}
+.sol-feature-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;}
+.sol-feature{
+  background:var(--white); border:1px solid var(--grid-line-strong); border-left:4px solid var(--blue);
+  border-radius:12px; padding:22px 24px; transition:transform .2s ease, box-shadow .2s ease;
+}
+.sol-feature:hover{transform:translateY(-3px); box-shadow:var(--shadow-hard-solid);}
+.sol-feature__icon{width:36px; height:36px; color:var(--blue); margin-bottom:12px;}
+.sol-feature__icon svg{width:100%; height:100%;}
+.sol-feature h3{font-size:15.5px; margin-bottom:6px;}
+.sol-feature p{font-size:13.5px; color:var(--ink-soft); line-height:1.55;}
+
+.sol-chips{display:flex; flex-wrap:wrap; gap:10px;}
+.sol-chip{
+  font-size:13.5px; font-weight:600; padding:10px 18px; border-radius:24px;
+  border:1.5px solid var(--grid-line-strong); background:var(--white); color:var(--ink);
+}
+
+@media (max-width:760px){
+  .sol-feature-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:560px){
+  .sol-feature-grid{grid-template-columns:1fr;}
+}
+
+/* ==================== Hero widget 1: Hotels & Resorts, OTA orbit ==================== */
+.sol-orbit{position:relative; width:280px; height:280px; max-width:100%; aspect-ratio:1;}
+@media (max-width:480px){ .sol-orbit{width:220px;} }
+.sol-orbit__hub{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:88px; height:88px; border-radius:50%; background:var(--blue);
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  font-family:var(--font-mono); font-weight:700; font-size:12px; text-align:center; line-height:1.2;
+  cursor:pointer; z-index:2; box-shadow:0 0 0 0 rgba(59,82,232,.6); transition:box-shadow .3s ease;
+  user-select:none;
+}
+.sol-orbit__hub.pulse{animation:sol-hub-pulse .8s ease;}
+@keyframes sol-hub-pulse{
+  0%{box-shadow:0 0 0 0 rgba(59,82,232,.7);}
+  100%{box-shadow:0 0 0 42px rgba(59,82,232,0);}
+}
+.sol-orbit__ring{
+  position:absolute; top:50%; left:50%; border:1px dashed rgba(17,24,39,.16); border-radius:50%;
+  transform:translate(-50%,-50%); animation:sol-orbit-spin linear infinite;
+}
+.sol-orbit__ring--1{width:180px; height:180px; animation-duration:26s;}
+.sol-orbit__ring--2{width:260px; height:260px; animation-duration:38s; animation-direction:reverse;}
+@media (max-width:480px){
+  .sol-orbit__ring--1{width:140px; height:140px;}
+  .sol-orbit__ring--2{width:205px; height:205px;}
+  .sol-orbit__hub{width:70px; height:70px; font-size:10.5px;}
+  .sol-orbit__pill{font-size:9.5px; padding:5px 9px;}
+}
+@keyframes sol-orbit-spin{from{transform:translate(-50%,-50%) rotate(0deg);} to{transform:translate(-50%,-50%) rotate(360deg);}}
+.sol-orbit__pill{
+  position:absolute; top:50%; left:50%; transform-origin:0 0;
+  font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--ink);
+  background:var(--white); border:1px solid var(--grid-line-strong);
+  padding:6px 12px; border-radius:20px; white-space:nowrap;
+}
+.sol-orbit__caption{
+  position:absolute; bottom:14px; left:50%; transform:translateX(-50%); text-align:center;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); white-space:nowrap;
+}
+@media (prefers-reduced-motion: reduce){
+  .sol-orbit__ring{animation:none;}
+}
+
+/* ==================== Hero widget 2: Boutique Properties, compare toggle ==================== */
+.sol-compare{width:100%; max-width:340px; color:var(--ink);}
+.sol-compare__switch{
+  display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:24px;
+  font-family:var(--font-mono); font-size:12px; font-weight:700;
+}
+.sol-compare__switch span{color:var(--ink-soft); opacity:.6; transition:color .2s ease, opacity .2s ease;}
+.sol-compare__switch span.active{color:var(--ink); opacity:1;}
+.sol-compare__track{
+  width:56px; height:30px; border-radius:20px; background:var(--white); position:relative;
+  cursor:pointer; border:1px solid var(--grid-line-strong);
+}
+.sol-compare__thumb{
+  position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--blue);
+  transition:transform .3s cubic-bezier(.16,1,.3,1);
+}
+.sol-compare__track.on .sol-compare__thumb{transform:translateX(26px);}
+.sol-compare__stats{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+.sol-compare__stat{background:var(--white); border:1px solid var(--grid-line); border-radius:12px; padding:14px 8px; text-align:center;}
+.sol-compare__stat .num{font-family:var(--font-mono); font-size:22px; font-weight:700; color:var(--blue);}
+.sol-compare__stat .lbl{font-size:10.5px; color:var(--ink-soft); margin-top:4px; text-transform:uppercase; letter-spacing:.04em;}
+
+/* ==================== Hero widget 3: Vacation Rentals, booking calendar ==================== */
+.sol-cal{width:100%; max-width:320px; color:var(--ink);}
+.sol-cal__grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:16px;}
+.sol-cal__day{
+  aspect-ratio:1; border-radius:6px; background:var(--white); border:1px solid var(--grid-line-strong);
+  cursor:pointer; transition:background .15s ease; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:10px; color:var(--ink-soft);
+}
+.sol-cal__day.booked{background:var(--blue); border-color:var(--blue); color:#fff;}
+.sol-cal__day:hover{border-color:var(--blue);}
+.sol-cal__meta{display:flex; align-items:center; justify-content:space-between; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft);}
+.sol-cal__counter{color:var(--ink); font-weight:700;}
+
+/* ==================== Hero widget 4: Hostels, dorm bed map ==================== */
+.sol-beds{width:100%; max-width:320px; color:var(--ink);}
+.sol-beds__grid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:14px;}
+.sol-beds__bed{
+  aspect-ratio:1; border-radius:5px; background:var(--white); border:1px solid var(--grid-line-strong);
+  cursor:pointer; transition:background .15s ease;
+}
+.sol-beds__bed.sold{background:var(--warn); border-color:var(--warn);}
+.sol-beds__meta{display:flex; align-items:center; justify-content:space-between; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); margin-top:14px;}
+.sol-beds__counter{color:var(--ink); font-weight:700;}
+
+/* ==================== Hero widget 5: Guest Houses, onboarding timeline ==================== */
+.sol-timeline{width:100%; max-width:340px; color:var(--ink);}
+.sol-timeline__track{position:relative; height:3px; background:var(--grid-line); border-radius:3px; margin:36px 0 22px;}
+.sol-timeline__fill{position:absolute; top:0; left:0; height:100%; background:var(--blue); border-radius:3px; transition:width .5s cubic-bezier(.16,1,.3,1); width:25%;}
+.sol-timeline__steps{display:flex; justify-content:space-between; position:relative; top:-48px; margin-bottom:-34px;}
+.sol-timeline__step{
+  width:26px; height:26px; border-radius:50%; background:var(--white); border:2px solid var(--grid-line-strong);
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; font-weight:700;
+  color:var(--ink-soft); cursor:pointer; transition:border-color .2s ease, color .2s ease;
+}
+.sol-timeline__step.active{border-color:var(--blue); background:var(--blue); color:#fff;}
+.sol-timeline__label{font-family:var(--font-mono); font-size:12px; color:var(--ink); min-height:18px;}
+.sol-timeline__desc{font-size:13px; color:var(--ink-soft); margin-top:6px; line-height:1.5;}
+
+/* ==================== Hero widget 6: Travel Agencies, live dashboard ==================== */
+.sol-dash{width:100%; max-width:340px; background:var(--white); border:1px solid var(--grid-line-strong); border-radius:16px; padding:20px; color:var(--ink);}
+.sol-dash__head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+.sol-dash__title{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em;}
+.sol-dash__live{display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--success);}
+.sol-dash__live-dot{width:7px; height:7px; border-radius:50%; background:var(--success); animation:sol-dash-pulse 1.6s ease-in-out infinite;}
+@keyframes sol-dash-pulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
+.sol-dash__grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.sol-dash__cell{background:#F5F6F8; border-radius:10px; padding:14px;}
+.sol-dash__cell .num{font-family:var(--font-mono); font-size:19px; font-weight:700; color:var(--ink);}
+.sol-dash__cell .lbl{font-size:11px; color:var(--ink-soft); margin-top:3px;}
+@media (prefers-reduced-motion: reduce){
+  .sol-dash__live-dot{animation:none;}
+}
+
+/* ---- Homepage "Built for every kind of property" showcase (Solutions, distinct from .product-card / Platform) ---- */
+.solution-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;}
+.solution-card{
+  display:block; background:var(--white); border:1px solid var(--grid-line-strong); border-radius:16px;
+  padding:26px 24px; transition:transform .2s ease, box-shadow .2s ease; position:relative; overflow:hidden;
+}
+.solution-card::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--blue);
+  transform:scaleX(0); transform-origin:left; transition:transform .25s ease;
+}
+.solution-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-hard-solid);}
+.solution-card:hover::before{transform:scaleX(1);}
+.solution-card__icon{width:34px; height:34px; color:var(--blue); margin-bottom:14px;}
+.solution-card__icon svg{width:100%; height:100%;}
+.solution-card h3{font-size:16px; margin-bottom:6px;}
+.solution-card p{font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
+.solution-card__more{display:inline-flex; align-items:center; gap:5px; margin-top:14px; font-size:12.5px; font-weight:700; color:var(--blue);}
+.solution-card__more svg{width:13px; height:13px;}
+
+@media (max-width:900px){
+  .solution-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:560px){
+  .solution-grid{grid-template-columns:1fr;}
 }

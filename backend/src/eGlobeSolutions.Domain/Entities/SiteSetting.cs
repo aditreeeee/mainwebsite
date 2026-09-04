@@ -36,6 +36,14 @@ public static class SiteSettingKeys
     /// <summary>Landline "Call Us" numbers, slash-separated (e.g. "+91 11 41717081/ +91 11 41717082/ +91 11 41717021"), shown as a separate line from the main mobile Phone number.</summary>
     public const string CallUsNumbers = "CallUsNumbers";
 
+    // ---- Display colors (theme) ----
+    /// <summary>Primary accent color (hex, e.g. "#3B52E8"), overrides the CSS custom
+    /// property --blue sitewide via ThemeColorsViewComponent. Blank = use the
+    /// built-in default from css/style.css.</summary>
+    public const string ThemePrimaryColor = "Theme.PrimaryColor";
+    /// <summary>Secondary/navy brand color (hex), overrides --navy sitewide. Blank = default.</summary>
+    public const string ThemeSecondaryColor = "Theme.SecondaryColor";
+
     // ---- SMTP (outbound mail: new-enquiry notifications) ----
     public const string SmtpHost = "Smtp.Host";
     public const string SmtpPort = "Smtp.Port";
@@ -52,6 +60,7 @@ public static class SiteSettingKeys
     {
         SiteName, Phone, Email, WhatsAppNumber, CallUsNumbers, BusinessHours,
         FacebookUrl, YoutubeUrl, LinkedInUrl, AppStoreUrl, GooglePlayUrl, FooterCopyright,
+        ThemePrimaryColor, ThemeSecondaryColor,
         SmtpHost, SmtpPort, SmtpUsername, SmtpPassword, SmtpEnableSsl, SmtpFromEmail, SmtpFromName,
         SmtpNotifyEmail, SmtpNotifyOnEnquiry
     };

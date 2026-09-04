@@ -8,7 +8,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/seo")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class SeoController : Controller
 {
     private readonly AppDbContext _db;

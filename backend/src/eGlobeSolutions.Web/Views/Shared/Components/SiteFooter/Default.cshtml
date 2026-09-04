@@ -14,66 +14,142 @@
     var copyright = Model.Get(SiteSettingKeys.FooterCopyright, "© 2026 eGlobe Solutions. All rights reserved.");
     var siteName = Model.Get(SiteSettingKeys.SiteName, "eGlobe Solutions");
     var phoneDigits = new string(phone.Where(char.IsDigit).ToArray());
+    // This component renders on every page, including nested /products/ and
+    // /solutions/ routes, where a bare relative href resolves against the
+    // wrong directory (see Views/Shared/Components/TopNav/Default.cshtml).
+    string Abs(string url) => url.StartsWith("http") || url.StartsWith("/") ? url : "/" + url;
 }
 <footer>
   <div class="container">
     <div class="footer__main">
       <div class="footer__cta">
-        <h3>Ready to connect your hotel?</h3>
-        <p>Talk to our team about the PMS, channel manager and everything else eGlobe sources for your hotel.</p>
-        <a href="contact.html" class="btn btn-primary btn-sm">Talk to Sales</a>
+        <div class="footer__cta-text">
+          <h3>Ready to connect your hotel?</h3>
+          <p>Talk to our team about the PMS, channel manager and everything else eGlobe sources for your hotel.</p>
+        </div>
+        <a href="/contact.html" class="btn btn-primary btn-sm footer__cta-btn">Talk to Sales</a>
+      </div>
+    </div>
+
+    <div class="footer__nav-cols footer__nav-cols--desktop">
+      <div class="footer__nav-col footer__nav-col--brand">
+        <span class="footer__col-label">Follow Us</span>
+        <div class="footer__social">
+          <a href="@facebook" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+          <a href="@youtube" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M23 12s0-3.6-.46-5.3a3 3 0 00-2.1-2.1C18.7 4 12 4 12 4s-6.7 0-8.44.6a3 3 0 00-2.1 2.1C1 8.4 1 12 1 12s0 3.6.46 5.3a3 3 0 002.1 2.1C5.3 20 12 20 12 20s6.7 0 8.44-.6a3 3 0 002.1-2.1C23 15.6 23 12 23 12z"/><polygon points="9.75 8.5 16 12 9.75 15.5" fill="#101935"/></svg></a>
+          <a href="@linkedIn" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          <a href="https://wa.me/@whatsApp" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+        </div>
+        <div class="footer__apps">
+          <a href="@appStore" target="_blank" rel="noopener" class="footer__app-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17.05 12.04c-.03-2.9 2.37-4.3 2.48-4.37-1.35-1.98-3.46-2.25-4.21-2.28-1.79-.18-3.5 1.06-4.41 1.06-.92 0-2.32-1.03-3.82-1-1.96.03-3.77 1.14-4.78 2.9-2.03 3.53-.52 8.76 1.46 11.63.97 1.4 2.13 2.98 3.65 2.92 1.47-.06 2.02-.95 3.8-.95 1.77 0 2.27.95 3.82.92 1.58-.03 2.58-1.44 3.54-2.85 1.12-1.63 1.58-3.21 1.6-3.29-.03-.01-3.07-1.18-3.1-4.7z"/><path d="M14.47 3.94c.8-.98 1.34-2.32 1.19-3.66-1.15.05-2.55.77-3.38 1.73-.74.85-1.4 2.23-1.22 3.53 1.28.1 2.6-.65 3.41-1.6z"/></svg>
+            <span><span class="small">Download on the</span><span class="big">App Store</span></span>
+          </a>
+          <a href="@googlePlay" target="_blank" rel="noopener" class="footer__app-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M3.6 2.3c-.3.3-.5.7-.5 1.2v17c0 .5.2.9.5 1.2l.1.1L13.3 12 3.7 2.2z"/><path d="M16.6 15.3l-3.3-3.3-9.7 9.7c.4.4 1 .5 1.6.1z"/><path d="M16.6 8.7l3.5-2c.6-.4.6-1.2 0-1.6l-3.5-2-3.7 3.6z"/><path d="M13.3 12l3.3-3.3-13.5-7.6c-.3-.2-.6-.2-.9-.1z"/></svg>
+            <span><span class="small">Get it on</span><span class="big">Google Play</span></span>
+          </a>
+        </div>
       </div>
 
-      <div class="footer__link-cols">
-        <div>
-          <h4>Company</h4>
-          <div class="footer__links">
-            @foreach (var link in Model.CompanyLinks)
-            {
-              <a href="@link.Url">@link.Label</a>
-              if (link.Label == "Home")
-              {
-                <a href="/index.html#ecosystem">Products</a>
-              }
-            }
-          </div>
+      @{
+          // Split into two columns so a 16-item list doesn't tower over its
+          // neighbours (Solutions/Company each have well under 10 items).
+          var platformHalf = (Model.ProductLinks.Count + 1) / 2;
+          var platformCol1 = Model.ProductLinks.Take(platformHalf).ToList();
+          var platformCol2 = Model.ProductLinks.Skip(platformHalf).ToList();
+      }
+      <div class="footer__nav-col">
+        <span class="footer__col-label">Platform</span>
+        <div class="footer__links">
+          @foreach (var link in platformCol1)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+          }
         </div>
-        <div>
-          <h4>Follow Us</h4>
-          <div class="footer__social">
-            <a href="@facebook" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
-            <a href="@youtube" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M23 12s0-3.6-.46-5.3a3 3 0 00-2.1-2.1C18.7 4 12 4 12 4s-6.7 0-8.44.6a3 3 0 00-2.1 2.1C1 8.4 1 12 1 12s0 3.6.46 5.3a3 3 0 002.1 2.1C5.3 20 12 20 12 20s6.7 0 8.44-.6a3 3 0 002.1-2.1C23 15.6 23 12 23 12z"/><polygon points="9.75 8.5 16 12 9.75 15.5" fill="#101935"/></svg></a>
-            <a href="@linkedIn" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
-            <a href="https://wa.me/@whatsApp" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
-          </div>
-          <div class="footer__apps">
-            <a href="@appStore" target="_blank" rel="noopener" class="footer__app-badge">
-              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17.05 12.04c-.03-2.9 2.37-4.3 2.48-4.37-1.35-1.98-3.46-2.25-4.21-2.28-1.79-.18-3.5 1.06-4.41 1.06-.92 0-2.32-1.03-3.82-1-1.96.03-3.77 1.14-4.78 2.9-2.03 3.53-.52 8.76 1.46 11.63.97 1.4 2.13 2.98 3.65 2.92 1.47-.06 2.02-.95 3.8-.95 1.77 0 2.27.95 3.82.92 1.58-.03 2.58-1.44 3.54-2.85 1.12-1.63 1.58-3.21 1.6-3.29-.03-.01-3.07-1.18-3.1-4.7z"/><path d="M14.47 3.94c.8-.98 1.34-2.32 1.19-3.66-1.15.05-2.55.77-3.38 1.73-.74.85-1.4 2.23-1.22 3.53 1.28.1 2.6-.65 3.41-1.6z"/></svg>
-              <span><span class="small">Download on the</span><span class="big">App Store</span></span>
-            </a>
-            <a href="@googlePlay" target="_blank" rel="noopener" class="footer__app-badge">
-              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M3.6 2.3c-.3.3-.5.7-.5 1.2v17c0 .5.2.9.5 1.2l.1.1L13.3 12 3.7 2.2z"/><path d="M16.6 15.3l-3.3-3.3-9.7 9.7c.4.4 1 .5 1.6.1z"/><path d="M16.6 8.7l3.5-2c.6-.4.6-1.2 0-1.6l-3.5-2-3.7 3.6z"/><path d="M13.3 12l3.3-3.3-13.5-7.6c-.3-.2-.6-.2-.9-.1z"/></svg>
-              <span><span class="small">Get it on</span><span class="big">Google Play</span></span>
-            </a>
-          </div>
+      </div>
+
+      <div class="footer__nav-col footer__nav-col--continued">
+        <span class="footer__col-label" aria-hidden="true">Platform</span>
+        <div class="footer__links">
+          @foreach (var link in platformCol2)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+          }
+        </div>
+      </div>
+
+      <div class="footer__nav-col">
+        <span class="footer__col-label">Solutions</span>
+        <div class="footer__links">
+          @foreach (var link in Model.SolutionLinks)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+          }
+        </div>
+      </div>
+
+      <div class="footer__nav-col">
+        <span class="footer__col-label">Company</span>
+        <div class="footer__links">
+          @foreach (var link in Model.CompanyLinks)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+            if (link.Label == "Home")
+            {
+              <a href="/index.html#ecosystem">Platform</a>
+              <a href="/solutions/hotels-resorts.html">Solutions</a>
+            }
+          }
         </div>
       </div>
     </div>
 
-    <div class="footer__products-row">
-      <h4><a href="/index.html#ecosystem">Products</a></h4>
-      <div class="footer__links footer__links--grid">
-        @foreach (var link in Model.ProductLinks)
-        {
-          <a href="@link.Url">@link.Label</a>
-        }
+    <div class="footer__mobile-accordion">
+      <details class="footer__accordion-item">
+        <summary>Platforms</summary>
+        <div class="footer__links">
+          @foreach (var link in Model.ProductLinks)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+          }
+        </div>
+      </details>
+
+      <details class="footer__accordion-item">
+        <summary>Solutions</summary>
+        <div class="footer__links">
+          @foreach (var link in Model.SolutionLinks)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+          }
+        </div>
+      </details>
+
+      <details class="footer__accordion-item">
+        <summary>Company</summary>
+        <div class="footer__links">
+          @foreach (var link in Model.CompanyLinks)
+          {
+            <a href="@Abs(link.Url)">@link.Label</a>
+          }
+        </div>
+      </details>
+
+      <div class="footer__mobile-social">
+        <div class="footer__social">
+          <a href="@facebook" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+          <a href="@youtube" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M23 12s0-3.6-.46-5.3a3 3 0 00-2.1-2.1C18.7 4 12 4 12 4s-6.7 0-8.44.6a3 3 0 00-2.1 2.1C1 8.4 1 12 1 12s0 3.6.46 5.3a3 3 0 002.1 2.1C5.3 20 12 20 12 20s6.7 0 8.44-.6a3 3 0 002.1-2.1C23 15.6 23 12 23 12z"/><polygon points="9.75 8.5 16 12 9.75 15.5" fill="#101935"/></svg></a>
+          <a href="@linkedIn" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          <a href="https://wa.me/@whatsApp" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+        </div>
       </div>
     </div>
 
     <div class="footer__legal-strip">
-      <a href="terms-of-use.html">Terms of Use</a>
-      <a href="refund-and-cancellation.html">Refund &amp; Cancellation</a>
-      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="/terms-of-use.html">Terms of Use</a>
+      <a href="/refund-and-cancellation.html">Refund &amp; Cancellation</a>
+      <a href="/privacy-policy.html">Privacy Policy</a>
     </div>
 
     <div class="footer__strip">

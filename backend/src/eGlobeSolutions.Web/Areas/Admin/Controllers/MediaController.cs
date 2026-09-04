@@ -10,7 +10,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 /// <summary>Simple media library: uploads land in wwwroot/uploads and are tracked in MediaAssets.</summary>
 [Area("Admin")]
 [Route("admin/media")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class MediaController : Controller
 {
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)

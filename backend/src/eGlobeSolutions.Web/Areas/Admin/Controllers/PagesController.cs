@@ -13,7 +13,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 /// </summary>
 [Area("Admin")]
 [Route("admin/pages")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class PagesController : Controller
 {
     private readonly AppDbContext _db;

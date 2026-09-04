@@ -1,6 +1,7 @@
 using eGlobeSolutions.Infrastructure.Persistence;
 using eGlobeSolutions.Web.Models.Public;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace eGlobeSolutions.Web.Controllers;
@@ -16,6 +17,7 @@ public class PricingController : Controller
     public PricingController(AppDbContext db) => _db = db;
 
     [HttpGet("pricing.html")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var vm = new PricingPageViewModel

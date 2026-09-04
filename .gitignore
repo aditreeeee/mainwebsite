@@ -4,6 +4,7 @@ backend/**/obj/
 backend/**/.vs/
 backend/**/TestResults/
 backend/src/eGlobeSolutions.Web/wwwroot/uploads/
+backend/src/eGlobeSolutions.Web/logs/
 
 # Frontend build tooling
 node_modules/

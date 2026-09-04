@@ -1,14 +1,36 @@
 @model List<MenuItem>
+@{
+    // MenuItem.Url is stored relative (e.g. "index.html"), correct only for
+    // root-level pages. This view is also rendered on nested routes
+    // (/products/{slug}.html, /solutions/{slug}.html via Views/Blog/Page.cshtml),
+    // where a bare relative link resolves against the current directory
+    // instead of the site root (e.g. "index.html" -> "/products/index.html",
+    // a 404 that then shows up in browser history). Force every internal
+    // link to root-absolute so it's correct regardless of page depth.
+    string Abs(string url) => url.StartsWith("http") || url.StartsWith("/") ? url : "/" + url;
+
+    // "/" and "/index.html" are the same page, so both must match Home;
+    // lets a screen reader announce which nav item is the current page
+    // instead of every link reading identically.
+    var currentPath = Context.Request.Path.Value?.TrimEnd('/').ToLowerInvariant() ?? "";
+    if (currentPath is "" or "/index.html") currentPath = "";
+    bool IsCurrent(string url)
+    {
+        var linkPath = Abs(url).TrimEnd('/').ToLowerInvariant();
+        if (linkPath is "/index.html" or "") linkPath = "";
+        return !linkPath.StartsWith("http") && linkPath == currentPath;
+    }
+}
 <nav class="topbar__links" id="topbar-links">
   @foreach (var item in Model)
   {
     @if (item.OpenInNewTab)
     {
-      <a href="@item.Url" target="_blank" rel="noopener">@item.Label</a>
+      <a href="@Abs(item.Url)" target="_blank" rel="noopener">@item.Label</a>
     }
     else
     {
-      <a href="@item.Url">@item.Label</a>
+      <a href="@Abs(item.Url)" aria-current="@(IsCurrent(item.Url) ? "page" : null)">@item.Label</a>
     }
   }
   <a href="https://www.eglobe-solutions.com/hms" target="_blank" rel="noopener" class="topbar__links-login">Log In</a>

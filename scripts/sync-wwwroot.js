@@ -21,10 +21,6 @@ const copies = [
   // [HttpGet] route in a Controller and NO ContentBlock/SeoMetadata rows
   // driving it, i.e. genuinely static, not CMS-editable.
   ["404.html", "404.html"],
-  ["about.html", "about.html"],
-  ["privacy-policy.html", "privacy-policy.html"],
-  ["terms-of-use.html", "terms-of-use.html"],
-  ["refund-and-cancellation.html", "refund-and-cancellation.html"],
 ];
 
 for (const [src, dest] of copies) {
@@ -45,16 +41,13 @@ for (const f of fs.readdirSync(imgSrcDir)) {
 }
 console.log(`  assets/img/* -> wwwroot/assets/img/* (${fs.readdirSync(imgSrcDir).length} files)`);
 
-// Product pages: static-only, no controller and no DB content (see the
-// note in scripts/check-headings.js's sibling comment above) -> mirror the
-// whole products/ folder into wwwroot so /products/*.html actually serves
-// instead of 404ing through the backend.
-const productsSrcDir = path.join(root, "products");
-const productsDestDir = path.join(wwwroot, "products");
-fs.mkdirSync(productsDestDir, { recursive: true });
-for (const f of fs.readdirSync(productsSrcDir).filter((f) => f.endsWith(".html"))) {
-  fs.copyFileSync(path.join(productsSrcDir, f), path.join(productsDestDir, f));
-}
-console.log(`  products/*.html -> wwwroot/products/*.html (${fs.readdirSync(productsSrcDir).length} files)`);
+// products/*.html and solutions/*.html at the repo root are design-reference
+// copies only (see backend/README.md), NOT synced into wwwroot: both are
+// database-backed CmsPages served through BlogController.ProductPage /
+// SolutionPage. wwwroot/products and wwwroot/solutions must stay empty, a
+// static file there would silently shadow the CMS route (static-file
+// middleware runs before MVC routing) and admin edits to those pages would
+// stop taking effect, exactly the bug fixed for the product pages this
+// session. Do not add a copy step for either folder here.
 
 console.log("wwwroot sync complete.");

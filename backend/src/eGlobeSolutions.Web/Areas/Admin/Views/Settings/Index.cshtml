@@ -8,6 +8,7 @@
 
 <nav class="admin-quicknav">
     <a href="#general">General</a>
+    <a href="#colors">Display Colors</a>
     <a href="#contact">Contact</a>
     <a href="#social">Social</a>
     <a href="#apps">Apps</a>
@@ -24,6 +25,27 @@
         <p class="admin-hint">Site name and footer text shown across every page.</p>
         <div class="admin-field"><label>Site Name</label><input asp-for="SiteName" /></div>
         <div class="admin-field"><label>Footer Copyright</label><input asp-for="FooterCopyright" /></div>
+    </div>
+
+    <div class="admin-card" id="colors">
+        <h2>Display Colors</h2>
+        <p class="admin-hint">Overrides the site's primary accent (buttons, links, highlights) and secondary/navy brand color everywhere. Leave blank to use the built-in defaults.</p>
+        <div class="admin-field">
+            <label>Primary Accent Color</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input type="color" id="ThemePrimaryColorPicker" value="@(string.IsNullOrWhiteSpace(Model.ThemePrimaryColor) ? "#3B52E8" : Model.ThemePrimaryColor)" style="width:48px; height:38px; padding:2px; cursor:pointer;" oninput="document.getElementById('ThemePrimaryColor').value = this.value.toUpperCase();">
+                <input asp-for="ThemePrimaryColor" placeholder="#3B52E8" style="max-width:140px;" oninput="var p = document.getElementById('ThemePrimaryColorPicker'); if(/^#[0-9A-Fa-f]{6}$/.test(this.value)) p.value = this.value;">
+            </div>
+        </div>
+        <div class="admin-field">
+            <label>Secondary (Navy) Color</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input type="color" id="ThemeSecondaryColorPicker" value="@(string.IsNullOrWhiteSpace(Model.ThemeSecondaryColor) ? "#1B2A5F" : Model.ThemeSecondaryColor)" style="width:48px; height:38px; padding:2px; cursor:pointer;" oninput="document.getElementById('ThemeSecondaryColor').value = this.value.toUpperCase();">
+                <input asp-for="ThemeSecondaryColor" placeholder="#1B2A5F" style="max-width:140px;" oninput="var p = document.getElementById('ThemeSecondaryColorPicker'); if(/^#[0-9A-Fa-f]{6}$/.test(this.value)) p.value = this.value;">
+            </div>
+        </div>
+        <span asp-validation-for="ThemePrimaryColor" class="admin-error"></span>
+        <span asp-validation-for="ThemeSecondaryColor" class="admin-error"></span>
     </div>
 
     <div class="admin-card" id="contact">

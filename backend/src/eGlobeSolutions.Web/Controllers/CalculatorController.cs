@@ -3,6 +3,7 @@ using eGlobeSolutions.Web.Models.Public;
 using eGlobeSolutions.Web.Models.Public.Calculator;
 using eGlobeSolutions.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,7 @@ public class CalculatorController : Controller
 
     [HttpGet("/calculator.html")]
     [HttpGet("/calculator")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var vm = new ContentPageViewModel
@@ -37,6 +39,7 @@ public class CalculatorController : Controller
 
     /// <summary>Full pricing catalog as JSON, used to render the module picker client-side.</summary>
     [HttpGet("/calculator/catalog")]
+    [OutputCache(PolicyName = "PublicContent")]
     public async Task<IActionResult> Catalog(CancellationToken ct)
     {
         return Json(await _pricing.GetCatalogAsync(ct));

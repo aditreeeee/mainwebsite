@@ -32,7 +32,7 @@
                 <button type="button" class="admin-btn" id="pg-preview-toggle">Preview</button>
             </div>
             <textarea asp-for="Body" id="pg-body" rows="18" style="font-family:monospace; font-size:12.5px; margin-top:8px;" required></textarea>
-            <div id="pg-preview" class="admin-body-preview" style="display:none;"></div>
+            <iframe id="pg-preview" title="Body preview" style="display:none; width:100%; border:1px solid #D8DBE0; border-radius:6px; margin-top:8px;"></iframe>
         </div>
     </div>
 
@@ -68,6 +68,25 @@
     var bodyEl = document.getElementById("pg-body");
     var previewEl = document.getElementById("pg-preview");
     var toggleBtn = document.getElementById("pg-preview-toggle");
+    var customHeroEl = document.getElementById("pg-custom-hero");
+
+    // A product/solution page's Body is full site markup (.page-hero,
+    // .sol-section, etc.) that only looks right under the real site
+    // stylesheet, the admin panel's own CSS has no idea what those classes
+    // are. Rendering it in an iframe with style.min.css linked, instead of
+    // dumping raw HTML into a plain admin-styled <div>, is what makes the
+    // preview actually resemble the live page rather than unstyled text.
+    // Custom-hero bodies are already full sections (self-contained); a plain
+    // body gets wrapped the same way Views/Blog/Page.cshtml wraps it live.
+    function buildPreviewDoc(bodyHtml) {
+        var wrapped = customHeroEl.checked
+            ? bodyHtml
+            : '<section class="section-tight panel-white"><div class="container" style="max-width:900px;"><div class="article-content">' + bodyHtml + '</div></div></section>';
+        return '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+            '<link rel="stylesheet" href="/css/style.min.css">' +
+            '<style>body{margin:0;}</style></head><body>' + wrapped + '</body></html>';
+    }
+
     toggleBtn.addEventListener("click", function () {
         var showing = previewEl.style.display !== "none";
         if (showing) {
@@ -75,8 +94,10 @@
             bodyEl.style.display = "block";
             toggleBtn.textContent = "Preview";
         } else {
-            previewEl.innerHTML = bodyEl.value || "<p style=\"color:#6B7280;\">Nothing to preview yet.</p>";
+            var html = bodyEl.value || '<p style="padding:20px;color:#6B7280;">Nothing to preview yet.</p>';
+            previewEl.srcdoc = buildPreviewDoc(html);
             previewEl.style.display = "block";
+            previewEl.style.height = "70vh";
             bodyEl.style.display = "none";
             toggleBtn.textContent = "Edit HTML";
         }

@@ -20,7 +20,8 @@
 <meta name="twitter:title" content="@(Model.Seo?.Title ?? "Blog, eGlobe Solutions")">
 <meta name="twitter:description" content="@(Model.Seo?.Description ?? "Guides, product updates and industry news on hotel technology from the eGlobe Solutions team.")">
 <meta name="twitter:image" content="@(Model.Seo?.OgImageUrl ?? "https://www.eglobe-solutions.com/img/eGlobe-Solutions-hotel-management-services.png")">
-<link rel="stylesheet" href="~/css/style.min.css">
+<link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true">
+@await Component.InvokeAsync("ThemeColors")
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
@@ -88,6 +89,7 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="scroll-progress"></div>
 
 <div class="topbar">
@@ -104,6 +106,7 @@
   </div>
 </div>
 
+<main id="main-content">
 <header class="page-hero page-hero--compact">
   <div class="container page-hero__split">
     <h1 data-reveal><span class="accent">Blog</span> &amp; <span class="accent-alt">Updates</span></h1>
@@ -197,6 +200,8 @@
     string CategoryGlyph(string categoryFilter) => categoryFilter switch { "product" => "P", "news" => "N", _ => "G" };
 }
 
+</main>
+
 @await Component.InvokeAsync("SiteFooter")
 
 <div class="nav-dock-wrap">
@@ -210,6 +215,6 @@
   </nav>
 </div>
 
-<script src="~/js/main.min.js"></script>
+<script src="~/js/main.min.js" asp-append-version="true"></script>
 </body>
 </html>

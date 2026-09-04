@@ -8,7 +8,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/menus")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "ContentManage")]
 public class MenusController : Controller
 {
     private readonly AppDbContext _db;

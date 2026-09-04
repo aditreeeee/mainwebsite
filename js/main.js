@@ -15,12 +15,15 @@
     });
   }
 
-  /* ---------- Solutions mega-menu (replaces the plain "Products" link) ----------
+  /* ---------- Platform + Solutions mega-menus ----------
      Injected into every page's topbar (and mobile burger list, which reuses the
      same #topbar-links markup) so this lives in one place instead of 40 files.
-     "Solutions" opens a full-width dropdown listing all 16 products grouped
-     into the same categories used on the homepage ecosystem section. */
-  var SOLUTIONS_CATEGORIES = [
+     "Platform" (what we offer) lists all 16 products grouped into the same
+     categories used on the homepage ecosystem section. "Solutions" (who we
+     serve) lists the 6 property-type pages. Both are built by the same
+     buildTopbarMega() helper below, keyed off a literal link-text match on
+     the server-rendered MenuItems seed ("Products" / "Solutions"). */
+  var PLATFORM_CATEGORIES = [
     {
       label: 'Core Operations',
       items: [
@@ -54,47 +57,52 @@
     }
   ];
 
-  function initSolutionsMenu(){
+  var SOLUTIONS_CATEGORIES = [
+    {
+      label: 'Property Types',
+      items: [
+        { name: 'Hotels & Resorts', href: 'solutions/hotels-resorts.html' },
+        { name: 'Boutique Properties', href: 'solutions/boutique-properties.html' },
+        { name: 'Vacation Rentals', href: 'solutions/vacation-rentals.html' },
+        { name: 'Hostels', href: 'solutions/hostels.html' },
+        { name: 'Guest Houses', href: 'solutions/guest-houses.html' },
+        { name: 'Travel Agencies', href: 'solutions/travel-agencies.html' }
+      ]
+    }
+  ];
+
+  function buildTopbarMega(matchText, opts){
     var links = document.getElementById('topbar-links');
     if(!links) return;
 
     var trigger = null;
     links.querySelectorAll('a').forEach(function(a){
-      if(a.textContent.trim() === 'Products') trigger = a;
+      if(a.textContent.trim() === matchText) trigger = a;
     });
     if(!trigger) return;
 
-    var depth = /\/(products|blog-articles)\//.test(location.pathname) ? '../' : '';
-    trigger.textContent = 'Solutions';
+    var depth = /\/(products|solutions|blog-articles)\//.test(location.pathname) ? '../' : '';
+    if(opts.renameTo) trigger.textContent = opts.renameTo;
     trigger.setAttribute('aria-haspopup', 'true');
     trigger.setAttribute('aria-expanded', 'false');
-    trigger.classList.add('topbar__solutions-trigger');
+    trigger.classList.add('topbar__mega-trigger');
 
     var wrap = document.createElement('div');
-    wrap.className = 'topbar__solutions';
+    wrap.className = 'topbar__mega-wrap';
     trigger.parentNode.insertBefore(wrap, trigger);
     wrap.appendChild(trigger);
 
     var panel = document.createElement('div');
-    panel.className = 'topbar__mega';
-    panel.id = 'topbar-mega';
+    panel.className = 'topbar__mega' + (opts.compact ? ' topbar__mega--compact' : '');
 
-    var columnsHtml = SOLUTIONS_CATEGORIES.map(function(cat){
+    var columnsHtml = opts.categories.map(function(cat){
       var itemsHtml = cat.items.map(function(it){
         return '<a href="' + depth + it.href + '">' + it.name + '</a>';
       }).join('');
       return '<div class="topbar__mega-col"><div class="topbar__mega-label">' + cat.label + '</div>' + itemsHtml + '</div>';
     }).join('');
 
-    panel.innerHTML =
-      columnsHtml +
-      '<div class="topbar__mega-cta">' +
-        '<div class="topbar__mega-cta-label">Not sure where to start?</div>' +
-        '<p>See how every module connects into one platform, sourced and managed for you.</p>' +
-        '<a href="' + depth + 'index.html#ecosystem" class="btn btn-ghost btn-sm">View Full Ecosystem</a>' +
-        '<a href="' + depth + 'contact.html" class="btn btn-primary btn-sm">Book a Demo</a>' +
-      '</div>';
-
+    panel.innerHTML = columnsHtml + opts.ctaHtml(depth);
     wrap.appendChild(panel);
 
     function openMenu(){
@@ -118,6 +126,36 @@
     });
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape') closeMenu();
+    });
+  }
+
+  function initPlatformMenu(){
+    buildTopbarMega('Products', {
+      renameTo: 'Platform',
+      categories: PLATFORM_CATEGORIES,
+      ctaHtml: function(depth){
+        return '<div class="topbar__mega-cta">' +
+          '<div class="topbar__mega-cta-label">Not sure where to start?</div>' +
+          '<p>See how every module connects into one platform, sourced and managed for you.</p>' +
+          '<a href="' + depth + 'index.html#ecosystem" class="btn btn-ghost btn-sm">View Full Ecosystem</a>' +
+          '<a href="' + depth + 'contact.html" class="btn btn-primary btn-sm">Book a Demo</a>' +
+        '</div>';
+      }
+    });
+  }
+
+  function initSolutionsMenu(){
+    buildTopbarMega('Solutions', {
+      categories: SOLUTIONS_CATEGORIES,
+      compact: true,
+      ctaHtml: function(depth){
+        return '<div class="topbar__mega-cta">' +
+          '<div class="topbar__mega-cta-label">Not sure which fits?</div>' +
+          '<p>Every eGlobe solution runs on the same platform, just configured for how your property operates.</p>' +
+          '<a href="' + depth + 'solutions/hotels-resorts.html" class="btn btn-ghost btn-sm">Browse All Solutions</a>' +
+          '<a href="' + depth + 'contact.html" class="btn btn-primary btn-sm">Book a Demo</a>' +
+        '</div>';
+      }
     });
   }
 
@@ -157,41 +195,45 @@
     }, {passive:true});
   }
 
-  /* ---------- Solutions in the nav-dock pill ----------
-     The nav-dock pill (Home/Pricing/Resellers) is the ONLY navigation
-     surface on mobile, #topbar-links is display:none below 760px entirely.
-     Previously there was no way to reach the product list on a phone at
-     all. A stacked accordion listing all 16 products here turned out to be
-     the wrong shape for a phone (too much to scan inside an already-small
-     popover), so on mobile "Solutions" is now a plain link straight to the
-     ecosystem section, exactly like Home/Pricing/Resellers already work.
-     Desktop keeps the small dropdown (real hover/click target, room for
-     categories) since the pill isn't the cramped surface there. This is a
-     single <a> element for both cases: on mobile its href just navigates
-     normally; on desktop the click handler intercepts it to open the
-     dropdown instead. Must run before initDock() so this link and the
-     dropdown's product links are included in initDock()'s "any link click
-     closes the mobile menu" wiring below. */
-  function initNavDockSolutions(){
+  /* ---------- Platform + Solutions in the nav-dock pill ----------
+     The nav-dock pill (Home/Solutions/Platform/Pricing/Resellers) is the
+     ONLY navigation surface on mobile, #topbar-links is display:none below
+     760px entirely. A stacked accordion listing every product/solution here
+     turned out to be the wrong shape for a phone (too much to scan inside
+     an already-small popover), so on mobile these links just navigate
+     straight to their href (Platform -> the ecosystem section, Solutions ->
+     the first solution page), exactly like Home/Pricing/Resellers. Desktop
+     keeps the small dropdown (real hover/click target, room for
+     categories) since the pill isn't the cramped surface there. This
+     converts the existing server-rendered <a> in place (rather than
+     inserting a new node) so there's exactly one nav-dock entry per
+     concept, no duplicate link left behind. Must run before initDock() so
+     these links and their dropdown items are included in initDock()'s "any
+     link click closes the mobile menu" wiring below. */
+  function buildNavDockMega(matchText, opts){
     var links = document.querySelector('.nav-dock__links');
     if(!links) return;
 
-    var depth = /\/(products|blog-articles)\//.test(location.pathname) ? '../' : '';
+    var toggle = null;
+    links.querySelectorAll('a').forEach(function(a){
+      if(a.textContent.trim() === matchText) toggle = a;
+    });
+    if(!toggle) return;
+
+    var depth = /\/(products|solutions|blog-articles)\//.test(location.pathname) ? '../' : '';
     var isMobileNav = function(){ return window.innerWidth <= 860; };
 
-    var toggle = document.createElement('a');
-    toggle.href = depth + 'index.html#ecosystem';
-    toggle.className = 'nav-dock__link nav-dock__solutions-toggle';
+    toggle.classList.add('nav-dock__link', 'nav-dock__mega-toggle');
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.textContent = 'Solutions';
+    if(opts.renameTo) toggle.textContent = opts.renameTo;
 
     var panel = document.createElement('div');
-    panel.className = 'nav-dock__solutions-panel';
-    panel.innerHTML = SOLUTIONS_CATEGORIES.map(function(cat){
+    panel.className = 'nav-dock__mega-panel';
+    panel.innerHTML = opts.categories.map(function(cat){
       var itemsHtml = cat.items.map(function(it){
         return '<a href="' + depth + it.href + '">' + it.name + '</a>';
       }).join('');
-      return '<div class="nav-dock__solutions-label">' + cat.label + '</div>' + itemsHtml;
+      return '<div class="nav-dock__mega-label">' + cat.label + '</div>' + itemsHtml;
     }).join('');
 
     function closePanel(){
@@ -200,7 +242,7 @@
     }
 
     toggle.addEventListener('click', function(e){
-      if(isMobileNav()) return; // let the href navigate to the ecosystem section as-is
+      if(isMobileNav()) return; // let the href navigate normally
       e.preventDefault();
       e.stopPropagation(); // don't let this bubble into the mobile "click outside closes menu" handler
       var open = panel.classList.toggle('open');
@@ -216,14 +258,15 @@
       if(e.key === 'Escape') closePanel();
     });
 
-    var homeLink = links.querySelector('a');
-    if(homeLink){
-      links.insertBefore(toggle, homeLink.nextSibling);
-      links.insertBefore(panel, toggle.nextSibling);
-    } else {
-      links.appendChild(toggle);
-      links.appendChild(panel);
-    }
+    toggle.insertAdjacentElement('afterend', panel);
+  }
+
+  function initNavDockPlatform(){
+    buildNavDockMega('Products', { renameTo: 'Platform', categories: PLATFORM_CATEGORIES });
+  }
+
+  function initNavDockSolutions(){
+    buildNavDockMega('Solutions', { categories: SOLUTIONS_CATEGORIES });
   }
 
   /* ---------- Floating dock: hidden only in the hero and footer zones ---------- */
@@ -292,10 +335,21 @@
   function initProgress(){
     var bar = document.querySelector('.scroll-progress');
     if(!bar) return;
-    window.addEventListener('scroll', function(){
+    // Batched through requestAnimationFrame like every other scroll listener
+    // in this file, this one used to write to style.width on every raw
+    // scroll event (dozens per second on a trackpad/momentum scroll),
+    // fighting the browser's own scroll-compositing and reading as jank.
+    var ticking = false;
+    function update(){
       var h = document.documentElement;
       var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
       bar.style.width = pct + '%';
+      ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+      if(ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
     }, {passive:true});
   }
 
@@ -307,6 +361,11 @@
       targets.forEach(function(t){ t.classList.add('in-view'); });
       return;
     }
+    // rootMargin's bottom edge is pulled up 15% of the viewport instead of a
+    // flat 60px, so a section starts revealing while it's still approaching
+    // from below and finishes arriving in step with the scroll, rather than
+    // waiting until it's already deep in the viewport and then popping in
+    // all at once, the same fixed 60px lagged badly on a tall/short viewport.
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         if(entry.isIntersecting){
@@ -314,7 +373,7 @@
           io.unobserve(entry.target);
         }
       });
-    }, {threshold:0.15, rootMargin:'0px 0px -60px 0px'});
+    }, {threshold:0.1, rootMargin:'0px 0px -15% 0px'});
     targets.forEach(function(t){ io.observe(t); });
   }
 
@@ -349,6 +408,44 @@
       });
     }, {threshold:0.4});
     counters.forEach(function(c){ io.observe(c); });
+  }
+
+  /* ---------- Kinetic typography: scroll-tied phrase highlighting ----------
+     Editorial-style effect for [data-kinetic] containers: each already-
+     accented phrase (.accent/.dim spans, the same markup content editors
+     already write) dims until it scrolls into a band near the vertical
+     centre of the viewport, then lights up, rather than being statically
+     coloured on load. Driven by IntersectionObserver with many thresholds
+     (a cheap way to get a continuous-feeling progress value without a raw
+     `scroll` listener recalculating layout every frame), not a scroll-jack:
+     the page still scrolls completely normally, only the text color/opacity
+     responds. */
+  function initKineticTypography(){
+    var containers = document.querySelectorAll('[data-kinetic]');
+    if(!containers.length) return;
+    if(prefersReduced){
+      containers.forEach(function(el){ el.classList.add('kinetic-static'); });
+      return;
+    }
+    var thresholds = [];
+    for(var t = 0; t <= 1; t += 0.05) thresholds.push(t);
+
+    containers.forEach(function(container){
+      var phrases = container.querySelectorAll('.accent, .dim');
+      if(!phrases.length) return;
+      phrases.forEach(function(p){ p.classList.add('kinetic-phrase'); });
+
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          // Ratio of the element's own height currently visible, used as a
+          // stand-in "progress" value, cheap since IO computes it for us.
+          var progress = entry.intersectionRatio;
+          entry.target.style.setProperty('--kinetic-progress', progress.toFixed(3));
+        });
+      }, {threshold:thresholds});
+
+      io.observe(container);
+    });
   }
 
   /* ---------- Department workspace tabs ---------- */
@@ -429,7 +526,20 @@
     tabList.forEach(function(tab, i){
       tab.setAttribute('tabindex', tab.classList.contains('active') ? '0' : '-1');
       tab.setAttribute('aria-selected', tab.classList.contains('active') ? 'true' : 'false');
-      tab.addEventListener('click', function(){ activate(tab, false); });
+      tab.addEventListener('click', function(){
+        // On mobile the stage starts hidden (CSS: display:none), so its
+        // height was measured as 0 back at init time. activate() itself
+        // no-ops when clicking the already-active tab (frontdesk, by
+        // default) and so never re-measures it, meaning a first click on
+        // Front Desk would reveal a 0-height, clipped stage without this.
+        var wasHidden = !stage.classList.contains('mobile-revealed');
+        stage.classList.add('mobile-revealed');
+        activate(tab, false);
+        if(wasHidden){
+          var active = stage.querySelector('.dept-panel.active');
+          if(active) stage.style.height = active.offsetHeight + 'px';
+        }
+      });
       tab.addEventListener('keydown', function(e){
         var idx = tabList.indexOf(tab);
         if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){
@@ -464,6 +574,18 @@
       task.addEventListener('click', function(){
         task.classList.toggle('done');
       });
+    });
+  }
+
+  /* ---------- Mobile app section: "Read more" list toggle ---------- */
+  function initAppFeatureReadMore(){
+    var list = document.getElementById('app-feature-list');
+    var btn = document.getElementById('app-feature-readmore');
+    if(!list || !btn) return;
+    btn.addEventListener('click', function(){
+      var expanded = list.classList.toggle('expanded');
+      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      btn.querySelector('span').textContent = expanded ? 'Read less' : 'Read more';
     });
   }
 
@@ -1472,14 +1594,18 @@
   /* ---------- init ---------- */
   document.addEventListener('DOMContentLoaded', function(){
     markActiveNav();
+    initNavDockPlatform();
     initNavDockSolutions();
     initDock();
+    initPlatformMenu();
     initSolutionsMenu();
     initTopbarBurger();
     initProgress();
     initReveal();
     initCounters();
+    initKineticTypography();
     initDeptTabs();
+    initAppFeatureReadMore();
     initCapTabs();
     initEngineList();
     initMagnetic();

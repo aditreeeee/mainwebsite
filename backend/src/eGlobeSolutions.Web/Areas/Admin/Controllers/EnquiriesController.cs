@@ -11,7 +11,7 @@ namespace eGlobeSolutions.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/enquiries")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "EnquiriesManage")]
 public class EnquiriesController : Controller
 {
     private readonly AppDbContext _db;
